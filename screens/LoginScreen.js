@@ -12,9 +12,7 @@ import * as yup from "yup";
 
 const schema = yup.object({
   email: yup.string().email("Email inválido"),
-  password: yup
-    .string()
-    .min(6, "Contraseña debe tener al menos 6 caracteres"),
+  password: yup.string().min(6, "Contraseña debe tener al menos 6 caracteres"),
 });
 
 const LoginScreen = ({ navigation }) => {
@@ -30,7 +28,7 @@ const LoginScreen = ({ navigation }) => {
     // Lógica de login (simulado, sin validación)
     console.log(data);
     // Navegar al Home sin importar las credenciales
-    navigation.navigate('Home');
+    navigation.navigate("Home");
   };
 
   return (

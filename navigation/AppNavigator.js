@@ -17,13 +17,41 @@ const AppNavigator = () => {
   return (
     <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={LoginScreen} options={{ title: "Iniciar Sesión" }} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: "Registro" }} />
-        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: "Recuperar Contraseña" }} />
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: "Inicio" }} />
-        <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ title: "Logros" }} />
-        <Stack.Screen name="Info" component={InfoScreen} options={{ title: "Información" }} />
-        <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: "Configuración" }} />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ title: "Iniciar Sesión" }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={RegisterScreen}
+          options={{ title: "Registro" }}
+        />
+        <Stack.Screen
+          name="ForgotPassword"
+          component={ForgotPasswordScreen}
+          options={{ title: "Recuperar Contraseña" }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ title: "Inicio" }}
+        />
+        <Stack.Screen
+          name="Achievements"
+          component={AchievementsScreen}
+          options={{ title: "Logros" }}
+        />
+        <Stack.Screen
+          name="Info"
+          component={InfoScreen}
+          options={{ title: "Información" }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{ title: "Configuración" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
