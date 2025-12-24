@@ -1,11 +1,24 @@
 import React from "react";
-import { UserProvider } from "./context/UserContext";
-import AppNavigator from "./navigation/AppNavigator";
+import { PaperProvider } from 'react-native-paper';
+import { UserProvider } from './context/UserContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import AppNavigator from './navigation/AppNavigator';
+
+const AppContent = () => {
+  const { theme } = useTheme();
+  return (
+    <PaperProvider theme={theme}>
+      <AppNavigator />
+    </PaperProvider>
+  );
+};
 
 export default function App() {
   return (
-    <UserProvider>
-      <AppNavigator />
-    </UserProvider>
+    <ThemeProvider>
+      <UserProvider>
+        <AppContent />
+      </UserProvider>
+    </ThemeProvider>
   );
 }

@@ -64,7 +64,9 @@ const HomeScreen = ({ navigation }) => {
   const handleViewInfo = () => {
     navigation.navigate("Info"); // Navegar a información
   };
-
+  const handleViewSettings = () => {
+    navigation.navigate('Settings'); // Navegar a configuración
+  };
   return (
     <PaperProvider>
       <ScrollView style={styles.container}>
@@ -112,6 +114,13 @@ const HomeScreen = ({ navigation }) => {
             style={styles.button}
           >
             Información
+          </Button>
+          <Button
+            mode="outlined"
+            onPress={handleViewSettings}
+            style={styles.button}
+          >
+            Configuración
           </Button>
         </View>
 
