@@ -16,7 +16,7 @@ const AppNavigator = () => {
   const { navigationTheme } = useTheme();
   return (
     <NavigationContainer theme={navigationTheme}>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={LoginScreen} options={{ title: "Iniciar Sesión" }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ title: "Registro" }} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: "Recuperar Contraseña" }} />

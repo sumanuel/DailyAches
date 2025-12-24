@@ -1,7 +1,12 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { Text, Card, Switch, Provider as PaperProvider } from 'react-native-paper';
-import { useTheme } from '../context/ThemeContext';
+import React from "react";
+import { View, StyleSheet, ScrollView } from "react-native";
+import {
+  Text,
+  Card,
+  Switch,
+  Provider as PaperProvider,
+} from "react-native-paper";
+import { useTheme } from "../context/ThemeContext";
 
 const SettingsScreen = () => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -26,15 +31,15 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   card: {
     margin: 10,
   },
   settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 10,
   },
 });

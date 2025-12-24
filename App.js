@@ -1,8 +1,8 @@
 import React from "react";
-import { PaperProvider } from 'react-native-paper';
-import { UserProvider } from './context/UserContext';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
-import AppNavigator from './navigation/AppNavigator';
+import { PaperProvider } from "react-native-paper";
+import { UserProvider } from "./context/UserContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import AppNavigator from "./navigation/AppNavigator";
 
 const AppContent = () => {
   const { theme } = useTheme();

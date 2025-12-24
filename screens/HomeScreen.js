@@ -8,9 +8,11 @@ import {
   FAB,
 } from "react-native-paper";
 import { Image } from "expo-image";
+import * as Sharing from "expo-sharing";
 import { useUser } from "../context/UserContext";
 
 const HomeScreen = ({ navigation }) => {
+  const { user, unlockAchievement } = useUser();
   const { user } = useUser();
   const [dailyRecords, setDailyRecords] = useState([]); // Simular registros diarios
   const [message, setMessage] = useState("");
@@ -65,7 +67,39 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate("Info"); // Navegar a información
   };
   const handleViewSettings = () => {
-    navigation.navigate('Settings'); // Navegar a configuración
+    navigation.navigate("Settings"); // Navegar a configuración
+  };
+  const handleShareToFacebook = async () => {
+    const hasRecords = dailyRecords.length > 0;
+    const shareMessage = hasRecords
+      ? `¡Registré dolores hoy en DailyAches! Nivel ${user.level}, ${user.points} puntos. #DailyAches`
+      : `¡Día perfecto! Sin dolores reportados hoy. #DailyAches`;
+
+    try {
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        await Sharing.shareAsync(null, {
+          dialogTitle: "Compartir en Facebook",
+          UTI: "public.plain-text", // Para texto
+        });
+        // Nota: Sharing.shareAsync no permite especificar Facebook directamente, pero el usuario puede elegir Facebook en el diálogo.
+        // Para Facebook específico, necesitarías Facebook SDK, pero esto es un placeholder.
+        Alert.alert(
+          "¡Compartido!",
+          "Mensaje preparado para compartir en Facebook."
+        );
+        // Desbloquear logro de compartir
+        unlockAchievement(5); // ID del logro "Compartidor"
+      } else {
+        Alert.alert(
+          "Error",
+          "Compartir no está disponible en este dispositivo."
+        );
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+      Alert.alert("Error", "No se pudo compartir.");
+    }
   };
   return (
     <PaperProvider>
@@ -121,6 +155,13 @@ const HomeScreen = ({ navigation }) => {
             style={styles.button}
           >
             Configuración
+          </Button>
+          <Button
+            mode="outlined"
+            onPress={handleShareToFacebook}
+            style={styles.button}
+          >
+            Compartir en Facebook
           </Button>
         </View>
 

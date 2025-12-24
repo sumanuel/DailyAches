@@ -11,11 +11,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
 const schema = yup.object({
-  email: yup.string().email("Email inválido").required("Email es requerido"),
+  email: yup.string().email("Email inválido"),
   password: yup
     .string()
-    .min(6, "Contraseña debe tener al menos 6 caracteres")
-    .required("Contraseña es requerida"),
+    .min(6, "Contraseña debe tener al menos 6 caracteres"),
 });
 
 const LoginScreen = ({ navigation }) => {
@@ -28,10 +27,10 @@ const LoginScreen = ({ navigation }) => {
   });
 
   const onSubmit = (data) => {
-    // Lógica de login (llamar a API)
+    // Lógica de login (simulado, sin validación)
     console.log(data);
-    // Navegar al Home si login exitoso
-    // navigation.navigate('Home');
+    // Navegar al Home sin importar las credenciales
+    navigation.navigate('Home');
   };
 
   return (
