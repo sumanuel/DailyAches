@@ -43,29 +43,29 @@ const InfoScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-        <Card style={styles.card}>
-          <Card.Title title="Información sobre Dolores Femeninos" />
-          <Card.Content>
-            <Text style={styles.intro}>
-              Los dolores en mujeres pueden estar influenciados por factores
-              hormonales, anatómicos y emocionales. Aquí explicamos algunos
-              comunes:
-            </Text>
-            {infoItems.map((item, index) => (
-              <List.Item
-                key={index}
-                title={item.title}
-                description={item.description}
-                left={(props) => <List.Icon {...props} icon="information" />}
-              />
-            ))}
-            <Text style={styles.note}>
-              Nota: Esta información es general. Consulta a un médico para
-              diagnósticos específicos.
-            </Text>
-          </Card.Content>
-        </Card>
-      </ScrollView>
+      <Card style={styles.card}>
+        <Card.Title title="Información sobre Dolores Femeninos" />
+        <Card.Content>
+          <Text style={styles.intro}>
+            Los dolores en mujeres pueden estar influenciados por factores
+            hormonales, anatómicos y emocionales. Aquí explicamos algunos
+            comunes:
+          </Text>
+          {infoItems.map((item, index) => (
+            <List.Item
+              key={index}
+              title={item.title}
+              description={item.description}
+              left={(props) => <List.Icon {...props} icon="information" />}
+            />
+          ))}
+          <Text style={styles.note}>
+            Nota: Esta información es general. Consulta a un médico para
+            diagnósticos específicos.
+          </Text>
+        </Card.Content>
+      </Card>
+    </ScrollView>
   );
 };
 

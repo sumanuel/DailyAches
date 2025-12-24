@@ -13,16 +13,16 @@ const SettingsScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-        <Card style={styles.card}>
-          <Card.Title title="Configuración" />
-          <Card.Content>
-            <View style={styles.settingItem}>
-              <Text>Modo Oscuro</Text>
-              <Switch value={isDarkMode} onValueChange={toggleTheme} />
-            </View>
-          </Card.Content>
-        </Card>
-      </ScrollView>
+      <Card style={styles.card}>
+        <Card.Title title="Configuración" />
+        <Card.Content>
+          <View style={styles.settingItem}>
+            <Text>Modo Oscuro</Text>
+            <Switch value={isDarkMode} onValueChange={toggleTheme} />
+          </View>
+        </Card.Content>
+      </Card>
+    </ScrollView>
   );
 };
 
