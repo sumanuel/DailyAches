@@ -12,8 +12,7 @@ const SettingsScreen = () => {
   const { isDarkMode, toggleTheme } = useTheme();
 
   return (
-    <Provider as PaperProvider>
-      <ScrollView style={styles.container}>
+    <ScrollView style={styles.container}>
         <Card style={styles.card}>
           <Card.Title title="Configuración" />
           <Card.Content>
@@ -24,7 +23,6 @@ const SettingsScreen = () => {
           </Card.Content>
         </Card>
       </ScrollView>
-    </Provider>
   );
 };
 

@@ -42,8 +42,7 @@ const InfoScreen = () => {
   ];
 
   return (
-    <Provider as PaperProvider>
-      <ScrollView style={styles.container}>
+    <ScrollView style={styles.container}>
         <Card style={styles.card}>
           <Card.Title title="Información sobre Dolores Femeninos" />
           <Card.Content>
@@ -67,7 +66,6 @@ const InfoScreen = () => {
           </Card.Content>
         </Card>
       </ScrollView>
-    </Provider>
   );
 };
 

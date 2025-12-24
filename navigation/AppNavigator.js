@@ -5,6 +5,8 @@ import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import HomeScreen from "../screens/HomeScreen";
+import RecordPainScreen from "../screens/RecordPainScreen";
+import StatsScreen from "../screens/StatsScreen";
 import AchievementsScreen from "../screens/AchievementsScreen";
 import InfoScreen from "../screens/InfoScreen";
 import SettingsScreen from "../screens/SettingsScreen";
@@ -36,6 +38,16 @@ const AppNavigator = () => {
           name="Home"
           component={HomeScreen}
           options={{ title: "Inicio" }}
+        />
+        <Stack.Screen
+          name="RecordPain"
+          component={RecordPainScreen}
+          options={{ title: "Registrar Dolor" }}
+        />
+        <Stack.Screen
+          name="Stats"
+          component={StatsScreen}
+          options={{ title: "Estadísticas" }}
         />
         <Stack.Screen
           name="Achievements"
