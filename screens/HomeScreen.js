@@ -13,7 +13,6 @@ import { useUser } from "../context/UserContext";
 
 const HomeScreen = ({ navigation }) => {
   const { user, unlockAchievement } = useUser();
-  const { user } = useUser();
   const [dailyRecords, setDailyRecords] = useState([]); // Simular registros diarios
   const [message, setMessage] = useState("");
   const [imageUri, setImageUri] = useState("https://via.placeholder.com/300"); // Imagen dinámica placeholder
