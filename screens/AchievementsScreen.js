@@ -3,13 +3,14 @@ import { View, StyleSheet, ScrollView, FlatList } from "react-native";
 import {
   Text,
   Card,
-  Provider as PaperProvider,
   List,
+  useTheme as usePaperTheme,
 } from "react-native-paper";
 import { useUser } from "../context/UserContext";
 
 const AchievementsScreen = () => {
   const { user } = useUser();
+  const paperTheme = usePaperTheme();
 
   const renderAchievement = ({ item }) => (
     <List.Item
@@ -34,31 +35,33 @@ const AchievementsScreen = () => {
   );
 
   return (
-    <Provider as PaperProvider>
-      <ScrollView style={styles.container}>
-        <Card style={styles.card}>
-          <Card.Title title="Logros" />
-          <Card.Content>
-            <Text style={styles.subtitle}>
-              Desbloquea logros registrando dolores y alcanzando hitos.
-            </Text>
-            <FlatList
-              data={user.achievements}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderAchievement}
-              ListEmptyComponent={<Text>No hay logros disponibles.</Text>}
-            />
-          </Card.Content>
-        </Card>
-      </ScrollView>
-    </Provider>
+    <ScrollView
+      style={[
+        styles.container,
+        { backgroundColor: paperTheme.colors.background },
+      ]}
+    >
+      <Card style={styles.card}>
+        <Card.Title title="Logros" />
+        <Card.Content>
+          <Text style={styles.subtitle}>
+            Desbloquea logros registrando dolores y alcanzando hitos.
+          </Text>
+          <FlatList
+            data={user.achievements}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderAchievement}
+            ListEmptyComponent={<Text>No hay logros disponibles.</Text>}
+          />
+        </Card.Content>
+      </Card>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   card: {
     margin: 10,

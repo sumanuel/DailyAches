@@ -3,14 +3,15 @@ import { View, StyleSheet, ScrollView, Dimensions } from "react-native";
 import {
   Text,
   Card,
-  Provider as PaperProvider,
   Button,
+  useTheme as usePaperTheme,
 } from "react-native-paper";
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
 
 const screenWidth = Dimensions.get("window").width;
 
 const StatsScreen = ({ navigation }) => {
+  const paperTheme = usePaperTheme();
   const [timeFrame, setTimeFrame] = useState("month"); // 'week', 'month', 'year'
 
   // Datos simulados
@@ -83,74 +84,76 @@ const StatsScreen = ({ navigation }) => {
   const currentData = timeFrame === "week" ? weeklyData : monthlyData;
 
   return (
-    <PaperProvider>
-      <ScrollView style={styles.container}>
-        <Card style={styles.card}>
-          <Card.Title title="Estadísticas de Dolores" />
-          <Card.Content>
-            <View style={styles.buttonGroup}>
-              <Button
-                mode={timeFrame === "week" ? "contained" : "outlined"}
-                onPress={() => setTimeFrame("week")}
-              >
-                Semana
-              </Button>
-              <Button
-                mode={timeFrame === "month" ? "contained" : "outlined"}
-                onPress={() => setTimeFrame("month")}
-              >
-                Mes
-              </Button>
-            </View>
+    <ScrollView
+      style={[
+        styles.container,
+        { backgroundColor: paperTheme.colors.background },
+      ]}
+    >
+      <Card style={styles.card}>
+        <Card.Title title="Estadísticas de Dolores" />
+        <Card.Content>
+          <View style={styles.buttonGroup}>
+            <Button
+              mode={timeFrame === "week" ? "contained" : "outlined"}
+              onPress={() => setTimeFrame("week")}
+            >
+              Semana
+            </Button>
+            <Button
+              mode={timeFrame === "month" ? "contained" : "outlined"}
+              onPress={() => setTimeFrame("month")}
+            >
+              Mes
+            </Button>
+          </View>
 
-            <Text style={styles.chartTitle}>Tendencia de Dolores</Text>
-            <LineChart
-              data={currentData}
-              width={screenWidth - 40}
-              height={220}
-              chartConfig={chartConfig}
-              bezier
-              style={styles.chart}
-            />
+          <Text style={styles.chartTitle}>Tendencia de Dolores</Text>
+          <LineChart
+            data={currentData}
+            width={screenWidth - 40}
+            height={220}
+            chartConfig={chartConfig}
+            bezier
+            style={styles.chart}
+          />
 
-            <Text style={styles.chartTitle}>Tipos de Dolores Más Comunes</Text>
-            <PieChart
-              data={painTypesData}
-              width={screenWidth - 40}
-              height={220}
-              chartConfig={chartConfig}
-              accessor="count"
-              backgroundColor="transparent"
-              paddingLeft="15"
-              style={styles.chart}
-            />
+          <Text style={styles.chartTitle}>Tipos de Dolores Más Comunes</Text>
+          <PieChart
+            data={painTypesData}
+            width={screenWidth - 40}
+            height={220}
+            chartConfig={chartConfig}
+            accessor="count"
+            backgroundColor="transparent"
+            paddingLeft="15"
+            style={styles.chart}
+          />
 
-            <Text style={styles.chartTitle}>Niveles y Puntos</Text>
-            <BarChart
-              data={{
-                labels: ["Nivel 1", "Nivel 2", "Nivel 3", "Nivel 4"],
-                datasets: [
-                  {
-                    data: [50, 120, 80, 200],
-                  },
-                ],
-              }}
-              width={screenWidth - 40}
-              height={220}
-              chartConfig={chartConfig}
-              style={styles.chart}
-            />
-          </Card.Content>
-        </Card>
-      </ScrollView>
-    </PaperProvider>
+          <Text style={styles.chartTitle}>Niveles y Puntos</Text>
+          <BarChart
+            data={{
+              labels: ["Nivel 1", "Nivel 2", "Nivel 3", "Nivel 4"],
+              datasets: [
+                {
+                  data: [50, 120, 80, 200],
+                },
+              ],
+            }}
+            width={screenWidth - 40}
+            height={220}
+            chartConfig={chartConfig}
+            style={styles.chart}
+          />
+        </Card.Content>
+      </Card>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   card: {
     margin: 10,

@@ -4,7 +4,8 @@ import {
   TextInput,
   Button,
   Text,
-  Provider as PaperProvider,
+  Card,
+  useTheme as usePaperTheme,
 } from "react-native-paper";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -15,6 +16,7 @@ const schema = yup.object({
 });
 
 const ForgotPasswordScreen = ({ navigation }) => {
+  const paperTheme = usePaperTheme();
   const {
     control,
     handleSubmit,
@@ -32,35 +34,42 @@ const ForgotPasswordScreen = ({ navigation }) => {
   };
 
   return (
-    <PaperProvider>
-      <View style={styles.container}>
-        <Text style={styles.title}>Recuperar Contraseña</Text>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              label="Email"
-              value={value}
-              onChangeText={onChange}
-              error={!!errors.email}
-              style={styles.input}
-            />
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: paperTheme.colors.background },
+      ]}
+    >
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text style={styles.title}>Recuperar Contraseña</Text>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                label="Email"
+                value={value}
+                onChangeText={onChange}
+                error={!!errors.email}
+                style={styles.input}
+              />
+            )}
+          />
+          {errors.email && (
+            <Text style={styles.error}>{errors.email.message}</Text>
           )}
-        />
-        {errors.email && (
-          <Text style={styles.error}>{errors.email.message}</Text>
-        )}
-        <Button
-          mode="contained"
-          onPress={handleSubmit(onSubmit)}
-          style={styles.button}
-        >
-          Enviar Email
-        </Button>
-        <Button onPress={() => navigation.goBack()}>Volver</Button>
-      </View>
-    </PaperProvider>
+          <Button
+            mode="contained"
+            onPress={handleSubmit(onSubmit)}
+            style={styles.button}
+          >
+            Enviar Email
+          </Button>
+          <Button onPress={() => navigation.goBack()}>Volver</Button>
+        </Card.Content>
+      </Card>
+    </View>
   );
 };
 
@@ -69,6 +78,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 20,
+  },
+  card: {
+    marginVertical: 10,
   },
   title: {
     fontSize: 24,

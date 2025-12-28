@@ -1,13 +1,14 @@
 import React from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView } from "react-native";
 import {
   Text,
   Card,
-  Provider as PaperProvider,
   List,
+  useTheme as usePaperTheme,
 } from "react-native-paper";
 
 const InfoScreen = () => {
+  const paperTheme = usePaperTheme();
   const infoItems = [
     {
       title: "Dolor Menstrual",
@@ -42,7 +43,12 @@ const InfoScreen = () => {
   ];
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={[
+        styles.container,
+        { backgroundColor: paperTheme.colors.background },
+      ]}
+    >
       <Card style={styles.card}>
         <Card.Title title="Información sobre Dolores Femeninos" />
         <Card.Content>
@@ -72,7 +78,6 @@ const InfoScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   card: {
     margin: 10,

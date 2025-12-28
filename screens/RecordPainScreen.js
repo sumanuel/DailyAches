@@ -5,9 +5,9 @@ import {
   Button,
   Text,
   Card,
-  Provider as PaperProvider,
   RadioButton,
   FAB,
+  useTheme as usePaperTheme,
 } from "react-native-paper";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -34,6 +34,7 @@ const persons = ["Esposa", "Novia", "Hermana", "Madre", "Otra"];
 
 const RecordPainScreen = ({ navigation }) => {
   const { incrementRecords, addPoints } = useUser();
+  const paperTheme = usePaperTheme();
   const [customPain, setCustomPain] = useState("");
   const {
     control,
@@ -49,102 +50,112 @@ const RecordPainScreen = ({ navigation }) => {
 
   const onSubmit = (data) => {
     // Lógica para guardar el registro (API o storage)
-    console.log(data);
+    const normalizedPain =
+      data.pain === "Otro" ? (customPain || "").trim() || "Otro" : data.pain;
+
+    const normalizedData = {
+      ...data,
+      pain: normalizedPain,
+    };
+
+    console.log(normalizedData);
     // Incrementar contador de registros y dar puntos
     incrementRecords();
     addPoints(10); // 10 puntos por registro
     Alert.alert(
       "¡Registrado!",
-      `Dolor registrado para ${data.person}: ${data.pain}`
+      `Dolor registrado para ${normalizedData.person}: ${normalizedData.pain}`
     );
     navigation.goBack();
   };
 
   return (
-    <PaperProvider>
-      <ScrollView style={styles.container}>
-        <Card style={styles.card}>
-          <Card.Title title="Registrar Dolor" />
-          <Card.Content>
-            <Text style={styles.label}>Selecciona el dolor:</Text>
-            <Controller
-              control={control}
-              name="pain"
-              render={({ field: { onChange, value } }) => (
-                <RadioButton.Group onValueChange={onChange} value={value}>
-                  {defaultPains.map((pain) => (
-                    <View key={pain} style={styles.radioItem}>
-                      <RadioButton value={pain} />
-                      <Text>{pain}</Text>
-                    </View>
-                  ))}
-                </RadioButton.Group>
-              )}
+    <ScrollView
+      style={[
+        styles.container,
+        { backgroundColor: paperTheme.colors.background },
+      ]}
+    >
+      <Card style={styles.card}>
+        <Card.Title title="Registrar Dolor" />
+        <Card.Content>
+          <Text style={styles.label}>Selecciona el dolor:</Text>
+          <Controller
+            control={control}
+            name="pain"
+            render={({ field: { onChange, value } }) => (
+              <RadioButton.Group onValueChange={onChange} value={value}>
+                {defaultPains.map((pain) => (
+                  <View key={pain} style={styles.radioItem}>
+                    <RadioButton value={pain} />
+                    <Text>{pain}</Text>
+                  </View>
+                ))}
+              </RadioButton.Group>
+            )}
+          />
+          {selectedPain === "Otro" && (
+            <TextInput
+              label="Especifica el dolor"
+              value={customPain}
+              onChangeText={setCustomPain}
+              style={styles.input}
             />
-            {selectedPain === "Otro" && (
+          )}
+          {errors.pain && (
+            <Text style={styles.error}>{errors.pain.message}</Text>
+          )}
+
+          <Text style={styles.label}>¿A quién le duele?</Text>
+          <Controller
+            control={control}
+            name="person"
+            render={({ field: { onChange, value } }) => (
+              <RadioButton.Group onValueChange={onChange} value={value}>
+                {persons.map((person) => (
+                  <View key={person} style={styles.radioItem}>
+                    <RadioButton value={person} />
+                    <Text>{person}</Text>
+                  </View>
+                ))}
+              </RadioButton.Group>
+            )}
+          />
+          {errors.person && (
+            <Text style={styles.error}>{errors.person.message}</Text>
+          )}
+
+          <Controller
+            control={control}
+            name="notes"
+            render={({ field: { onChange, value } }) => (
               <TextInput
-                label="Especifica el dolor"
-                value={customPain}
-                onChangeText={setCustomPain}
+                label="Notas adicionales (opcional)"
+                value={value}
+                onChangeText={onChange}
+                multiline
+                numberOfLines={3}
                 style={styles.input}
               />
             )}
-            {errors.pain && (
-              <Text style={styles.error}>{errors.pain.message}</Text>
-            )}
+          />
 
-            <Text style={styles.label}>¿A quién le duele?</Text>
-            <Controller
-              control={control}
-              name="person"
-              render={({ field: { onChange, value } }) => (
-                <RadioButton.Group onValueChange={onChange} value={value}>
-                  {persons.map((person) => (
-                    <View key={person} style={styles.radioItem}>
-                      <RadioButton value={person} />
-                      <Text>{person}</Text>
-                    </View>
-                  ))}
-                </RadioButton.Group>
-              )}
-            />
-            {errors.person && (
-              <Text style={styles.error}>{errors.person.message}</Text>
-            )}
-
-            <Controller
-              control={control}
-              name="notes"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  label="Notas adicionales (opcional)"
-                  value={value}
-                  onChangeText={onChange}
-                  multiline
-                  numberOfLines={3}
-                  style={styles.input}
-                />
-              )}
-            />
-
-            <Button
-              mode="contained"
-              onPress={handleSubmit(onSubmit)}
-              style={styles.button}
-            >
-              Registrar Dolor (+10 puntos)
-            </Button>
-          </Card.Content>
-        </Card>
-      </ScrollView>
-    </PaperProvider>
+          <Button
+            mode="contained"
+            onPress={handleSubmit(onSubmit)}
+            style={styles.button}
+          >
+            Registrar Dolor (+10 puntos)
+          </Button>
+        </Card.Content>
+      </Card>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   card: {
     margin: 10,

@@ -4,15 +4,21 @@ import {
   Text,
   Card,
   Switch,
-  Provider as PaperProvider,
+  useTheme as usePaperTheme,
 } from "react-native-paper";
 import { useTheme } from "../context/ThemeContext";
 
 const SettingsScreen = () => {
   const { isDarkMode, toggleTheme } = useTheme();
+  const paperTheme = usePaperTheme();
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={[
+        styles.container,
+        { backgroundColor: paperTheme.colors.background },
+      ]}
+    >
       <Card style={styles.card}>
         <Card.Title title="Configuración" />
         <Card.Content>
@@ -29,7 +35,6 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   card: {
     margin: 10,

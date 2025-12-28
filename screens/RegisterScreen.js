@@ -4,7 +4,8 @@ import {
   TextInput,
   Button,
   Text,
-  Provider as PaperProvider,
+  Card,
+  useTheme as usePaperTheme,
 } from "react-native-paper";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -24,6 +25,7 @@ const schema = yup.object({
 });
 
 const RegisterScreen = ({ navigation }) => {
+  const paperTheme = usePaperTheme();
   const {
     control,
     handleSubmit,
@@ -40,85 +42,94 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
-    <PaperProvider>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Registro</Text>
-        <Controller
-          control={control}
-          name="name"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              label="Nombre"
-              value={value}
-              onChangeText={onChange}
-              error={!!errors.name}
-              style={styles.input}
-            />
+    <ScrollView
+      contentContainerStyle={[
+        styles.container,
+        { backgroundColor: paperTheme.colors.background },
+      ]}
+    >
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text style={styles.title}>Registro</Text>
+          <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                label="Nombre"
+                value={value}
+                onChangeText={onChange}
+                error={!!errors.name}
+                style={styles.input}
+              />
+            )}
+          />
+          {errors.name && (
+            <Text style={styles.error}>{errors.name.message}</Text>
           )}
-        />
-        {errors.name && <Text style={styles.error}>{errors.name.message}</Text>}
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              label="Email"
-              value={value}
-              onChangeText={onChange}
-              error={!!errors.email}
-              style={styles.input}
-            />
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                label="Email"
+                value={value}
+                onChangeText={onChange}
+                error={!!errors.email}
+                style={styles.input}
+              />
+            )}
+          />
+          {errors.email && (
+            <Text style={styles.error}>{errors.email.message}</Text>
           )}
-        />
-        {errors.email && (
-          <Text style={styles.error}>{errors.email.message}</Text>
-        )}
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              label="Contraseña"
-              value={value}
-              onChangeText={onChange}
-              secureTextEntry
-              error={!!errors.password}
-              style={styles.input}
-            />
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                label="Contraseña"
+                value={value}
+                onChangeText={onChange}
+                secureTextEntry
+                error={!!errors.password}
+                style={styles.input}
+              />
+            )}
+          />
+          {errors.password && (
+            <Text style={styles.error}>{errors.password.message}</Text>
           )}
-        />
-        {errors.password && (
-          <Text style={styles.error}>{errors.password.message}</Text>
-        )}
-        <Controller
-          control={control}
-          name="confirmPassword"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              label="Confirmar Contraseña"
-              value={value}
-              onChangeText={onChange}
-              secureTextEntry
-              error={!!errors.confirmPassword}
-              style={styles.input}
-            />
+          <Controller
+            control={control}
+            name="confirmPassword"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                label="Confirmar Contraseña"
+                value={value}
+                onChangeText={onChange}
+                secureTextEntry
+                error={!!errors.confirmPassword}
+                style={styles.input}
+              />
+            )}
+          />
+          {errors.confirmPassword && (
+            <Text style={styles.error}>{errors.confirmPassword.message}</Text>
           )}
-        />
-        {errors.confirmPassword && (
-          <Text style={styles.error}>{errors.confirmPassword.message}</Text>
-        )}
-        <Button
-          mode="contained"
-          onPress={handleSubmit(onSubmit)}
-          style={styles.button}
-        >
-          Registrarse
-        </Button>
-        <Button onPress={() => navigation.navigate("Login")}>
-          ¿Ya tienes cuenta? Inicia Sesión
-        </Button>
-      </ScrollView>
-    </PaperProvider>
+          <Button
+            mode="contained"
+            onPress={handleSubmit(onSubmit)}
+            style={styles.button}
+          >
+            Registrarse
+          </Button>
+          <Button onPress={() => navigation.navigate("Login")}>
+            ¿Ya tienes cuenta? Inicia Sesión
+          </Button>
+        </Card.Content>
+      </Card>
+    </ScrollView>
   );
 };
 
@@ -127,6 +138,9 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     padding: 20,
+  },
+  card: {
+    marginVertical: 10,
   },
   title: {
     fontSize: 24,

@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import { View, StyleSheet, ScrollView, Alert, Share } from "react-native";
 import {
   Text,
   Button,
   Card,
-  Provider as PaperProvider,
   FAB,
+  useTheme as usePaperTheme,
 } from "react-native-paper";
 import { Image } from "expo-image";
-import * as Sharing from "expo-sharing";
 import { useUser } from "../context/UserContext";
 
 const HomeScreen = ({ navigation }) => {
   const { user, unlockAchievement } = useUser();
+  const paperTheme = usePaperTheme();
   const [dailyRecords, setDailyRecords] = useState([]); // Simular registros diarios
   const [message, setMessage] = useState("");
   const [imageUri, setImageUri] = useState("https://via.placeholder.com/300"); // Imagen dinámica placeholder
@@ -75,118 +75,102 @@ const HomeScreen = ({ navigation }) => {
       : `¡Día perfecto! Sin dolores reportados hoy. #DailyAches`;
 
     try {
-      const isAvailable = await Sharing.isAvailableAsync();
-      if (isAvailable) {
-        await Sharing.shareAsync(null, {
-          dialogTitle: "Compartir en Facebook",
-          UTI: "public.plain-text", // Para texto
-        });
-        // Nota: Sharing.shareAsync no permite especificar Facebook directamente, pero el usuario puede elegir Facebook en el diálogo.
-        // Para Facebook específico, necesitarías Facebook SDK, pero esto es un placeholder.
-        Alert.alert(
-          "¡Compartido!",
-          "Mensaje preparado para compartir en Facebook."
-        );
-        // Desbloquear logro de compartir
-        unlockAchievement(5); // ID del logro "Compartidor"
-      } else {
-        Alert.alert(
-          "Error",
-          "Compartir no está disponible en este dispositivo."
-        );
-      }
+      await Share.share({
+        message: shareMessage,
+      });
+
+      Alert.alert("¡Listo!", "Se abrió el panel para compartir.");
+      unlockAchievement(5); // ID del logro "Compartidor"
     } catch (error) {
       console.error("Error sharing:", error);
       Alert.alert("Error", "No se pudo compartir.");
     }
   };
   return (
-    <PaperProvider>
-      <ScrollView style={styles.container}>
+    <ScrollView
+      style={[
+        styles.container,
+        { backgroundColor: paperTheme.colors.background },
+      ]}
+      contentContainerStyle={styles.content}
+    >
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text style={styles.title}>¡Bienvenido a DailyAches!</Text>
+          <Text style={styles.level}>
+            Nivel: {user.level} | Puntos: {user.points}
+          </Text>
+          <Text style={styles.message}>{message}</Text>
+          <Image
+            source={{ uri: imageUri }}
+            style={styles.image}
+            placeholder={require("../assets/splash-icon.png")} // Placeholder local si existe
+            contentFit="cover"
+          />
+        </Card.Content>
+      </Card>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          mode="contained"
+          onPress={handleAddRecord}
+          style={styles.button}
+        >
+          Registrar Dolor
+        </Button>
+        <Button mode="outlined" onPress={handleViewStats} style={styles.button}>
+          Ver Estadísticas
+        </Button>
+        <Button
+          mode="outlined"
+          onPress={handleViewAchievements}
+          style={styles.button}
+        >
+          Ver Logros
+        </Button>
+        <Button mode="outlined" onPress={handleViewInfo} style={styles.button}>
+          Información
+        </Button>
+        <Button
+          mode="outlined"
+          onPress={handleViewSettings}
+          style={styles.button}
+        >
+          Configuración
+        </Button>
+        <Button
+          mode="outlined"
+          onPress={handleShareToFacebook}
+          style={styles.button}
+        >
+          Compartir en Facebook
+        </Button>
+      </View>
+
+      {dailyRecords.length > 0 && (
         <Card style={styles.card}>
+          <Card.Title title="Registros de Hoy" />
           <Card.Content>
-            <Text style={styles.title}>¡Bienvenido a DailyAches!</Text>
-            <Text style={styles.level}>
-              Nivel: {user.level} | Puntos: {user.points}
-            </Text>
-            <Text style={styles.message}>{message}</Text>
-            <Image
-              source={{ uri: imageUri }}
-              style={styles.image}
-              placeholder={require("../assets/splash-icon.png")} // Placeholder local si existe
-              contentFit="cover"
-            />
+            {dailyRecords.map((record, index) => (
+              <Text key={index}>
+                - {record.pain} para {record.person}
+              </Text>
+            ))}
           </Card.Content>
         </Card>
+      )}
 
-        <View style={styles.buttonContainer}>
-          <Button
-            mode="contained"
-            onPress={handleAddRecord}
-            style={styles.button}
-          >
-            Registrar Dolor
-          </Button>
-          <Button
-            mode="outlined"
-            onPress={handleViewStats}
-            style={styles.button}
-          >
-            Ver Estadísticas
-          </Button>
-          <Button
-            mode="outlined"
-            onPress={handleViewAchievements}
-            style={styles.button}
-          >
-            Ver Logros
-          </Button>
-          <Button
-            mode="outlined"
-            onPress={handleViewInfo}
-            style={styles.button}
-          >
-            Información
-          </Button>
-          <Button
-            mode="outlined"
-            onPress={handleViewSettings}
-            style={styles.button}
-          >
-            Configuración
-          </Button>
-          <Button
-            mode="outlined"
-            onPress={handleShareToFacebook}
-            style={styles.button}
-          >
-            Compartir en Facebook
-          </Button>
-        </View>
-
-        {dailyRecords.length > 0 && (
-          <Card style={styles.card}>
-            <Card.Title title="Registros de Hoy" />
-            <Card.Content>
-              {dailyRecords.map((record, index) => (
-                <Text key={index}>
-                  - {record.pain} para {record.person}
-                </Text>
-              ))}
-            </Card.Content>
-          </Card>
-        )}
-
-        <FAB icon="plus" style={styles.fab} onPress={handleAddRecord} />
-      </ScrollView>
-    </PaperProvider>
+      <FAB icon="plus" style={styles.fab} onPress={handleAddRecord} />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+  },
+  content: {
+    paddingBottom: 24,
   },
   card: {
     margin: 10,
@@ -213,15 +197,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    margin: 10,
-    flexWrap: "wrap",
+    marginHorizontal: 10,
+    gap: 10,
   },
   button: {
-    flex: 1,
-    marginHorizontal: 5,
-    marginVertical: 5,
+    marginVertical: 0,
   },
   fab: {
     position: "absolute",

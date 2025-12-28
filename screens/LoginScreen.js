@@ -4,7 +4,8 @@ import {
   TextInput,
   Button,
   Text,
-  Provider as PaperProvider,
+  Card,
+  useTheme as usePaperTheme,
 } from "react-native-paper";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -16,6 +17,7 @@ const schema = yup.object({
 });
 
 const LoginScreen = ({ navigation }) => {
+  const paperTheme = usePaperTheme();
   const {
     control,
     handleSubmit,
@@ -32,57 +34,64 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <PaperProvider>
-      <View style={styles.container}>
-        <Text style={styles.title}>Iniciar Sesión</Text>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              label="Email"
-              value={value}
-              onChangeText={onChange}
-              error={!!errors.email}
-              style={styles.input}
-            />
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: paperTheme.colors.background },
+      ]}
+    >
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text style={styles.title}>Iniciar Sesión</Text>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                label="Email"
+                value={value}
+                onChangeText={onChange}
+                error={!!errors.email}
+                style={styles.input}
+              />
+            )}
+          />
+          {errors.email && (
+            <Text style={styles.error}>{errors.email.message}</Text>
           )}
-        />
-        {errors.email && (
-          <Text style={styles.error}>{errors.email.message}</Text>
-        )}
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              label="Contraseña"
-              value={value}
-              onChangeText={onChange}
-              secureTextEntry
-              error={!!errors.password}
-              style={styles.input}
-            />
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                label="Contraseña"
+                value={value}
+                onChangeText={onChange}
+                secureTextEntry
+                error={!!errors.password}
+                style={styles.input}
+              />
+            )}
+          />
+          {errors.password && (
+            <Text style={styles.error}>{errors.password.message}</Text>
           )}
-        />
-        {errors.password && (
-          <Text style={styles.error}>{errors.password.message}</Text>
-        )}
-        <Button
-          mode="contained"
-          onPress={handleSubmit(onSubmit)}
-          style={styles.button}
-        >
-          Iniciar Sesión
-        </Button>
-        <Button onPress={() => navigation.navigate("Register")}>
-          ¿No tienes cuenta? Regístrate
-        </Button>
-        <Button onPress={() => navigation.navigate("ForgotPassword")}>
-          Olvidé mi contraseña
-        </Button>
-      </View>
-    </PaperProvider>
+          <Button
+            mode="contained"
+            onPress={handleSubmit(onSubmit)}
+            style={styles.button}
+          >
+            Iniciar Sesión
+          </Button>
+          <Button onPress={() => navigation.navigate("Register")}>
+            ¿No tienes cuenta? Regístrate
+          </Button>
+          <Button onPress={() => navigation.navigate("ForgotPassword")}>
+            Olvidé mi contraseña
+          </Button>
+        </Card.Content>
+      </Card>
+    </View>
   );
 };
 
@@ -91,6 +100,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 20,
+  },
+  card: {
+    marginVertical: 10,
   },
   title: {
     fontSize: 24,
