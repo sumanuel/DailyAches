@@ -47,13 +47,6 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [user.records]);
 
-  const handleAddRecord = () => {
-    navigation.navigate("Registro");
-  };
-
-  const handleViewStats = () => {
-    navigation.navigate("Estadísticas");
-  };
   const handleShareToFacebook = async () => {
     const hasRecords = dailyRecords.length > 0;
     const shareMessage = hasRecords
@@ -98,16 +91,6 @@ const HomeScreen = ({ navigation }) => {
 
       <View style={styles.buttonContainer}>
         <Button
-          mode="contained"
-          onPress={handleAddRecord}
-          style={styles.button}
-        >
-          Registrar Dolor
-        </Button>
-        <Button mode="outlined" onPress={handleViewStats} style={styles.button}>
-          Ver Estadísticas
-        </Button>
-        <Button
           mode="outlined"
           onPress={handleShareToFacebook}
           style={styles.button}
@@ -117,16 +100,31 @@ const HomeScreen = ({ navigation }) => {
       </View>
 
       {dailyRecords.length > 0 && (
-        <Card style={styles.card}>
-          <Card.Title title="Registros de Hoy" />
-          <Card.Content>
-            {dailyRecords.map((record, index) => (
-              <Text key={index}>
-                - {record.pain} para {record.personName}
-              </Text>
-            ))}
-          </Card.Content>
-        </Card>
+        <>
+          {Object.entries(
+            dailyRecords.reduce((acc, record) => {
+              if (!acc[record.personName]) acc[record.personName] = [];
+              acc[record.personName].push(record);
+              return acc;
+            }, {})
+          ).map(([personName, records]) => (
+            <Card key={personName} style={styles.card}>
+              <Card.Title title={`Dolores de ${personName}`} />
+              <Card.Content>
+                {records.map((record, index) => (
+                  <Card key={index} style={styles.painCard}>
+                    <Card.Content>
+                      <Text>{record.pain}</Text>
+                      {record.notes && (
+                        <Text style={styles.notes}>{record.notes}</Text>
+                      )}
+                    </Card.Content>
+                  </Card>
+                ))}
+              </Card.Content>
+            </Card>
+          ))}
+        </>
       )}
     </ScrollView>
   );
@@ -169,6 +167,15 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: 0,
+  },
+  painCard: {
+    marginVertical: 4,
+    backgroundColor: "#f5f5f5",
+  },
+  notes: {
+    fontSize: 12,
+    opacity: 0.7,
+    marginTop: 4,
   },
 });
 
