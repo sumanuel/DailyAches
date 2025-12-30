@@ -61,7 +61,14 @@ const PainSettingsScreen = () => {
               />
             </View>
           )}
-          ItemSeparatorComponent={() => <View style={styles.sep} />}
+          ItemSeparatorComponent={() => (
+            <View
+              style={[
+                styles.sep,
+                { backgroundColor: paperTheme.colors.outlineVariant },
+              ]}
+            />
+          )}
           contentContainerStyle={styles.listContent}
         />
 
@@ -93,8 +100,8 @@ const PainSettingsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  card: { width: "100%" },
+  container: { flex: 1, padding: 12 },
+  card: { width: "100%", borderRadius: 16, overflow: "hidden" },
   sub: { opacity: 0.7, marginBottom: 8 },
   listContent: { paddingHorizontal: 16, paddingBottom: 8 },
   itemRow: {
@@ -103,7 +110,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  sep: { height: 1, opacity: 0.08 },
+  sep: { height: StyleSheet.hairlineWidth, opacity: 0.6 },
 });
 
 export default PainSettingsScreen;

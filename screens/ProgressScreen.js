@@ -25,7 +25,11 @@ const ProgressScreen = () => {
         <List.Icon
           {...props}
           icon={item.unlocked ? "trophy" : "trophy-outline"}
-          color={item.unlocked ? "#FFD700" : "#ccc"}
+          color={
+            item.unlocked
+              ? paperTheme.colors.tertiary
+              : paperTheme.colors.onSurfaceVariant
+          }
         />
       )}
       right={(props) => (
@@ -103,10 +107,10 @@ const styles = StyleSheet.create({
   progress: { marginTop: 12, height: 10, borderRadius: 6 },
   sub: { marginTop: 8, opacity: 0.7 },
   subtitle: { fontSize: 16, marginBottom: 10, textAlign: "center" },
-  unlockedItem: { backgroundColor: "#e8f5e8" },
-  lockedItem: { backgroundColor: "#f5f5f5" },
-  unlockedPoints: { color: "#4CAF50", fontWeight: "bold" },
-  lockedPoints: { color: "#ccc" },
+  unlockedItem: { opacity: 1 },
+  lockedItem: { opacity: 0.7 },
+  unlockedPoints: { fontWeight: "bold" },
+  lockedPoints: { opacity: 0.7 },
 });
 
 export default ProgressScreen;

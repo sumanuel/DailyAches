@@ -86,11 +86,19 @@ const RecordPainScreen = ({ navigation, route }) => {
         styles.container,
         { backgroundColor: paperTheme.colors.background },
       ]}
+      contentContainerStyle={styles.content}
     >
       <Card style={styles.card}>
         <Card.Title title="Registrar dolor" subtitle={personName} />
         <Card.Content>
-          <Text style={styles.label}>Selecciona el dolor:</Text>
+          <Text
+            style={[
+              styles.label,
+              { color: paperTheme.colors.onSurfaceVariant },
+            ]}
+          >
+            Selecciona el dolor
+          </Text>
           <Controller
             control={control}
             name="pain"
@@ -114,7 +122,9 @@ const RecordPainScreen = ({ navigation, route }) => {
             />
           )}
           {errors.pain && (
-            <Text style={styles.error}>{errors.pain.message}</Text>
+            <Text style={[styles.error, { color: paperTheme.colors.error }]}>
+              {errors.pain.message}
+            </Text>
           )}
 
           <Controller
@@ -146,32 +156,14 @@ const RecordPainScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  card: {
-    margin: 10,
-  },
-  label: {
-    fontSize: 16,
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  radioItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 5,
-  },
-  input: {
-    marginBottom: 10,
-  },
-  button: {
-    marginTop: 20,
-  },
-  error: {
-    color: "red",
-    fontSize: 12,
-  },
+  container: { flex: 1 },
+  content: { padding: 12, paddingBottom: 24 },
+  card: { borderRadius: 16, overflow: "hidden" },
+  label: { marginTop: 4, marginBottom: 10, fontWeight: "700" },
+  radioItem: { flexDirection: "row", alignItems: "center", paddingVertical: 4 },
+  input: { marginTop: 10 },
+  button: { marginTop: 16 },
+  error: { fontSize: 12, marginTop: 6 },
 });
 
 export default RecordPainScreen;

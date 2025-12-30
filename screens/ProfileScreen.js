@@ -62,8 +62,8 @@ const ProfileScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  card: { width: "100%" },
+  container: { flex: 1, padding: 12 },
+  card: { width: "100%", borderRadius: 16, overflow: "hidden" },
   input: { marginBottom: 12 },
   hint: { opacity: 0.7, marginTop: 4 },
   button: { marginTop: 16 },

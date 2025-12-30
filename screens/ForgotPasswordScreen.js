@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import {
   TextInput,
   Button,
@@ -29,7 +29,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
     // Lógica para enviar email de recuperación
     console.log(data);
     // Mostrar mensaje de éxito y navegar de vuelta
-    alert("Email de recuperación enviado");
+    Alert.alert("Listo", "Email de recuperación enviado");
     navigation.goBack();
   };
 
@@ -42,7 +42,9 @@ const ForgotPasswordScreen = ({ navigation }) => {
     >
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.title}>Recuperar Contraseña</Text>
+          <Text variant="titleLarge" style={styles.title}>
+            Recuperar Contraseña
+          </Text>
           <Controller
             control={control}
             name="email"
@@ -57,7 +59,9 @@ const ForgotPasswordScreen = ({ navigation }) => {
             )}
           />
           {errors.email && (
-            <Text style={styles.error}>{errors.email.message}</Text>
+            <Text style={[styles.error, { color: paperTheme.colors.error }]}>
+              {errors.email.message}
+            </Text>
           )}
           <Button
             mode="contained"
@@ -77,25 +81,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    padding: 20,
+    padding: 12,
   },
-  card: {
-    marginVertical: 10,
-  },
-  title: {
-    fontSize: 24,
-    textAlign: "center",
-    marginBottom: 20,
-  },
+  card: { borderRadius: 16, overflow: "hidden" },
+  title: { textAlign: "center", marginBottom: 16 },
   input: {
     marginBottom: 10,
   },
   button: {
-    marginTop: 10,
+    marginTop: 12,
   },
   error: {
-    color: "red",
     fontSize: 12,
+    marginBottom: 8,
   },
 });
 

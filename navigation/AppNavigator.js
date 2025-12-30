@@ -26,8 +26,16 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 const AuthStackNavigator = () => {
+  const { theme } = useTheme();
   return (
-    <AuthStack.Navigator initialRouteName="Login">
+    <AuthStack.Navigator
+      initialRouteName="Login"
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.primary },
+        headerTintColor: theme.colors.onPrimary,
+        headerTitleStyle: { fontWeight: "700" },
+      }}
+    >
       <AuthStack.Screen
         name="Login"
         component={LoginScreen}
@@ -48,20 +56,36 @@ const AuthStackNavigator = () => {
 };
 
 const HomeStackNavigator = () => {
+  const { theme } = useTheme();
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.primary },
+        headerTintColor: theme.colors.onPrimary,
+        headerTitleStyle: { fontWeight: "700" },
+        contentStyle: { backgroundColor: theme.colors.background },
+      }}
+    >
       <Stack.Screen
         name="HomeMain"
         component={HomeScreen}
-        options={{ title: "Home" }}
+        options={{ title: "Inicio" }}
       />
     </Stack.Navigator>
   );
 };
 
 const RegistroStackNavigator = () => {
+  const { theme } = useTheme();
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.primary },
+        headerTintColor: theme.colors.onPrimary,
+        headerTitleStyle: { fontWeight: "700" },
+        contentStyle: { backgroundColor: theme.colors.background },
+      }}
+    >
       <Stack.Screen
         name="People"
         component={PeopleScreen}
@@ -77,20 +101,36 @@ const RegistroStackNavigator = () => {
 };
 
 const StatsStackNavigator = () => {
+  const { theme } = useTheme();
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.primary },
+        headerTintColor: theme.colors.onPrimary,
+        headerTitleStyle: { fontWeight: "700" },
+        contentStyle: { backgroundColor: theme.colors.background },
+      }}
+    >
       <Stack.Screen
         name="StatsMain"
         component={StatsScreen}
-        options={{ title: "Estadísticas" }}
+        options={{ title: "Historial" }}
       />
     </Stack.Navigator>
   );
 };
 
 const MoreStackNavigator = () => {
+  const { theme } = useTheme();
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.primary },
+        headerTintColor: theme.colors.onPrimary,
+        headerTitleStyle: { fontWeight: "700" },
+        contentStyle: { backgroundColor: theme.colors.background },
+      }}
+    >
       <Stack.Screen
         name="MoreMain"
         component={MoreScreen}
@@ -121,15 +161,22 @@ const MoreStackNavigator = () => {
 };
 
 const MainTabsNavigator = () => {
+  const { theme } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+        tabBarStyle: {
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.outlineVariant,
+        },
         tabBarIcon: ({ color, size }) => {
           const iconMap = {
             Home: "home-variant",
             Registro: "account-multiple",
-            Estadísticas: "chart-bar",
+            Historial: "history",
             Más: "dots-horizontal-circle-outline",
           };
           const iconName = iconMap[route.name] || "circle-outline";
@@ -139,9 +186,13 @@ const MainTabsNavigator = () => {
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeStackNavigator} />
+      <Tab.Screen
+        name="Home"
+        component={HomeStackNavigator}
+        options={{ title: "Inicio" }}
+      />
       <Tab.Screen name="Registro" component={RegistroStackNavigator} />
-      <Tab.Screen name="Estadísticas" component={StatsStackNavigator} />
+      <Tab.Screen name="Historial" component={StatsStackNavigator} />
       <Tab.Screen name="Más" component={MoreStackNavigator} />
     </Tab.Navigator>
   );

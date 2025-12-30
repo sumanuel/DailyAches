@@ -18,6 +18,7 @@ const SettingsScreen = () => {
         styles.container,
         { backgroundColor: paperTheme.colors.background },
       ]}
+      contentContainerStyle={styles.content}
     >
       <Card style={styles.card}>
         <Card.Title title="Configuración" />
@@ -33,17 +34,14 @@ const SettingsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  card: {
-    margin: 10,
-  },
+  container: { flex: 1 },
+  content: { padding: 12, paddingBottom: 24 },
+  card: { borderRadius: 16, overflow: "hidden" },
   settingItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 6,
   },
 });
 

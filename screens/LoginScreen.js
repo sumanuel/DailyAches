@@ -42,7 +42,9 @@ const LoginScreen = ({ navigation }) => {
     >
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.title}>Iniciar Sesión</Text>
+          <Text variant="titleLarge" style={styles.title}>
+            Iniciar Sesión
+          </Text>
           <Controller
             control={control}
             name="email"
@@ -57,7 +59,9 @@ const LoginScreen = ({ navigation }) => {
             )}
           />
           {errors.email && (
-            <Text style={styles.error}>{errors.email.message}</Text>
+            <Text style={[styles.error, { color: paperTheme.colors.error }]}>
+              {errors.email.message}
+            </Text>
           )}
           <Controller
             control={control}
@@ -74,7 +78,9 @@ const LoginScreen = ({ navigation }) => {
             )}
           />
           {errors.password && (
-            <Text style={styles.error}>{errors.password.message}</Text>
+            <Text style={[styles.error, { color: paperTheme.colors.error }]}>
+              {errors.password.message}
+            </Text>
           )}
           <Button
             mode="contained"
@@ -99,25 +105,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    padding: 20,
+    padding: 12,
   },
-  card: {
-    marginVertical: 10,
-  },
-  title: {
-    fontSize: 24,
-    textAlign: "center",
-    marginBottom: 20,
-  },
+  card: { borderRadius: 16, overflow: "hidden" },
+  title: { textAlign: "center", marginBottom: 16 },
   input: {
     marginBottom: 10,
   },
   button: {
-    marginTop: 10,
+    marginTop: 12,
   },
   error: {
-    color: "red",
     fontSize: 12,
+    marginBottom: 8,
   },
 });
 

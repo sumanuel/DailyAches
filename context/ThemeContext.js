@@ -22,19 +22,23 @@ const { LightTheme: NavigationLight, DarkTheme: NavigationDark } =
 
 const lightTheme = {
   ...MD3LightTheme,
+  roundness: 16,
   colors: {
     ...MD3LightTheme.colors,
-    primary: "#6200ee",
-    secondary: "#03dac6",
+    primary: "#6D28D9",
+    secondary: "#7C3AED",
+    tertiary: "#A78BFA",
   },
 };
 
 const darkTheme = {
   ...MD3DarkTheme,
+  roundness: 16,
   colors: {
     ...MD3DarkTheme.colors,
-    primary: "#bb86fc",
-    secondary: "#03dac6",
+    primary: "#C4B5FD",
+    secondary: "#A78BFA",
+    tertiary: "#DDD6FE",
   },
 };
 

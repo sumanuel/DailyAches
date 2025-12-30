@@ -50,7 +50,9 @@ const RegisterScreen = ({ navigation }) => {
     >
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.title}>Registro</Text>
+          <Text variant="titleLarge" style={styles.title}>
+            Registro
+          </Text>
           <Controller
             control={control}
             name="name"
@@ -65,7 +67,9 @@ const RegisterScreen = ({ navigation }) => {
             )}
           />
           {errors.name && (
-            <Text style={styles.error}>{errors.name.message}</Text>
+            <Text style={[styles.error, { color: paperTheme.colors.error }]}>
+              {errors.name.message}
+            </Text>
           )}
           <Controller
             control={control}
@@ -81,7 +85,9 @@ const RegisterScreen = ({ navigation }) => {
             )}
           />
           {errors.email && (
-            <Text style={styles.error}>{errors.email.message}</Text>
+            <Text style={[styles.error, { color: paperTheme.colors.error }]}>
+              {errors.email.message}
+            </Text>
           )}
           <Controller
             control={control}
@@ -98,7 +104,9 @@ const RegisterScreen = ({ navigation }) => {
             )}
           />
           {errors.password && (
-            <Text style={styles.error}>{errors.password.message}</Text>
+            <Text style={[styles.error, { color: paperTheme.colors.error }]}>
+              {errors.password.message}
+            </Text>
           )}
           <Controller
             control={control}
@@ -115,7 +123,9 @@ const RegisterScreen = ({ navigation }) => {
             )}
           />
           {errors.confirmPassword && (
-            <Text style={styles.error}>{errors.confirmPassword.message}</Text>
+            <Text style={[styles.error, { color: paperTheme.colors.error }]}>
+              {errors.confirmPassword.message}
+            </Text>
           )}
           <Button
             mode="contained"
@@ -137,25 +147,19 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     justifyContent: "center",
-    padding: 20,
+    padding: 12,
   },
-  card: {
-    marginVertical: 10,
-  },
-  title: {
-    fontSize: 24,
-    textAlign: "center",
-    marginBottom: 20,
-  },
+  card: { borderRadius: 16, overflow: "hidden" },
+  title: { textAlign: "center", marginBottom: 16 },
   input: {
     marginBottom: 10,
   },
   button: {
-    marginTop: 10,
+    marginTop: 12,
   },
   error: {
-    color: "red",
     fontSize: 12,
+    marginBottom: 8,
   },
 });
 

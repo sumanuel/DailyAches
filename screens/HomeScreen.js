@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
-import { Text, Card, useTheme as usePaperTheme } from "react-native-paper";
+import React, { useEffect, useMemo, useState } from "react";
+import { StyleSheet, View, ScrollView } from "react-native";
+import { Card, Text, useTheme as usePaperTheme } from "react-native-paper";
 import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
 
-const HomeScreen = ({ navigation }) => {
-  const { user, unlockAchievement, getTodayRecords } = useUser();
+const HomeScreen = () => {
+  const { user, getTodayRecords } = useUser();
   const paperTheme = usePaperTheme();
   const [dailyRecords, setDailyRecords] = useState([]);
   const [message, setMessage] = useState("");
@@ -42,6 +42,16 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [user.records]);
 
+  const groupedByPerson = useMemo(() => {
+    return Object.entries(
+      dailyRecords.reduce((acc, record) => {
+        if (!acc[record.personName]) acc[record.personName] = [];
+        acc[record.personName].push(record);
+        return acc;
+      }, {})
+    );
+  }, [dailyRecords]);
+
   return (
     <ScrollView
       style={[
@@ -52,11 +62,20 @@ const HomeScreen = ({ navigation }) => {
     >
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.title}>¡Bienvenido a DailyAches!</Text>
-          <Text style={styles.level}>
+          <Text variant="titleLarge" style={styles.title}>
+            ¡Bienvenido a DailyAches!
+          </Text>
+          <Text
+            style={[
+              styles.level,
+              { color: paperTheme.colors.onSurfaceVariant },
+            ]}
+          >
             Nivel: {user.level} | Puntos: {user.points}
           </Text>
-          <Text style={styles.message}>{message}</Text>
+          <Text variant="titleMedium" style={styles.message}>
+            {message}
+          </Text>
           <Image
             source={{ uri: imageUri }}
             style={styles.image}
@@ -66,88 +85,54 @@ const HomeScreen = ({ navigation }) => {
         </Card.Content>
       </Card>
 
-      <View style={styles.buttonContainer}>
-        {/* Share button removed - moved to More screen */}
-      </View>
-
       {dailyRecords.length > 0 && (
-        <>
-          {Object.entries(
-            dailyRecords.reduce((acc, record) => {
-              if (!acc[record.personName]) acc[record.personName] = [];
-              acc[record.personName].push(record);
-              return acc;
-            }, {})
-          ).map(([personName, records]) => (
+        <View style={styles.section}>
+          {groupedByPerson.map(([personName, records]) => (
             <Card key={personName} style={styles.card}>
               <Card.Title title={`Dolores de ${personName}`} />
               <Card.Content>
                 {records.map((record, index) => (
-                  <Card key={index} style={styles.painCard}>
+                  <Card
+                    key={record.id || index}
+                    style={[
+                      styles.painCard,
+                      { backgroundColor: paperTheme.colors.surfaceVariant },
+                    ]}
+                  >
                     <Card.Content>
-                      <Text>{record.pain}</Text>
-                      {record.notes && (
-                        <Text style={styles.notes}>{record.notes}</Text>
-                      )}
+                      <Text variant="titleMedium">{record.pain}</Text>
+                      {record.notes ? (
+                        <Text
+                          style={{
+                            color: paperTheme.colors.onSurfaceVariant,
+                            marginTop: 4,
+                          }}
+                        >
+                          {record.notes}
+                        </Text>
+                      ) : null}
                     </Card.Content>
                   </Card>
                 ))}
               </Card.Content>
             </Card>
           ))}
-        </>
+        </View>
       )}
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    paddingBottom: 24,
-  },
-  card: {
-    margin: 10,
-  },
-  title: {
-    fontSize: 24,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  level: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 10,
-    fontWeight: "bold",
-  },
-  message: {
-    fontSize: 18,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  image: {
-    width: "100%",
-    height: 200,
-    borderRadius: 10,
-  },
-  buttonContainer: {
-    marginHorizontal: 10,
-    gap: 10,
-  },
-  button: {
-    marginVertical: 0,
-  },
-  painCard: {
-    marginVertical: 4,
-    backgroundColor: "#f5f5f5",
-  },
-  notes: {
-    fontSize: 12,
-    opacity: 0.7,
-    marginTop: 4,
-  },
+  container: { flex: 1 },
+  content: { padding: 12, paddingBottom: 24 },
+  section: { marginTop: 2 },
+  card: { borderRadius: 16, overflow: "hidden", marginBottom: 12 },
+  title: { textAlign: "center" },
+  level: { textAlign: "center", marginTop: 6, fontWeight: "700" },
+  message: { textAlign: "center", marginTop: 10 },
+  image: { width: "100%", height: 200, borderRadius: 14, marginTop: 12 },
+  painCard: { marginTop: 8, borderRadius: 14, overflow: "hidden" },
 });
 
 export default HomeScreen;

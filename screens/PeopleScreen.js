@@ -177,12 +177,12 @@ const PeopleScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  searchCard: { margin: 10 },
+  container: { flex: 1, padding: 12 },
+  searchCard: { borderRadius: 16, overflow: "hidden" },
   searchContent: { paddingVertical: 6 },
   searchInput: { backgroundColor: "transparent" },
-  list: { paddingHorizontal: 10, gap: 10, paddingBottom: 96 },
-  card: { width: "100%" },
+  list: { gap: 10, paddingBottom: 96, marginTop: 12 },
+  card: { width: "100%", borderRadius: 16, overflow: "hidden" },
   row: {
     flexDirection: "row",
     alignItems: "center",
