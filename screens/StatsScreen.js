@@ -7,7 +7,14 @@ import {
   Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
+import {
+  DatePickerModal,
+  es,
+  registerTranslation,
+} from "react-native-paper-dates";
 import { useUser } from "../context/UserContext";
+
+registerTranslation("es", es);
 
 const monthShortEs = [
   "ene",
@@ -78,11 +85,35 @@ const getPrevMonthRange = (date) => {
   return { start: startOfMonth(d), end: endOfMonth(d) };
 };
 
-const StatsScreen = () => {
+const getPresetRange = (preset, now = new Date()) => {
+  if (preset === "this_week") {
+    const start = startOfWeekMonday(now);
+    const end = endOfDay(now);
+    return { start, end };
+  }
+  if (preset === "prev_month") {
+    return getPrevMonthRange(now);
+  }
+  const start = startOfMonth(now);
+  const end = endOfMonth(now);
+  return { start, end };
+};
+
+const StatsScreen = ({ route }) => {
   const paperTheme = usePaperTheme();
   const { user, getTodayRecords } = useUser();
+  const { personId, personName } = route?.params || {};
   const [tab, setTab] = useState("today"); // today | history
-  const [preset, setPreset] = useState("this_month"); // this_month | prev_month | this_week
+  const [preset, setPreset] = useState("this_month"); // this_month | prev_month | this_week | custom
+  const [historyRange, setHistoryRange] = useState(() =>
+    getPresetRange("this_month")
+  );
+  const [rangeOpen, setRangeOpen] = useState(false);
+
+  const applyPreset = (p) => {
+    setPreset(p);
+    setHistoryRange(getPresetRange(p));
+  };
 
   const peopleById = useMemo(() => {
     const map = new Map();
@@ -90,36 +121,24 @@ const StatsScreen = () => {
     return map;
   }, [user.people]);
 
-  const todayRecords = useMemo(
-    () => getTodayRecords(),
-    [getTodayRecords, user.records]
-  );
-
-  const historyRange = useMemo(() => {
-    const now = new Date();
-    if (preset === "this_week") {
-      const start = startOfWeekMonday(now);
-      const end = endOfDay(now);
-      return { start, end };
-    }
-    if (preset === "prev_month") {
-      return getPrevMonthRange(now);
-    }
-    const start = startOfMonth(now);
-    const end = endOfMonth(now);
-    return { start, end };
-  }, [preset]);
+  const todayRecords = useMemo(() => {
+    const allToday = getTodayRecords();
+    if (!personId) return [];
+    return allToday.filter((r) => r.personId === personId);
+  }, [getTodayRecords, personId, user.records]);
 
   const historyRecords = useMemo(() => {
     const start = historyRange.start.getTime();
     const end = historyRange.end.getTime();
+    if (!personId) return [];
     return (user.records || [])
       .filter((r) => {
+        if (r.personId !== personId) return false;
         const t = new Date(r.createdAt).getTime();
         return t >= start && t <= end;
       })
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, [historyRange.end, historyRange.start, user.records]);
+  }, [historyRange.end, historyRange.start, personId, user.records]);
 
   const records = tab === "today" ? todayRecords : historyRecords;
   const count = records.length;
@@ -202,6 +221,27 @@ const StatsScreen = () => {
     );
   };
 
+  if (!personId || !personName) {
+    return (
+      <ScrollView
+        style={[
+          styles.container,
+          { backgroundColor: paperTheme.colors.background },
+        ]}
+        contentContainerStyle={styles.content}
+      >
+        <Card style={styles.emptyCard}>
+          <Card.Content>
+            <Text variant="titleMedium">Selecciona una persona</Text>
+            <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
+              Vuelve atrás y elige a quién deseas ver el historial.
+            </Text>
+          </Card.Content>
+        </Card>
+      </ScrollView>
+    );
+  }
+
   return (
     <ScrollView
       style={[
@@ -219,9 +259,11 @@ const StatsScreen = () => {
             color={paperTheme.colors.onSurfaceVariant}
           />
           <View style={styles.headerText}>
-            <Text variant="titleLarge">Historial de dolores ({count})</Text>
+            <Text variant="titleMedium" style={styles.headerTitle}>
+              {personName} ({count})
+            </Text>
             <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
-              Visualiza tus registros y explora los detalles con un toque.
+              Historial de dolores para esta persona.
             </Text>
           </View>
         </Card.Content>
@@ -264,7 +306,14 @@ const StatsScreen = () => {
                 >
                   DESDE
                 </Text>
-                <Button mode="outlined" icon="calendar" disabled>
+                <Button
+                  mode="outlined"
+                  icon="calendar"
+                  onPress={() => setRangeOpen(true)}
+                  style={styles.calendarBtn}
+                  contentStyle={styles.calendarBtnContent}
+                  labelStyle={styles.calendarBtnLabel}
+                >
                   {formatDateEs(historyRange.start)}
                 </Button>
               </View>
@@ -277,7 +326,14 @@ const StatsScreen = () => {
                 >
                   HASTA
                 </Text>
-                <Button mode="outlined" icon="calendar" disabled>
+                <Button
+                  mode="outlined"
+                  icon="calendar"
+                  onPress={() => setRangeOpen(true)}
+                  style={styles.calendarBtn}
+                  contentStyle={styles.calendarBtnContent}
+                  labelStyle={styles.calendarBtnLabel}
+                >
                   {formatDateEs(historyRange.end)}
                 </Button>
               </View>
@@ -286,19 +342,19 @@ const StatsScreen = () => {
             <View style={styles.quickRow}>
               <Button
                 mode={preset === "this_month" ? "contained" : "outlined"}
-                onPress={() => setPreset("this_month")}
+                onPress={() => applyPreset("this_month")}
               >
                 Este mes
               </Button>
               <Button
                 mode={preset === "prev_month" ? "contained" : "outlined"}
-                onPress={() => setPreset("prev_month")}
+                onPress={() => applyPreset("prev_month")}
               >
                 Mes anterior
               </Button>
               <Button
                 mode={preset === "this_week" ? "contained" : "outlined"}
-                onPress={() => setPreset("this_week")}
+                onPress={() => applyPreset("this_week")}
               >
                 Esta semana
               </Button>
@@ -306,6 +362,26 @@ const StatsScreen = () => {
           </Card.Content>
         </Card>
       )}
+
+      <DatePickerModal
+        locale="es"
+        mode="range"
+        visible={rangeOpen}
+        startDate={historyRange.start}
+        endDate={historyRange.end}
+        onDismiss={() => setRangeOpen(false)}
+        onConfirm={({ startDate, endDate }) => {
+          if (startDate && endDate) {
+            setHistoryRange({
+              start: startOfDay(startDate),
+              end: endOfDay(endDate),
+            });
+            setPreset("custom");
+          }
+          setRangeOpen(false);
+        }}
+        saveLabel="Aplicar"
+      />
 
       {count === 0 ? (
         <Card style={styles.emptyCard}>
@@ -333,6 +409,7 @@ const styles = StyleSheet.create({
   headerCard: { borderRadius: 16, overflow: "hidden" },
   headerContent: { flexDirection: "row", alignItems: "center", gap: 12 },
   headerText: { flex: 1 },
+  headerTitle: { fontWeight: "800" },
 
   segment: {
     flexDirection: "row",
@@ -342,11 +419,14 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   segmentBtn: { flex: 1, borderRadius: 12 },
-  segmentBtnContent: { height: 44 },
+  segmentBtnContent: { height: 40 },
 
   filtersCard: { marginTop: 12, borderRadius: 16, overflow: "hidden" },
-  rangeRow: { flexDirection: "row", gap: 12 },
+  rangeRow: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
   rangeCol: { flex: 1, gap: 6 },
+  calendarBtn: { alignSelf: "stretch" },
+  calendarBtnContent: { justifyContent: "flex-start", height: 40 },
+  calendarBtnLabel: { fontSize: 12 },
   quickRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12 },
 
   recordsList: { marginTop: 12, gap: 10 },
@@ -367,7 +447,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   kv: { flex: 1 },
-  kvLabel: { fontSize: 11, letterSpacing: 0.6, fontWeight: "700" },
+  kvLabel: { fontSize: 10, letterSpacing: 0.6, fontWeight: "700" },
 
   emptyCard: { marginTop: 12, borderRadius: 16, overflow: "hidden" },
 });

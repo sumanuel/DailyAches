@@ -11,6 +11,7 @@ import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import HomeScreen from "../screens/HomeScreen";
 import PeopleScreen from "../screens/PeopleScreen";
 import RecordPainScreen from "../screens/RecordPainScreen";
+import HistoryPeopleScreen from "../screens/HistoryPeopleScreen";
 import StatsScreen from "../screens/StatsScreen";
 import MoreScreen from "../screens/MoreScreen";
 import ProgressScreen from "../screens/ProgressScreen";
@@ -113,8 +114,17 @@ const StatsStackNavigator = () => {
     >
       <Stack.Screen
         name="StatsMain"
-        component={StatsScreen}
+        component={HistoryPeopleScreen}
         options={{ title: "Historial" }}
+      />
+      <Stack.Screen
+        name="HistoryDetail"
+        component={StatsScreen}
+        options={({ route }) => ({
+          title: route?.params?.personName
+            ? `Historial · ${route.params.personName}`
+            : "Historial",
+        })}
       />
     </Stack.Navigator>
   );
