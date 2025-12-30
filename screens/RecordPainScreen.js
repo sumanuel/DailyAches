@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import {
   TextInput,
@@ -6,7 +6,6 @@ import {
   Text,
   Card,
   RadioButton,
-  FAB,
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import { useForm, Controller } from "react-hook-form";
@@ -16,31 +15,21 @@ import { useUser } from "../context/UserContext";
 
 const schema = yup.object({
   pain: yup.string().required("Selecciona un dolor"),
-  person: yup.string().required("Selecciona a quién le duele"),
   notes: yup.string(),
 });
 
-const defaultPains = [
-  "Dolor de cabeza",
-  "Dolor de espalda",
-  "Dolor menstrual",
-  "Dolor de estómago",
-  "Dolor de garganta",
-  "Dolor de dientes",
-  "Otro",
-];
-
-const persons = ["Esposa", "Novia", "Hermana", "Madre", "Otra"];
-
-const RecordPainScreen = ({ navigation }) => {
-  const { incrementRecords, addPoints } = useUser();
+const RecordPainScreen = ({ navigation, route }) => {
+  const { user, addRecord } = useUser();
   const paperTheme = usePaperTheme();
   const [customPain, setCustomPain] = useState("");
+  const { personId, personName } = route?.params || {};
+
+  const painTypes = useMemo(() => user.painTypes || [], [user.painTypes]);
+
   const {
     control,
     handleSubmit,
     formState: { errors },
-    setValue,
     watch,
   } = useForm({
     resolver: yupResolver(schema),
@@ -49,25 +38,47 @@ const RecordPainScreen = ({ navigation }) => {
   const selectedPain = watch("pain");
 
   const onSubmit = (data) => {
-    // Lógica para guardar el registro (API o storage)
     const normalizedPain =
       data.pain === "Otro" ? (customPain || "").trim() || "Otro" : data.pain;
 
-    const normalizedData = {
-      ...data,
+    addRecord({
+      personId,
+      personName,
       pain: normalizedPain,
-    };
+      notes: data.notes,
+    });
 
-    console.log(normalizedData);
-    // Incrementar contador de registros y dar puntos
-    incrementRecords();
-    addPoints(10); // 10 puntos por registro
     Alert.alert(
       "¡Registrado!",
-      `Dolor registrado para ${normalizedData.person}: ${normalizedData.pain}`
+      `Dolor registrado para ${personName}: ${normalizedPain}`
     );
     navigation.goBack();
   };
+
+  if (!personId || !personName) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: paperTheme.colors.background },
+        ]}
+      >
+        <Card style={styles.card}>
+          <Card.Title title="Registrar dolor" />
+          <Card.Content>
+            <Text>Selecciona una persona primero desde “Registro”.</Text>
+            <Button
+              mode="contained"
+              onPress={() => navigation.goBack()}
+              style={styles.button}
+            >
+              Volver
+            </Button>
+          </Card.Content>
+        </Card>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -77,7 +88,7 @@ const RecordPainScreen = ({ navigation }) => {
       ]}
     >
       <Card style={styles.card}>
-        <Card.Title title="Registrar Dolor" />
+        <Card.Title title="Registrar dolor" subtitle={personName} />
         <Card.Content>
           <Text style={styles.label}>Selecciona el dolor:</Text>
           <Controller
@@ -85,7 +96,7 @@ const RecordPainScreen = ({ navigation }) => {
             name="pain"
             render={({ field: { onChange, value } }) => (
               <RadioButton.Group onValueChange={onChange} value={value}>
-                {defaultPains.map((pain) => (
+                {painTypes.map((pain) => (
                   <View key={pain} style={styles.radioItem}>
                     <RadioButton value={pain} />
                     <Text>{pain}</Text>
@@ -104,25 +115,6 @@ const RecordPainScreen = ({ navigation }) => {
           )}
           {errors.pain && (
             <Text style={styles.error}>{errors.pain.message}</Text>
-          )}
-
-          <Text style={styles.label}>¿A quién le duele?</Text>
-          <Controller
-            control={control}
-            name="person"
-            render={({ field: { onChange, value } }) => (
-              <RadioButton.Group onValueChange={onChange} value={value}>
-                {persons.map((person) => (
-                  <View key={person} style={styles.radioItem}>
-                    <RadioButton value={person} />
-                    <Text>{person}</Text>
-                  </View>
-                ))}
-              </RadioButton.Group>
-            )}
-          />
-          {errors.person && (
-            <Text style={styles.error}>{errors.person.message}</Text>
           )}
 
           <Controller
@@ -145,7 +137,7 @@ const RecordPainScreen = ({ navigation }) => {
             onPress={handleSubmit(onSubmit)}
             style={styles.button}
           >
-            Registrar Dolor (+10 puntos)
+            Registrar dolor (+10 puntos)
           </Button>
         </Card.Content>
       </Card>

@@ -4,16 +4,15 @@ import {
   Text,
   Button,
   Card,
-  FAB,
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
 
 const HomeScreen = ({ navigation }) => {
-  const { user, unlockAchievement } = useUser();
+  const { user, unlockAchievement, getTodayRecords } = useUser();
   const paperTheme = usePaperTheme();
-  const [dailyRecords, setDailyRecords] = useState([]); // Simular registros diarios
+  const [dailyRecords, setDailyRecords] = useState([]);
   const [message, setMessage] = useState("");
   const [imageUri, setImageUri] = useState("https://via.placeholder.com/300"); // Imagen dinámica placeholder
 
@@ -30,9 +29,7 @@ const HomeScreen = ({ navigation }) => {
   ];
 
   useEffect(() => {
-    // Simular carga de registros diarios (desde API o storage)
-    // Por ahora, vacío para mostrar mensajes por defecto
-    const todayRecords = []; // Simular que no hay registros
+    const todayRecords = getTodayRecords();
     setDailyRecords(todayRecords);
 
     if (todayRecords.length === 0) {
@@ -48,25 +45,14 @@ const HomeScreen = ({ navigation }) => {
       setMessage(randomDefault);
       setImageUri("https://via.placeholder.com/300?text=Dolores+Registrados"); // Imagen relacionada
     }
-  }, []);
+  }, [user.records]);
 
   const handleAddRecord = () => {
-    navigation.navigate("RecordPain"); // Navegar a pantalla de registro de dolores
+    navigation.navigate("Registro");
   };
 
   const handleViewStats = () => {
-    navigation.navigate("Stats"); // Navegar a estadísticas
-  };
-
-  const handleViewAchievements = () => {
-    navigation.navigate("Achievements"); // Navegar a logros
-  };
-
-  const handleViewInfo = () => {
-    navigation.navigate("Info"); // Navegar a información
-  };
-  const handleViewSettings = () => {
-    navigation.navigate("Settings"); // Navegar a configuración
+    navigation.navigate("Estadísticas");
   };
   const handleShareToFacebook = async () => {
     const hasRecords = dailyRecords.length > 0;
@@ -123,23 +109,6 @@ const HomeScreen = ({ navigation }) => {
         </Button>
         <Button
           mode="outlined"
-          onPress={handleViewAchievements}
-          style={styles.button}
-        >
-          Ver Logros
-        </Button>
-        <Button mode="outlined" onPress={handleViewInfo} style={styles.button}>
-          Información
-        </Button>
-        <Button
-          mode="outlined"
-          onPress={handleViewSettings}
-          style={styles.button}
-        >
-          Configuración
-        </Button>
-        <Button
-          mode="outlined"
           onPress={handleShareToFacebook}
           style={styles.button}
         >
@@ -153,14 +122,12 @@ const HomeScreen = ({ navigation }) => {
           <Card.Content>
             {dailyRecords.map((record, index) => (
               <Text key={index}>
-                - {record.pain} para {record.person}
+                - {record.pain} para {record.personName}
               </Text>
             ))}
           </Card.Content>
         </Card>
       )}
-
-      <FAB icon="plus" style={styles.fab} onPress={handleAddRecord} />
     </ScrollView>
   );
 };
@@ -202,12 +169,6 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: 0,
-  },
-  fab: {
-    position: "absolute",
-    margin: 16,
-    right: 0,
-    bottom: 0,
   },
 });
 

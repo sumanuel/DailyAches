@@ -52,12 +52,53 @@ const levels = [
   // Agregar más niveles
 ];
 
+const defaultPainTypes = [
+  "Dolor de cabeza",
+  "Dolor de espalda",
+  "Dolor menstrual",
+  "Dolor de estómago",
+  "Dolor de garganta",
+  "Dolor de dientes",
+  "Otro",
+];
+
+const defaultProfile = {
+  name: "",
+  email: "",
+};
+
+const computeLevel = (points) => {
+  let current = levels[0];
+  for (const lvl of levels) {
+    if (points >= lvl.pointsRequired) current = lvl;
+  }
+  return current.level;
+};
+
+const getNextLevelRequirement = (level) => {
+  const idx = levels.findIndex((l) => l.level === level);
+  if (idx < 0) return null;
+  return levels[idx + 1] || null;
+};
+
+const isSameDay = (a, b) => {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+};
+
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState({
     points: 0,
     level: 1,
     recordsCount: 0,
     achievements: achievements,
+    profile: defaultProfile,
+    people: [],
+    painTypes: defaultPainTypes,
+    records: [],
   });
 
   useEffect(() => {
@@ -68,7 +109,29 @@ export const UserProvider = ({ children }) => {
     try {
       const data = await AsyncStorage.getItem("userData");
       if (data) {
-        setUser(JSON.parse(data));
+        const parsed = JSON.parse(data);
+        setUser({
+          points: typeof parsed.points === "number" ? parsed.points : 0,
+          level:
+            typeof parsed.level === "number"
+              ? parsed.level
+              : computeLevel(
+                  typeof parsed.points === "number" ? parsed.points : 0
+                ),
+          recordsCount:
+            typeof parsed.recordsCount === "number" ? parsed.recordsCount : 0,
+          achievements: Array.isArray(parsed.achievements)
+            ? parsed.achievements
+            : achievements,
+          profile: parsed.profile
+            ? { ...defaultProfile, ...parsed.profile }
+            : defaultProfile,
+          people: Array.isArray(parsed.people) ? parsed.people : [],
+          painTypes: Array.isArray(parsed.painTypes)
+            ? parsed.painTypes
+            : defaultPainTypes,
+          records: Array.isArray(parsed.records) ? parsed.records : [],
+        });
       }
     } catch (error) {
       console.error("Error loading user data:", error);
@@ -86,9 +149,7 @@ export const UserProvider = ({ children }) => {
   const addPoints = (points) => {
     setUser((prevUser) => {
       const newPoints = prevUser.points + points;
-      const newLevel =
-        levels.find((l) => newPoints >= l.pointsRequired)?.level ||
-        prevUser.level;
+      const newLevel = computeLevel(newPoints);
       const newUser = { ...prevUser, points: newPoints, level: newLevel };
       saveUserData(newUser);
       return newUser;
@@ -98,22 +159,28 @@ export const UserProvider = ({ children }) => {
   const incrementRecords = () => {
     setUser((prevUser) => {
       const newRecordsCount = prevUser.recordsCount + 1;
-      let newAchievements = [...prevUser.achievements];
+      let newPoints = prevUser.points;
+      const newAchievements = prevUser.achievements.map((ach) => ({ ...ach }));
 
       // Desbloquear logros
-      if (newRecordsCount >= 1 && !newAchievements[0].unlocked) {
-        newAchievements[0].unlocked = true;
-        addPoints(newAchievements[0].points);
+      const first = newAchievements.find((a) => a.id === 1);
+      if (newRecordsCount >= 1 && first && !first.unlocked) {
+        first.unlocked = true;
+        newPoints += first.points;
       }
-      if (newRecordsCount >= 10 && !newAchievements[1].unlocked) {
-        newAchievements[1].unlocked = true;
-        addPoints(newAchievements[1].points);
+      const ten = newAchievements.find((a) => a.id === 2);
+      if (newRecordsCount >= 10 && ten && !ten.unlocked) {
+        ten.unlocked = true;
+        newPoints += ten.points;
       }
 
+      const newLevel = computeLevel(newPoints);
       const newUser = {
         ...prevUser,
         recordsCount: newRecordsCount,
         achievements: newAchievements,
+        points: newPoints,
+        level: newLevel,
       };
       saveUserData(newUser);
       return newUser;
@@ -122,20 +189,178 @@ export const UserProvider = ({ children }) => {
 
   const unlockAchievement = (id) => {
     setUser((prevUser) => {
-      const newAchievements = prevUser.achievements.map((ach) =>
-        ach.id === id ? { ...ach, unlocked: true } : ach
-      );
-      const achievement = newAchievements.find((a) => a.id === id);
-      if (achievement) addPoints(achievement.points);
-      const newUser = { ...prevUser, achievements: newAchievements };
+      let pointsDelta = 0;
+      const newAchievements = prevUser.achievements.map((ach) => {
+        if (ach.id !== id) return ach;
+        if (ach.unlocked) return ach;
+        pointsDelta += ach.points;
+        return { ...ach, unlocked: true };
+      });
+      const newPoints = prevUser.points + pointsDelta;
+      const newLevel = computeLevel(newPoints);
+      const newUser = {
+        ...prevUser,
+        achievements: newAchievements,
+        points: newPoints,
+        level: newLevel,
+      };
       saveUserData(newUser);
       return newUser;
     });
   };
 
+  const updateProfile = (partial) => {
+    setUser((prevUser) => {
+      const newUser = {
+        ...prevUser,
+        profile: { ...prevUser.profile, ...(partial || {}) },
+      };
+      saveUserData(newUser);
+      return newUser;
+    });
+  };
+
+  const addPerson = (name) => {
+    const trimmed = (name || "").trim();
+    if (!trimmed) return;
+    setUser((prevUser) => {
+      const exists = prevUser.people.some(
+        (p) => (p.name || "").toLowerCase() === trimmed.toLowerCase()
+      );
+      if (exists) return prevUser;
+      const newPerson = { id: String(Date.now()), name: trimmed };
+      const newUser = { ...prevUser, people: [newPerson, ...prevUser.people] };
+      saveUserData(newUser);
+      return newUser;
+    });
+  };
+
+  const removePerson = (personId) => {
+    setUser((prevUser) => {
+      const newUser = {
+        ...prevUser,
+        people: prevUser.people.filter((p) => p.id !== personId),
+        records: prevUser.records.filter((r) => r.personId !== personId),
+      };
+      saveUserData(newUser);
+      return newUser;
+    });
+  };
+
+  const addPainType = (pain) => {
+    const trimmed = (pain || "").trim();
+    if (!trimmed) return;
+    setUser((prevUser) => {
+      const exists = prevUser.painTypes.some(
+        (p) => (p || "").toLowerCase() === trimmed.toLowerCase()
+      );
+      if (exists) return prevUser;
+      const newUser = {
+        ...prevUser,
+        painTypes: [trimmed, ...prevUser.painTypes],
+      };
+      saveUserData(newUser);
+      return newUser;
+    });
+  };
+
+  const removePainType = (pain) => {
+    setUser((prevUser) => {
+      const newUser = {
+        ...prevUser,
+        painTypes: prevUser.painTypes.filter((p) => p !== pain),
+      };
+      saveUserData(newUser);
+      return newUser;
+    });
+  };
+
+  const addRecord = ({ personId, personName, pain, notes }) => {
+    const now = new Date();
+    const record = {
+      id: String(Date.now()),
+      createdAt: now.toISOString(),
+      personId: personId || null,
+      personName: (personName || "").trim() || "(Sin nombre)",
+      pain: (pain || "").trim() || "(Sin dolor)",
+      notes: (notes || "").trim() || "",
+    };
+
+    setUser((prevUser) => {
+      const newRecords = [record, ...prevUser.records];
+
+      const newRecordsCount = prevUser.recordsCount + 1;
+      let newPoints = prevUser.points + 10; // +10 por registro
+      const newAchievements = prevUser.achievements.map((ach) => ({ ...ach }));
+
+      const first = newAchievements.find((a) => a.id === 1);
+      if (newRecordsCount >= 1 && first && !first.unlocked) {
+        first.unlocked = true;
+        newPoints += first.points;
+      }
+      const ten = newAchievements.find((a) => a.id === 2);
+      if (newRecordsCount >= 10 && ten && !ten.unlocked) {
+        ten.unlocked = true;
+        newPoints += ten.points;
+      }
+
+      const newLevel = computeLevel(newPoints);
+      const lvl5 = newAchievements.find((a) => a.id === 4);
+      if (newLevel >= 5 && lvl5 && !lvl5.unlocked) {
+        lvl5.unlocked = true;
+        newPoints += lvl5.points;
+      }
+
+      const finalLevel = computeLevel(newPoints);
+      const newUser = {
+        ...prevUser,
+        records: newRecords,
+        recordsCount: newRecordsCount,
+        points: newPoints,
+        level: finalLevel,
+        achievements: newAchievements,
+      };
+      saveUserData(newUser);
+      return newUser;
+    });
+  };
+
+  const getLevelProgress = () => {
+    const next = getNextLevelRequirement(user.level);
+    if (!next) return { progress: 1, nextLevel: null, remaining: 0 };
+    const currentReq =
+      levels.find((l) => l.level === user.level)?.pointsRequired ?? 0;
+    const span = next.pointsRequired - currentReq;
+    const progress =
+      span <= 0 ? 1 : Math.min(1, (user.points - currentReq) / span);
+    const remaining = Math.max(0, next.pointsRequired - user.points);
+    return { progress, nextLevel: next.level, remaining };
+  };
+
+  const getTodayRecords = () => {
+    const today = new Date();
+    return user.records.filter((r) => {
+      const d = new Date(r.createdAt);
+      return isSameDay(d, today);
+    });
+  };
+
   return (
     <UserContext.Provider
-      value={{ user, addPoints, incrementRecords, unlockAchievement }}
+      value={{
+        user,
+        addPoints,
+        incrementRecords,
+        unlockAchievement,
+        updateProfile,
+        addPerson,
+        removePerson,
+        addPainType,
+        removePainType,
+        addRecord,
+        getLevelProgress,
+        getTodayRecords,
+      }}
     >
       {children}
     </UserContext.Provider>

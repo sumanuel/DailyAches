@@ -29,8 +29,8 @@ const LoginScreen = ({ navigation }) => {
   const onSubmit = (data) => {
     // Lógica de login (simulado, sin validación)
     console.log(data);
-    // Navegar al Home sin importar las credenciales
-    navigation.navigate("Home");
+    // Navegar al área principal sin importar las credenciales
+    navigation.getParent()?.replace("Main");
   };
 
   return (

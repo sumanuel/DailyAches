@@ -1,87 +1,118 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, ScrollView, Dimensions } from "react-native";
 import {
-  Text,
-  Card,
   Button,
+  Card,
+  Menu,
+  Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
-import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
+import { LineChart, PieChart } from "react-native-chart-kit";
+import { useUser } from "../context/UserContext";
 
 const screenWidth = Dimensions.get("window").width;
 
-const StatsScreen = ({ navigation }) => {
+const dayLabels = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
+const isSameDay = (a, b) =>
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
+
+const StatsScreen = () => {
   const paperTheme = usePaperTheme();
-  const [timeFrame, setTimeFrame] = useState("month"); // 'week', 'month', 'year'
+  const { user } = useUser();
+  const [selectedPersonId, setSelectedPersonId] = useState(null);
+  const [menuVisible, setMenuVisible] = useState(false);
 
-  // Datos simulados
-  const weeklyData = {
-    labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
-    datasets: [
-      {
-        data: [2, 1, 3, 0, 2, 1, 0],
-      },
-    ],
-  };
+  useEffect(() => {
+    if (!selectedPersonId && user.people?.length) {
+      setSelectedPersonId(user.people[0].id);
+    }
+  }, [selectedPersonId, user.people]);
 
-  const monthlyData = {
-    labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun"],
-    datasets: [
-      {
-        data: [15, 12, 18, 10, 14, 8],
-      },
-    ],
-  };
+  const selectedPerson = useMemo(
+    () => (user.people || []).find((p) => p.id === selectedPersonId) || null,
+    [selectedPersonId, user.people]
+  );
 
-  const painTypesData = [
-    {
-      name: "Cabeza",
-      count: 20,
-      color: "#FF6384",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 15,
-    },
-    {
-      name: "Espalda",
-      count: 15,
-      color: "#36A2EB",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 15,
-    },
-    {
-      name: "Menstrual",
-      count: 25,
-      color: "#FFCE56",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 15,
-    },
-    {
-      name: "Estómago",
-      count: 10,
-      color: "#4BC0C0",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 15,
-    },
-  ];
+  const filteredRecords = useMemo(() => {
+    const all = user.records || [];
+    if (!selectedPersonId) return [];
+    return all.filter((r) => r.personId === selectedPersonId);
+  }, [selectedPersonId, user.records]);
+
+  const last7Days = useMemo(() => {
+    const today = new Date();
+    const days = [];
+    for (let i = 6; i >= 0; i -= 1) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      days.push(d);
+    }
+    return days;
+  }, []);
+
+  const weeklySeries = useMemo(() => {
+    const counts = last7Days.map((d) => {
+      return filteredRecords.filter((r) => isSameDay(new Date(r.createdAt), d))
+        .length;
+    });
+    return {
+      labels: last7Days.map((d) => dayLabels[d.getDay()]),
+      datasets: [{ data: counts }],
+    };
+  }, [filteredRecords, last7Days]);
+
+  const painTypeData = useMemo(() => {
+    const counts = new Map();
+    for (const r of filteredRecords) {
+      const key = (r.pain || "(Sin dolor)").trim() || "(Sin dolor)";
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+
+    const palette = [
+      paperTheme.colors.primary,
+      paperTheme.colors.secondary,
+      paperTheme.colors.tertiary,
+      paperTheme.colors.error,
+    ];
+
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([name, count], idx) => ({
+        name,
+        count,
+        color: palette[idx % palette.length],
+        legendFontColor: paperTheme.colors.onSurfaceVariant,
+        legendFontSize: 12,
+      }));
+  }, [
+    filteredRecords,
+    paperTheme.colors.error,
+    paperTheme.colors.onSurfaceVariant,
+    paperTheme.colors.primary,
+    paperTheme.colors.secondary,
+    paperTheme.colors.tertiary,
+  ]);
 
   const chartConfig = {
-    backgroundColor: "#ffffff",
-    backgroundGradientFrom: "#ffffff",
-    backgroundGradientTo: "#ffffff",
+    backgroundColor: paperTheme.colors.surface,
+    backgroundGradientFrom: paperTheme.colors.surface,
+    backgroundGradientTo: paperTheme.colors.surface,
     decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    color: () => paperTheme.colors.primary,
+    labelColor: () => paperTheme.colors.onSurface,
     style: {
       borderRadius: 16,
     },
     propsForDots: {
       r: "6",
       strokeWidth: "2",
-      stroke: "#ffa726",
+      stroke: paperTheme.colors.secondary,
     },
   };
-
-  const currentData = timeFrame === "week" ? weeklyData : monthlyData;
 
   return (
     <ScrollView
@@ -93,58 +124,71 @@ const StatsScreen = ({ navigation }) => {
       <Card style={styles.card}>
         <Card.Title title="Estadísticas de Dolores" />
         <Card.Content>
-          <View style={styles.buttonGroup}>
-            <Button
-              mode={timeFrame === "week" ? "contained" : "outlined"}
-              onPress={() => setTimeFrame("week")}
-            >
-              Semana
-            </Button>
-            <Button
-              mode={timeFrame === "month" ? "contained" : "outlined"}
-              onPress={() => setTimeFrame("month")}
-            >
-              Mes
-            </Button>
-          </View>
+          {!user.people?.length ? (
+            <View>
+              <Text variant="titleMedium">No hay personas</Text>
+              <Text style={styles.muted}>
+                Agrega una persona en “Registro” para ver estadísticas.
+              </Text>
+            </View>
+          ) : (
+            <>
+              <View style={styles.selectRow}>
+                <Text style={styles.selectLabel}>Persona:</Text>
+                <Menu
+                  visible={menuVisible}
+                  onDismiss={() => setMenuVisible(false)}
+                  anchor={
+                    <Button
+                      mode="outlined"
+                      onPress={() => setMenuVisible(true)}
+                    >
+                      {selectedPerson?.name || "Seleccionar"}
+                    </Button>
+                  }
+                >
+                  {(user.people || []).map((p) => (
+                    <Menu.Item
+                      key={p.id}
+                      onPress={() => {
+                        setSelectedPersonId(p.id);
+                        setMenuVisible(false);
+                      }}
+                      title={p.name}
+                    />
+                  ))}
+                </Menu>
+              </View>
 
-          <Text style={styles.chartTitle}>Tendencia de Dolores</Text>
-          <LineChart
-            data={currentData}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={chartConfig}
-            bezier
-            style={styles.chart}
-          />
+              <Text style={styles.chartTitle}>Últimos 7 días</Text>
+              <LineChart
+                data={weeklySeries}
+                width={screenWidth - 40}
+                height={220}
+                chartConfig={chartConfig}
+                bezier
+                style={styles.chart}
+              />
 
-          <Text style={styles.chartTitle}>Tipos de Dolores Más Comunes</Text>
-          <PieChart
-            data={painTypesData}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={chartConfig}
-            accessor="count"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            style={styles.chart}
-          />
-
-          <Text style={styles.chartTitle}>Niveles y Puntos</Text>
-          <BarChart
-            data={{
-              labels: ["Nivel 1", "Nivel 2", "Nivel 3", "Nivel 4"],
-              datasets: [
-                {
-                  data: [50, 120, 80, 200],
-                },
-              ],
-            }}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={chartConfig}
-            style={styles.chart}
-          />
+              <Text style={styles.chartTitle}>Dolores más comunes</Text>
+              {painTypeData.length === 0 ? (
+                <Text style={styles.muted}>
+                  Aún no hay registros para esta persona.
+                </Text>
+              ) : (
+                <PieChart
+                  data={painTypeData}
+                  width={screenWidth - 40}
+                  height={220}
+                  chartConfig={chartConfig}
+                  accessor="count"
+                  backgroundColor="transparent"
+                  paddingLeft="15"
+                  style={styles.chart}
+                />
+              )}
+            </>
+          )}
         </Card.Content>
       </Card>
     </ScrollView>
@@ -158,11 +202,14 @@ const styles = StyleSheet.create({
   card: {
     margin: 10,
   },
-  buttonGroup: {
+  selectRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 20,
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 16,
   },
+  selectLabel: { opacity: 0.8 },
+  muted: { opacity: 0.7, marginTop: 6 },
   chartTitle: {
     fontSize: 18,
     textAlign: "center",
