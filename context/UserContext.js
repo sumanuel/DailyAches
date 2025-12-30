@@ -220,7 +220,7 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  const addPerson = (name) => {
+  const addPerson = (name, relationship) => {
     const trimmed = (name || "").trim();
     if (!trimmed) return;
     setUser((prevUser) => {
@@ -228,7 +228,11 @@ export const UserProvider = ({ children }) => {
         (p) => (p.name || "").toLowerCase() === trimmed.toLowerCase()
       );
       if (exists) return prevUser;
-      const newPerson = { id: String(Date.now()), name: trimmed };
+      const newPerson = {
+        id: String(Date.now()),
+        name: trimmed,
+        relationship: relationship || "Otro",
+      };
       const newUser = { ...prevUser, people: [newPerson, ...prevUser.people] };
       saveUserData(newUser);
       return newUser;

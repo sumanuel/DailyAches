@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, Alert, Share } from "react-native";
-import {
-  Text,
-  Button,
-  Card,
-  useTheme as usePaperTheme,
-} from "react-native-paper";
+import { View, StyleSheet, ScrollView } from "react-native";
+import { Text, Card, useTheme as usePaperTheme } from "react-native-paper";
 import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
 
@@ -47,24 +42,6 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [user.records]);
 
-  const handleShareToFacebook = async () => {
-    const hasRecords = dailyRecords.length > 0;
-    const shareMessage = hasRecords
-      ? `¡Registré dolores hoy en DailyAches! Nivel ${user.level}, ${user.points} puntos. #DailyAches`
-      : `¡Día perfecto! Sin dolores reportados hoy. #DailyAches`;
-
-    try {
-      await Share.share({
-        message: shareMessage,
-      });
-
-      Alert.alert("¡Listo!", "Se abrió el panel para compartir.");
-      unlockAchievement(5); // ID del logro "Compartidor"
-    } catch (error) {
-      console.error("Error sharing:", error);
-      Alert.alert("Error", "No se pudo compartir.");
-    }
-  };
   return (
     <ScrollView
       style={[
@@ -90,13 +67,7 @@ const HomeScreen = ({ navigation }) => {
       </Card>
 
       <View style={styles.buttonContainer}>
-        <Button
-          mode="outlined"
-          onPress={handleShareToFacebook}
-          style={styles.button}
-        >
-          Compartir en Facebook
-        </Button>
+        {/* Share button removed - moved to More screen */}
       </View>
 
       {dailyRecords.length > 0 && (

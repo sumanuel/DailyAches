@@ -10,6 +10,7 @@ import {
   Dialog,
   Button,
   useTheme as usePaperTheme,
+  Menu,
 } from "react-native-paper";
 import { useUser } from "../context/UserContext";
 
@@ -20,6 +21,18 @@ const PeopleScreen = ({ navigation }) => {
   const [query, setQuery] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [newName, setNewName] = useState("");
+  const [newRelationship, setNewRelationship] = useState("Otro");
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  const relationshipOptions = [
+    "Esposa",
+    "Novia",
+    "Madre",
+    "Hermana",
+    "Prima",
+    "Amiga",
+    "Otro",
+  ];
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -29,11 +42,12 @@ const PeopleScreen = ({ navigation }) => {
 
   const openAdd = () => {
     setNewName("");
+    setNewRelationship("Otro");
     setAddOpen(true);
   };
 
   const onConfirmAdd = () => {
-    addPerson(newName);
+    addPerson(newName, newRelationship);
     setAddOpen(false);
   };
 
@@ -98,7 +112,7 @@ const PeopleScreen = ({ navigation }) => {
                       {p.name}
                     </Text>
                     <Text variant="bodySmall" style={styles.muted}>
-                      Toca para registrar un dolor
+                      {p.relationship || "Otro"} • Toca para registrar un dolor
                     </Text>
                   </View>
                 </View>
@@ -124,7 +138,33 @@ const PeopleScreen = ({ navigation }) => {
               value={newName}
               onChangeText={setNewName}
               autoFocus
+              style={styles.input}
             />
+            <Menu
+              visible={menuVisible}
+              onDismiss={() => setMenuVisible(false)}
+              anchor={
+                <Button
+                  mode="outlined"
+                  onPress={() => setMenuVisible(true)}
+                  style={styles.relationshipButton}
+                  icon="chevron-down"
+                >
+                  Parentezco: {newRelationship}
+                </Button>
+              }
+            >
+              {relationshipOptions.map((option) => (
+                <Menu.Item
+                  key={option}
+                  onPress={() => {
+                    setNewRelationship(option);
+                    setMenuVisible(false);
+                  }}
+                  title={option}
+                />
+              ))}
+            </Menu>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setAddOpen(false)}>Cancelar</Button>
@@ -160,6 +200,8 @@ const styles = StyleSheet.create({
   meta: { flex: 1 },
   muted: { opacity: 0.7, marginTop: 2 },
   fab: { position: "absolute", right: 16, bottom: 16 },
+  input: { marginBottom: 16 },
+  relationshipButton: { marginTop: 8 },
 });
 
 export default PeopleScreen;
