@@ -160,7 +160,13 @@ const HomeScreen = () => {
           {groupedByPerson.map(([personKey, group]) => {
             const relationship = peopleById[personKey]?.relationship;
             return (
-              <Card key={personKey} style={[styles.card, { backgroundColor: paperTheme.colors.surfaceVariant }]}>
+              <Card
+                key={personKey}
+                style={[
+                  styles.card,
+                  { backgroundColor: paperTheme.colors.surfaceVariant },
+                ]}
+              >
                 <Card.Title
                   title={group.personName}
                   subtitle={relationship || undefined}
