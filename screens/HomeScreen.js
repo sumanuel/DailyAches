@@ -131,7 +131,7 @@ const HomeScreen = () => {
       <Card style={styles.card}>
         <Card.Content>
           <Text variant="titleLarge" style={styles.title}>
-            ¡Bienvenido a DailyAches!
+            ¡Bienvenido a DailyAches! 😊
           </Text>
           <Text
             style={[
@@ -211,7 +211,7 @@ const HomeScreen = () => {
                                 variant="titleMedium"
                                 style={styles.painTitle}
                               >
-                                {record.pain}
+                                😣 {record.pain}
                               </Text>
                             </View>
                             <View style={styles.painActions}>

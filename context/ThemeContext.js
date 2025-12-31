@@ -22,30 +22,30 @@ const { LightTheme: NavigationLight, DarkTheme: NavigationDark } =
 
 const lightTheme = {
   ...MD3LightTheme,
-  roundness: 16,
+  roundness: 20,
   colors: {
     ...MD3LightTheme.colors,
-    // Softer pastel purple + lower-contrast surfaces
-    primary: "#7C3AED",
+    // Clean tienda-app inspired colors
+    primary: "#6B45C4",
     onPrimary: "#FFFFFF",
-    primaryContainer: "#F2EAFE",
-    onPrimaryContainer: "#2B0A6B",
-    secondary: "#8B5CF6",
+    primaryContainer: "#F3E5F5",
+    onPrimaryContainer: "#4A148C",
+    secondary: "#2f5ae0",
     onSecondary: "#FFFFFF",
-    secondaryContainer: "#F5EEFF",
-    onSecondaryContainer: "#2B0A6B",
-    tertiary: "#A78BFA",
-    onTertiary: "#2B0A6B",
-    tertiaryContainer: "#F7F2FF",
-    onTertiaryContainer: "#2B0A6B",
+    secondaryContainer: "#E3F2FD",
+    onSecondaryContainer: "#0D47A1",
+    tertiary: "#6B45C4",
+    onTertiary: "#FFFFFF",
+    tertiaryContainer: "#F3E5F5",
+    onTertiaryContainer: "#4A148C",
 
-    background: "#F4F3F8",
-    onBackground: "#13101F",
+    background: "#e8edf2",
+    onBackground: "#1f2633",
     surface: "#FFFFFF",
-    onSurface: "#13101F",
-    surfaceVariant: "#ECE9F6",
-    onSurfaceVariant: "#433D5B",
-    outline: "#CFC8E6",
+    onSurface: "#1f2633",
+    surfaceVariant: "#f3f5fa",
+    onSurfaceVariant: "#6f7c8c",
+    outline: "#d5dbe7",
   },
   fonts: {
     ...MD3LightTheme.fonts,
@@ -61,13 +61,13 @@ const lightTheme = {
 
 const darkTheme = {
   ...MD3DarkTheme,
-  roundness: 16,
+  roundness: 20,
   colors: {
     ...MD3DarkTheme.colors,
-    primary: "#C4B5FD",
-    onPrimary: "#1C093B",
-    secondary: "#A78BFA",
-    tertiary: "#DDD6FE",
+    primary: "#9575CD",
+    onPrimary: "#4A148C",
+    secondary: "#64B5F6",
+    tertiary: "#9575CD",
   },
   fonts: {
     ...MD3DarkTheme.fonts,

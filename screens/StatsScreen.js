@@ -215,7 +215,7 @@ const StatsScreen = ({ route }) => {
               }}
               numberOfLines={1}
             >
-              {record.pain}
+              😣 {record.pain}
             </Text>
           </View>
         </Card.Content>
@@ -287,7 +287,7 @@ const StatsScreen = ({ route }) => {
           />
           <View style={styles.headerText}>
             <Text variant="titleMedium" style={styles.headerTitle}>
-              {personName} ({count})
+              📊 {personName} ({count})
             </Text>
             <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
               Historial de dolores para esta persona.
