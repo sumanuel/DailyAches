@@ -25,7 +25,7 @@ const avatarImages = {
 
 const PeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
-  const { user, addPerson, removePerson } = useUser();
+  const { user, addPerson, removePerson, updatePerson } = useUser();
 
   const [query, setQuery] = useState("");
   const [addOpen, setAddOpen] = useState(false);
@@ -33,6 +33,8 @@ const PeopleScreen = ({ navigation }) => {
   const [newRelationship, setNewRelationship] = useState("");
   const [selectedAvatar, setSelectedAvatar] = useState("Mujer feliz.png");
   const [menuVisible, setMenuVisible] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [editPerson, setEditPerson] = useState(null);
 
   const avatars = [
     "DolorDeCabeza.png",
@@ -52,21 +54,40 @@ const PeopleScreen = ({ navigation }) => {
     "Otro",
   ];
 
+  const openAdd = () => {
+    setNewName("");
+    setNewRelationship("");
+    setSelectedAvatar("Mujer feliz.png");
+    setIsEdit(false);
+    setEditPerson(null);
+    setAddOpen(true);
+  };
+
+  const openEdit = (person) => {
+    setNewName(person.name);
+    setNewRelationship(person.relationship);
+    setSelectedAvatar(person.avatar);
+    setIsEdit(true);
+    setEditPerson(person);
+    setAddOpen(true);
+  };
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return user.people;
     return user.people.filter((p) => (p.name || "").toLowerCase().includes(q));
   }, [query, user.people]);
 
-  const openAdd = () => {
-    setNewName("");
-    setNewRelationship("");
-    setSelectedAvatar("Mujer feliz.png");
-    setAddOpen(true);
-  };
-
   const onConfirmAdd = () => {
-    addPerson(newName, newRelationship, selectedAvatar);
+    if (isEdit && editPerson) {
+      updatePerson(editPerson.id, {
+        name: newName,
+        relationship: newRelationship,
+        avatar: selectedAvatar,
+      });
+    } else {
+      addPerson(newName, newRelationship, selectedAvatar);
+    }
     setAddOpen(false);
   };
 
@@ -147,11 +168,18 @@ const PeopleScreen = ({ navigation }) => {
                     </Text>
                   </View>
                 </View>
-                <IconButton
-                  icon="trash-can-outline"
-                  onPress={() => removePerson(p.id)}
-                  accessibilityLabel="Eliminar persona"
-                />
+                <View style={styles.actions}>
+                  <IconButton
+                    icon="pencil"
+                    onPress={() => openEdit(p)}
+                    accessibilityLabel="Editar persona"
+                  />
+                  <IconButton
+                    icon="trash-can-outline"
+                    onPress={() => removePerson(p.id)}
+                    accessibilityLabel="Eliminar persona"
+                  />
+                </View>
               </Card.Content>
             </Card>
           ))
@@ -166,7 +194,9 @@ const PeopleScreen = ({ navigation }) => {
           onDismiss={() => setAddOpen(false)}
           style={styles.dialog}
         >
-          <Dialog.Title>Agregar persona</Dialog.Title>
+          <Dialog.Title>
+            {isEdit ? "Editar persona" : "Agregar persona"}
+          </Dialog.Title>
           <Dialog.Content style={styles.dialogContent}>
             <TextInput
               label="Nombre"
@@ -277,6 +307,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   checkMark: { color: "white", fontSize: 24, fontWeight: "bold" },
+  actions: { flexDirection: "row" },
 });
 
 export default PeopleScreen;

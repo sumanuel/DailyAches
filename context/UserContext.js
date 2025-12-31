@@ -53,13 +53,13 @@ const levels = [
 ];
 
 const defaultPainTypes = [
-  "Dolor de cabeza",
-  "Dolor de espalda",
-  "Dolor menstrual",
-  "Dolor de estómago",
-  "Dolor de garganta",
-  "Dolor de dientes",
-  "Otro",
+  { name: "Dolor de cabeza", image: "DolorDeCabeza.png" },
+  { name: "Dolor de espalda", image: "DolorDeEspalda.png" },
+  { name: "Dolor menstrual", image: "DolorDePiernas.png" },
+  { name: "Dolor de estómago", image: "DolorDePiernas.png" },
+  { name: "Dolor de garganta", image: "DolorDePiernas.png" },
+  { name: "Dolor de dientes", image: "DolorDePiernas.png" },
+  { name: "Otro", image: "Mujer feliz.png" },
 ];
 
 const defaultProfile = {
@@ -128,7 +128,11 @@ export const UserProvider = ({ children }) => {
             : defaultProfile,
           people: Array.isArray(parsed.people) ? parsed.people : [],
           painTypes: Array.isArray(parsed.painTypes)
-            ? parsed.painTypes
+            ? parsed.painTypes.map((p) =>
+                typeof p === "string"
+                  ? { name: p, image: "Mujer feliz.png" }
+                  : p
+              )
             : defaultPainTypes,
           records: Array.isArray(parsed.records) ? parsed.records : [],
         });
@@ -252,35 +256,78 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  const addPainType = (pain) => {
-    const trimmed = (pain || "").trim();
+  const updatePerson = (personId, updates) => {
+    setUser((prevUser) => {
+      const newPeople = prevUser.people.map((p) =>
+        p.id === personId ? { ...p, ...updates } : p
+      );
+      const newRecords = prevUser.records.map((r) =>
+        r.personId === personId
+          ? { ...r, personName: updates.name || r.personName }
+          : r
+      );
+      const newUser = { ...prevUser, people: newPeople, records: newRecords };
+      saveUserData(newUser);
+      return newUser;
+    });
+  };
+
+  const updateRecord = (recordId, updates) => {
+    setUser((prevUser) => {
+      const newRecords = prevUser.records.map((r) =>
+        r.id === recordId ? { ...r, ...updates } : r
+      );
+      const newUser = { ...prevUser, records: newRecords };
+      saveUserData(newUser);
+      return newUser;
+    });
+  };
+
+  const addPainType = (name, image = "Mujer feliz.png") => {
+    const trimmed = (name || "").trim();
     if (!trimmed) return;
     setUser((prevUser) => {
       const exists = prevUser.painTypes.some(
-        (p) => (p || "").toLowerCase() === trimmed.toLowerCase()
+        (p) => p.name.toLowerCase() === trimmed.toLowerCase()
       );
       if (exists) return prevUser;
+      const newPainType = { name: trimmed, image };
       const newUser = {
         ...prevUser,
-        painTypes: [trimmed, ...prevUser.painTypes],
+        painTypes: [newPainType, ...prevUser.painTypes],
       };
       saveUserData(newUser);
       return newUser;
     });
   };
 
-  const removePainType = (pain) => {
+  const updatePainType = (oldName, newName, newImage) => {
+    const trimmed = (newName || "").trim();
+    if (!trimmed) return;
     setUser((prevUser) => {
       const newUser = {
         ...prevUser,
-        painTypes: prevUser.painTypes.filter((p) => p !== pain),
+        painTypes: prevUser.painTypes.map((p) =>
+          p.name === oldName ? { name: trimmed, image: newImage } : p
+        ),
       };
       saveUserData(newUser);
       return newUser;
     });
   };
 
-  const addRecord = ({ personId, personName, pain, notes }) => {
+  const removePainType = (painName) => {
+    setUser((prevUser) => {
+      const newUser = {
+        ...prevUser,
+        painTypes: prevUser.painTypes.filter((p) => p.name !== painName),
+      };
+      saveUserData(newUser);
+      return newUser;
+    });
+  };
+
+  const addRecord = ({ personId, personName, pain, notes, image }) => {
     const now = new Date();
     const record = {
       id: String(Date.now()),
@@ -289,6 +336,7 @@ export const UserProvider = ({ children }) => {
       personName: (personName || "").trim() || "(Sin nombre)",
       pain: (pain || "").trim() || "(Sin dolor)",
       notes: (notes || "").trim() || "",
+      image: (image || "").trim() || "",
     };
 
     setUser((prevUser) => {
@@ -360,8 +408,11 @@ export const UserProvider = ({ children }) => {
         updateProfile,
         addPerson,
         removePerson,
+        updatePerson,
+        updateRecord,
         addPainType,
         removePainType,
+        updatePainType,
         addRecord,
         getLevelProgress,
         getTodayRecords,

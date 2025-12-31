@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { StyleSheet, View, ScrollView, Alert, Share } from "react-native";
 import {
   Card,
@@ -8,6 +8,7 @@ import {
   Avatar,
 } from "react-native-paper";
 import { Image } from "expo-image";
+import { useFocusEffect } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
 
 const avatarImages = {
@@ -16,6 +17,13 @@ const avatarImages = {
   "DolorDePiernas.png": require("../assets/avatars/DolorDePiernas.png"),
   "Mujer feliz.png": require("../assets/avatars/Mujer feliz.png"),
   "Saltando.png": require("../assets/avatars/Saltando.png"),
+};
+
+const painImages = {
+  "DolorDeCabeza.png": require("../assets/resourse_one/DolorDeCabeza.png"),
+  "DolorDeEspalda.png": require("../assets/resourse_one/DolorDeEspalda.png"),
+  "DolorDePiernas.png": require("../assets/resourse_one/DolorDePiernas.png"),
+  "Mujer feliz.png": require("../assets/resourse_one/Mujer feliz.png"),
 };
 
 const HomeScreen = () => {
@@ -37,24 +45,26 @@ const HomeScreen = () => {
     "¡Día perfecto! Sin dolores reportados. ¡Felicidades!",
   ];
 
-  useEffect(() => {
-    const todayRecords = getTodayRecords();
-    setDailyRecords(todayRecords);
+  useFocusEffect(
+    useCallback(() => {
+      const todayRecords = getTodayRecords();
+      setDailyRecords(todayRecords);
 
-    if (todayRecords.length === 0) {
-      // Mensaje de sorpresa si no hay registros
-      const randomSurprise =
-        surpriseMessages[Math.floor(Math.random() * surpriseMessages.length)];
-      setMessage(randomSurprise);
-      setImageUri(require("../assets/resourse_one/Mujer feliz.png"));
-    } else {
-      // Mensajes dinámicos basados en registros
-      const randomDefault =
-        defaultMessages[Math.floor(Math.random() * defaultMessages.length)];
-      setMessage(randomDefault);
-      setImageUri(require("../assets/resourse_one/DolorDeCabeza.png"));
-    }
-  }, [user.records]);
+      if (todayRecords.length === 0) {
+        // Mensaje de sorpresa si no hay registros
+        const randomSurprise =
+          surpriseMessages[Math.floor(Math.random() * surpriseMessages.length)];
+        setMessage(randomSurprise);
+        setImageUri(require("../assets/avatars/Saltando.png"));
+      } else {
+        // Mensajes dinámicos basados en registros
+        const randomDefault =
+          defaultMessages[Math.floor(Math.random() * defaultMessages.length)];
+        setMessage(randomDefault);
+        setImageUri(require("../assets/resourse_one/DolorDeCabeza.png"));
+      }
+    }, [getTodayRecords, user.records])
+  );
 
   const peopleById = useMemo(() => {
     const map = {};
@@ -67,9 +77,13 @@ const HomeScreen = () => {
   const formatTime = (iso) => {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return "";
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mm = String(d.getMinutes()).padStart(2, "0");
-    return `${hh}:${mm}`;
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const hh = String(hours).padStart(2, "0");
+    return `${hh}:${minutes} ${ampm}`;
   };
 
   const handleShareRecord = async (record) => {
@@ -147,6 +161,7 @@ const HomeScreen = () => {
                 <Card.Title
                   title={group.personName}
                   subtitle={relationship || undefined}
+                  titleStyle={{ fontWeight: 'bold', fontSize: 18 }}
                   left={(props) => (
                     <Avatar.Image
                       size={40}
@@ -176,35 +191,48 @@ const HomeScreen = () => {
                       >
                         <Card.Content>
                           <View style={styles.painHeader}>
-                            <Text
-                              variant="titleMedium"
-                              style={styles.painTitle}
-                            >
-                              {record.pain}
-                            </Text>
-                            <IconButton
-                              icon="share-variant"
-                              size={18}
-                              onPress={() => handleShareRecord(record)}
-                              accessibilityLabel="Compartir registro"
-                            />
+                            {record.image ? (
+                              <Image
+                                source={painImages[record.image]}
+                                style={styles.recordImage}
+                              />
+                            ) : null}
+                            <View style={styles.painInfo}>
+                              <Text
+                                variant="titleMedium"
+                                style={styles.painTitle}
+                              >
+                                {record.pain}
+                              </Text>
+                              {timeLabel ? (
+                                <Text style={styles.timeLabel}>
+                                  {timeLabel}
+                                </Text>
+                              ) : null}
+                            </View>
+                            <View style={styles.painActions}>
+                              <IconButton
+                                icon="pencil"
+                                size={18}
+                                onPress={() =>
+                                  navigation.navigate("RecordPain", { record })
+                                }
+                                accessibilityLabel="Editar registro"
+                              />
+                              <IconButton
+                                icon="share-variant"
+                                size={18}
+                                onPress={() => handleShareRecord(record)}
+                                accessibilityLabel="Compartir registro"
+                              />
+                            </View>
                           </View>
-
-                          <Text
-                            style={{
-                              color: paperTheme.colors.onSurfaceVariant,
-                              marginTop: 2,
-                            }}
-                          >
-                            {relationship}
-                            {timeLabel ? ` • ${timeLabel}` : ""}
-                          </Text>
 
                           {record.notes ? (
                             <Text
                               style={{
                                 color: paperTheme.colors.onSurfaceVariant,
-                                marginTop: 4,
+                                marginTop: 2,
                               }}
                             >
                               {record.notes}
@@ -237,10 +265,22 @@ const styles = StyleSheet.create({
   painHeader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     gap: 8,
   },
-  painTitle: { flex: 1, fontWeight: "700" },
+  painInfo: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  recordImage: { width: 40, height: 40, borderRadius: 20 },
+  painTitle: { fontWeight: "700" },
+  timeLabel: {
+    fontSize: 12,
+    color: "#666",
+    marginLeft: 8,
+  },
+  painActions: { flexDirection: "row" },
 });
 
 export default HomeScreen;
