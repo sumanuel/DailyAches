@@ -144,12 +144,14 @@ const HomeScreen = () => {
           <Text variant="titleMedium" style={styles.message}>
             {message}
           </Text>
-          <Image
-            source={imageUri}
-            style={styles.image}
-            placeholder={require("../assets/splash-icon.png")} // Placeholder local si existe
-            contentFit="contain"
-          />
+          {dailyRecords.length === 0 && (
+            <Image
+              source={imageUri}
+              style={styles.image}
+              placeholder={require("../assets/splash-icon.png")} // Placeholder local si existe
+              contentFit="contain"
+            />
+          )}
         </Card.Content>
       </Card>
 
@@ -226,9 +228,7 @@ const HomeScreen = () => {
                           </View>
 
                           {timeLabel ? (
-                            <Text style={styles.timeBelow}>
-                              {timeLabel}
-                            </Text>
+                            <Text style={styles.timeBelow}>{timeLabel}</Text>
                           ) : null}
 
                           {record.notes ? (
