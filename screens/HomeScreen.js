@@ -37,13 +37,13 @@ const HomeScreen = () => {
       const randomSurprise =
         surpriseMessages[Math.floor(Math.random() * surpriseMessages.length)];
       setMessage(randomSurprise);
-      setImageUri("https://via.placeholder.com/300?text=Sin+Dolores"); // Imagen de celebración
+      setImageUri(require("../assets/resourse_one/Mujer feliz.png"));
     } else {
       // Mensajes dinámicos basados en registros
       const randomDefault =
         defaultMessages[Math.floor(Math.random() * defaultMessages.length)];
       setMessage(randomDefault);
-      setImageUri("https://via.placeholder.com/300?text=Dolores+Registrados"); // Imagen relacionada
+      setImageUri(require("../assets/resourse_one/DolorDeCabeza.png"));
     }
   }, [user.records]);
 
@@ -121,10 +121,10 @@ const HomeScreen = () => {
             {message}
           </Text>
           <Image
-            source={{ uri: imageUri }}
+            source={imageUri}
             style={styles.image}
             placeholder={require("../assets/splash-icon.png")} // Placeholder local si existe
-            contentFit="cover"
+            contentFit="contain"
           />
         </Card.Content>
       </Card>
