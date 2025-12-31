@@ -21,7 +21,7 @@ const PeopleScreen = ({ navigation }) => {
   const [query, setQuery] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newRelationship, setNewRelationship] = useState("Otro");
+  const [newRelationship, setNewRelationship] = useState("");
   const [menuVisible, setMenuVisible] = useState(false);
 
   const relationshipOptions = [
@@ -111,8 +111,13 @@ const PeopleScreen = ({ navigation }) => {
                     <Text variant="titleMedium" numberOfLines={1}>
                       {p.name}
                     </Text>
-                    <Text variant="bodySmall" style={styles.muted}>
-                      {p.relationship || "Otro"} • Toca para registrar un dolor
+                    <Text
+                      style={{
+                        color: paperTheme.colors.onSurfaceVariant,
+                        marginTop: 2,
+                      }}
+                    >
+                      {p.relationship} Toca para registrar dolor
                     </Text>
                   </View>
                 </View>

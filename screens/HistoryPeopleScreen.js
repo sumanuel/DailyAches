@@ -4,6 +4,7 @@ import {
   Card,
   Text,
   TextInput,
+  IconButton,
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import { useUser } from "../context/UserContext";
@@ -93,13 +94,11 @@ const HistoryPeopleScreen = ({ navigation }) => {
                         marginTop: 2,
                       }}
                     >
-                      {p.relationship || "Otro"}
+                      Toca para ver historial
                     </Text>
                   </View>
                 </View>
-                <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
-                  ›
-                </Text>
+                <IconButton icon="chevron-right" />
               </Card.Content>
             </Card>
           ))
@@ -129,7 +128,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarText: { fontSize: 16, fontWeight: "700" },
+  avatarText: { fontSize: 18, fontWeight: "700" },
   meta: { flex: 1 },
 });
 

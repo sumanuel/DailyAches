@@ -231,7 +231,7 @@ export const UserProvider = ({ children }) => {
       const newPerson = {
         id: String(Date.now()),
         name: trimmed,
-        relationship: relationship || "Otro",
+        relationship: relationship || "",
       };
       const newUser = { ...prevUser, people: [newPerson, ...prevUser.people] };
       saveUserData(newUser);
