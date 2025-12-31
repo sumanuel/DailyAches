@@ -161,7 +161,7 @@ const HomeScreen = () => {
                 <Card.Title
                   title={group.personName}
                   subtitle={relationship || undefined}
-                  titleStyle={{ fontWeight: 'bold', fontSize: 18 }}
+                  titleStyle={{ fontWeight: "bold", fontSize: 18 }}
                   left={(props) => (
                     <Avatar.Image
                       size={40}
