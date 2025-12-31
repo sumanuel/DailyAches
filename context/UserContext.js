@@ -316,6 +316,17 @@ export const UserProvider = ({ children }) => {
     });
   };
 
+  const deleteRecord = (recordId) => {
+    setUser((prevUser) => {
+      const newUser = {
+        ...prevUser,
+        records: prevUser.records.filter((r) => r.id !== recordId),
+      };
+      saveUserData(newUser);
+      return newUser;
+    });
+  };
+
   const removePainType = (painName) => {
     setUser((prevUser) => {
       const newUser = {
@@ -410,6 +421,7 @@ export const UserProvider = ({ children }) => {
         removePerson,
         updatePerson,
         updateRecord,
+        deleteRecord,
         addPainType,
         removePainType,
         updatePainType,

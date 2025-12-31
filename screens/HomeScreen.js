@@ -28,7 +28,7 @@ const painImages = {
 };
 
 const HomeScreen = () => {
-  const { user, getTodayRecords, unlockAchievement } = useUser();
+  const { user, getTodayRecords, unlockAchievement, deleteRecord } = useUser();
   const paperTheme = usePaperTheme();
   const navigation = useNavigation();
   const [dailyRecords, setDailyRecords] = useState([]);
@@ -88,25 +88,24 @@ const HomeScreen = () => {
     return `${hh}:${minutes} ${ampm}`;
   };
 
-  const handleShareRecord = async (record) => {
-    const person = peopleById[record.personId];
-    const relationship = person?.relationship
-      ? ` (${person.relationship})`
-      : "";
-    const when = record.createdAt ? formatTime(record.createdAt) : "";
-    const notesPart = record.notes ? `\nNotas: ${record.notes}` : "";
-    const message = `Registro en DailyAches${when ? ` (${when})` : ""}:\n${
-      record.personName
-    }${relationship}\nDolor: ${record.pain}${notesPart}\n#DailyAches`;
-
-    try {
-      await Share.share({ message });
-      Alert.alert("¡Listo!", "Se abrió el panel para compartir.");
-      unlockAchievement(5);
-    } catch (error) {
-      console.error("Error sharing:", error);
-      Alert.alert("Error", "No se pudo compartir.");
-    }
+  const handleDeleteRecord = (record) => {
+    Alert.alert(
+      "Eliminar registro",
+      `¿Estás seguro de que quieres eliminar el registro de dolor "${record.pain}" para ${record.personName}?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () => {
+            deleteRecord(record.id);
+            // Refresh the records
+            const todayRecords = getTodayRecords();
+            setDailyRecords(todayRecords);
+          },
+        },
+      ]
+    );
   };
 
   const groupedByPerson = useMemo(() => {
@@ -209,13 +208,14 @@ const HomeScreen = () => {
                               >
                                 {record.pain}
                               </Text>
-                              {timeLabel ? (
-                                <Text style={styles.timeLabel}>
-                                  {timeLabel}
-                                </Text>
-                              ) : null}
                             </View>
                             <View style={styles.painActions}>
+                              <IconButton
+                                icon="delete"
+                                size={18}
+                                onPress={() => handleDeleteRecord(record)}
+                                accessibilityLabel="Eliminar registro"
+                              />
                               <IconButton
                                 icon="share-variant"
                                 size={18}
@@ -224,6 +224,12 @@ const HomeScreen = () => {
                               />
                             </View>
                           </View>
+
+                          {timeLabel ? (
+                            <Text style={styles.timeBelow}>
+                              {timeLabel}
+                            </Text>
+                          ) : null}
 
                           {record.notes ? (
                             <Text
@@ -259,6 +265,7 @@ const styles = StyleSheet.create({
   message: { textAlign: "center", marginTop: 10 },
   image: { width: "100%", height: 200, borderRadius: 14, marginTop: 12 },
   painCard: { marginTop: 8, borderRadius: 14, overflow: "hidden" },
+  cardContent: { paddingHorizontal: 8, paddingVertical: 8 },
   painHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -276,6 +283,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#666",
     marginLeft: 8,
+  },
+  timeBelow: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 4,
+    alignSelf: "flex-start",
   },
   painActions: { flexDirection: "row" },
 });
