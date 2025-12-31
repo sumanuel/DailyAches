@@ -72,6 +72,11 @@ const HomeStackNavigator = () => {
         component={HomeScreen}
         options={{ title: "Inicio" }}
       />
+      <Stack.Screen
+        name="RecordPain"
+        component={RecordPainScreen}
+        options={{ title: "Registrar dolor" }}
+      />
     </Stack.Navigator>
   );
 };

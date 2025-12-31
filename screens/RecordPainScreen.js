@@ -59,9 +59,7 @@ const RecordPainScreen = ({ navigation, route }) => {
       const matchingPain = painTypes.find((p) => p.name === record.pain);
       if (matchingPain) {
         setSelectedPainType(matchingPain);
-        setSelectedImage(matchingPain.image);
       }
-      setSelectedImage(record.image || "DolorDeCabeza.png");
     }
   }, [record, painTypes, setValue]);
 

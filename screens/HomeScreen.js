@@ -8,6 +8,7 @@ import {
   Avatar,
 } from "react-native-paper";
 import { Image } from "expo-image";
+import { useNavigation } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
 
@@ -29,6 +30,7 @@ const painImages = {
 const HomeScreen = () => {
   const { user, getTodayRecords, unlockAchievement } = useUser();
   const paperTheme = usePaperTheme();
+  const navigation = useNavigation();
   const [dailyRecords, setDailyRecords] = useState([]);
   const [message, setMessage] = useState("");
   const [imageUri, setImageUri] = useState("https://via.placeholder.com/300"); // Imagen dinámica placeholder
@@ -188,6 +190,9 @@ const HomeScreen = () => {
                           styles.painCard,
                           { backgroundColor: paperTheme.colors.surfaceVariant },
                         ]}
+                        onPress={() =>
+                          navigation.navigate("RecordPain", { record })
+                        }
                       >
                         <Card.Content>
                           <View style={styles.painHeader}>
@@ -211,14 +216,6 @@ const HomeScreen = () => {
                               ) : null}
                             </View>
                             <View style={styles.painActions}>
-                              <IconButton
-                                icon="pencil"
-                                size={18}
-                                onPress={() =>
-                                  navigation.navigate("RecordPain", { record })
-                                }
-                                accessibilityLabel="Editar registro"
-                              />
                               <IconButton
                                 icon="share-variant"
                                 size={18}
