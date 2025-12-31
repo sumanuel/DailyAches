@@ -129,7 +129,7 @@ const RecordPainScreen = ({ navigation, route }) => {
         ]}
       >
         <Card style={styles.card}>
-          <Card.Title title="Registrar dolor" />
+          <Card.Title title="Registrar" />
           <Card.Content>
             <Text>Selecciona una persona primero desde “Registro”.</Text>
             <Button
@@ -152,12 +152,12 @@ const RecordPainScreen = ({ navigation, route }) => {
     >
       <Card style={styles.card}>
         <Card.Title
-          title={isEdit ? "Editar registro" : "Registrar dolor"}
+          title={isEdit ? "Editar registro" : "Registrar"}
           subtitle={personName}
         />
         <Card.Content>
           <TextInput
-            label="Buscar dolor"
+            label="Buscar"
             value={searchQuery}
             onChangeText={setSearchQuery}
             style={styles.searchInput}
@@ -217,7 +217,7 @@ const RecordPainScreen = ({ navigation, route }) => {
             onPress={handleSubmit(onSubmit)}
             style={styles.button}
           >
-            {isEdit ? "Actualizar registro" : "Registrar dolor (+10 puntos)"}
+            {isEdit ? "Actualizar registro" : "Registrar (+10 puntos)"}
           </Button>
         </Card.Content>
       </Card>

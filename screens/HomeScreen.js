@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   recordImage: { width: 40, height: 40, borderRadius: 20 },
-  painTitle: { fontWeight: "700" },
+  painTitle: {},
   timeLabel: {
     fontSize: 12,
     color: "#666",

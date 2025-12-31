@@ -164,7 +164,7 @@ const PeopleScreen = ({ navigation }) => {
                         marginTop: 2,
                       }}
                     >
-                      {p.relationship} Toca para registrar dolor
+                      Toca para registrar
                     </Text>
                   </View>
                 </View>
