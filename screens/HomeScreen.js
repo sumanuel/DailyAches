@@ -160,7 +160,7 @@ const HomeScreen = () => {
           {groupedByPerson.map(([personKey, group]) => {
             const relationship = peopleById[personKey]?.relationship;
             return (
-              <Card key={personKey} style={styles.card}>
+              <Card key={personKey} style={[styles.card, { backgroundColor: paperTheme.colors.surfaceVariant }]}>
                 <Card.Title
                   title={group.personName}
                   subtitle={relationship || undefined}
@@ -187,10 +187,7 @@ const HomeScreen = () => {
                     return (
                       <Card
                         key={record.id || index}
-                        style={[
-                          styles.painCard,
-                          { backgroundColor: paperTheme.colors.surfaceVariant },
-                        ]}
+                        style={styles.painCard}
                         onPress={() =>
                           navigation.navigate("RecordPain", { record })
                         }
