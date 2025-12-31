@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { StyleSheet, View, ScrollView } from "react-native";
+import { StyleSheet, View, ScrollView, Modal } from "react-native";
 import {
   Avatar,
   Button,
@@ -7,14 +7,8 @@ import {
   Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
-import {
-  DatePickerModal,
-  es,
-  registerTranslation,
-} from "react-native-paper-dates";
+import { Calendar } from "react-native-calendars";
 import { useUser } from "../context/UserContext";
-
-registerTranslation("es", es);
 
 const monthShortEs = [
   "ene",
@@ -109,6 +103,8 @@ const StatsScreen = ({ route }) => {
     getPresetRange("this_month")
   );
   const [rangeOpen, setRangeOpen] = useState(false);
+  const [selectingStart, setSelectingStart] = useState(true); // true for start, false for end
+  const [tempRange, setTempRange] = useState(historyRange);
 
   const applyPreset = (p) => {
     setPreset(p);
@@ -142,6 +138,37 @@ const StatsScreen = ({ route }) => {
 
   const records = tab === "today" ? todayRecords : historyRecords;
   const count = records.length;
+
+  const getMarkedDates = () => {
+    const marked = {};
+    const start = rangeOpen ? tempRange.start : historyRange.start;
+    const end = rangeOpen ? tempRange.end : historyRange.end;
+    const startStr = start.toISOString().split("T")[0];
+    const endStr = end.toISOString().split("T")[0];
+    marked[startStr] = {
+      startingDay: true,
+      color: paperTheme.colors.primary,
+      textColor: "white",
+    };
+    marked[endStr] = {
+      endingDay: true,
+      color: paperTheme.colors.primary,
+      textColor: "white",
+    };
+    if (startStr !== endStr) {
+      let current = new Date(start);
+      current.setDate(current.getDate() + 1);
+      while (current < end) {
+        const dateStr = current.toISOString().split("T")[0];
+        marked[dateStr] = {
+          color: paperTheme.colors.primary,
+          textColor: "white",
+        };
+        current.setDate(current.getDate() + 1);
+      }
+    }
+    return marked;
+  };
 
   const renderRecord = (record, index) => {
     const person = record.personId ? peopleById.get(record.personId) : null;
@@ -309,7 +336,11 @@ const StatsScreen = ({ route }) => {
                 <Button
                   mode="outlined"
                   icon="calendar"
-                  onPress={() => setRangeOpen(true)}
+                  onPress={() => {
+                    setSelectingStart(true);
+                    setTempRange(historyRange);
+                    setRangeOpen(true);
+                  }}
                   style={styles.calendarBtn}
                   contentStyle={styles.calendarBtnContent}
                   labelStyle={styles.calendarBtnLabel}
@@ -329,7 +360,11 @@ const StatsScreen = ({ route }) => {
                 <Button
                   mode="outlined"
                   icon="calendar"
-                  onPress={() => setRangeOpen(true)}
+                  onPress={() => {
+                    setSelectingStart(false);
+                    setTempRange(historyRange);
+                    setRangeOpen(true);
+                  }}
                   style={styles.calendarBtn}
                   contentStyle={styles.calendarBtnContent}
                   labelStyle={styles.calendarBtnLabel}
@@ -343,18 +378,30 @@ const StatsScreen = ({ route }) => {
               <Button
                 mode={preset === "this_month" ? "contained" : "outlined"}
                 onPress={() => applyPreset("this_month")}
+                style={{ flex: 1 }}
+                contentStyle={{ height: 36, paddingHorizontal: 0 }}
+                labelStyle={{ fontSize: 12 }}
+                compact={true}
               >
                 Este mes
               </Button>
               <Button
                 mode={preset === "prev_month" ? "contained" : "outlined"}
                 onPress={() => applyPreset("prev_month")}
+                style={{ flex: 1 }}
+                contentStyle={{ height: 36, paddingHorizontal: 0 }}
+                labelStyle={{ fontSize: 12 }}
+                compact={true}
               >
                 Mes anterior
               </Button>
               <Button
                 mode={preset === "this_week" ? "contained" : "outlined"}
                 onPress={() => applyPreset("this_week")}
+                style={{ flex: 1 }}
+                contentStyle={{ height: 36, paddingHorizontal: 0 }}
+                labelStyle={{ fontSize: 12 }}
+                compact={true}
               >
                 Esta semana
               </Button>
@@ -363,25 +410,86 @@ const StatsScreen = ({ route }) => {
         </Card>
       )}
 
-      <DatePickerModal
-        locale="es"
-        mode="range"
+      <Modal
         visible={rangeOpen}
-        startDate={historyRange.start}
-        endDate={historyRange.end}
-        onDismiss={() => setRangeOpen(false)}
-        onConfirm={({ startDate, endDate }) => {
-          if (startDate && endDate) {
-            setHistoryRange({
-              start: startOfDay(startDate),
-              end: endOfDay(endDate),
-            });
-            setPreset("custom");
-          }
-          setRangeOpen(false);
-        }}
-        saveLabel="Aplicar"
-      />
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setRangeOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View
+            style={[
+              styles.modalContent,
+              { backgroundColor: paperTheme.colors.background },
+            ]}
+          >
+            <Text variant="titleMedium" style={styles.modalTitle}>
+              Seleccionar {selectingStart ? "fecha de inicio" : "fecha de fin"}
+            </Text>
+            <Calendar
+              current={
+                selectingStart
+                  ? tempRange.start.toISOString().split("T")[0]
+                  : tempRange.end.toISOString().split("T")[0]
+              }
+              markedDates={getMarkedDates()}
+              onDayPress={(day) => {
+                const selectedDate = new Date(day.dateString);
+                if (selectingStart) {
+                  setTempRange((prev) => ({
+                    ...prev,
+                    start: startOfDay(selectedDate),
+                    end:
+                      prev.end < selectedDate
+                        ? endOfDay(selectedDate)
+                        : prev.end,
+                  }));
+                } else {
+                  setTempRange((prev) => ({
+                    ...prev,
+                    end: endOfDay(selectedDate),
+                    start:
+                      prev.start > selectedDate
+                        ? startOfDay(selectedDate)
+                        : prev.start,
+                  }));
+                }
+              }}
+              theme={{
+                backgroundColor: paperTheme.colors.background,
+                calendarBackground: paperTheme.colors.surface,
+                textSectionTitleColor: paperTheme.colors.onSurface,
+                selectedDayBackgroundColor: paperTheme.colors.primary,
+                selectedDayTextColor: paperTheme.colors.onPrimary,
+                todayTextColor: paperTheme.colors.primary,
+                dayTextColor: paperTheme.colors.onSurface,
+                textDisabledColor: paperTheme.colors.onSurfaceDisabled,
+                dotColor: paperTheme.colors.primary,
+                selectedDotColor: paperTheme.colors.onPrimary,
+                arrowColor: paperTheme.colors.primary,
+                monthTextColor: paperTheme.colors.onSurface,
+                indicatorColor: paperTheme.colors.primary,
+                textDayFontSize: 16,
+                textMonthFontSize: 18,
+                textDayHeaderFontSize: 14,
+              }}
+            />
+            <View style={styles.modalButtons}>
+              <Button onPress={() => setRangeOpen(false)}>Cancelar</Button>
+              <Button
+                mode="contained"
+                onPress={() => {
+                  setHistoryRange(tempRange);
+                  setPreset("custom");
+                  setRangeOpen(false);
+                }}
+              >
+                Aplicar
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {count === 0 ? (
         <Card style={styles.emptyCard}>
@@ -427,7 +535,12 @@ const styles = StyleSheet.create({
   calendarBtn: { alignSelf: "stretch" },
   calendarBtnContent: { justifyContent: "flex-start", height: 40 },
   calendarBtnLabel: { fontSize: 12 },
-  quickRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12 },
+  quickRow: {
+    flexDirection: "row",
+    gap: 0,
+    marginTop: 12,
+    justifyContent: "center",
+  },
 
   recordsList: { marginTop: 12, gap: 10 },
   recordCard: { borderRadius: 16, overflow: "hidden" },
@@ -450,6 +563,19 @@ const styles = StyleSheet.create({
   kvLabel: { fontSize: 10, letterSpacing: 0.6, fontWeight: "700" },
 
   emptyCard: { marginTop: 12, borderRadius: 16, overflow: "hidden" },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: { width: "90%", borderRadius: 16, padding: 16 },
+  modalTitle: { textAlign: "center", marginBottom: 16 },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 16,
+  },
 });
 
 export default StatsScreen;
