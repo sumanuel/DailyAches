@@ -7,7 +7,16 @@ import {
   IconButton,
   useTheme as usePaperTheme,
 } from "react-native-paper";
+import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
+
+const avatarImages = {
+  "DolorDeCabeza.png": require("../assets/avatars/DolorDeCabeza.png"),
+  "DolorDeEspalda.png": require("../assets/avatars/DolorDeEspalda.png"),
+  "DolorDePiernas.png": require("../assets/avatars/DolorDePiernas.png"),
+  "Mujer feliz.png": require("../assets/avatars/Mujer feliz.png"),
+  "Saltando.png": require("../assets/avatars/Saltando.png"),
+};
 
 const HistoryPeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
@@ -74,16 +83,23 @@ const HistoryPeopleScreen = ({ navigation }) => {
             >
               <Card.Content style={styles.row}>
                 <View style={styles.rowLeft}>
-                  <View
-                    style={[
-                      styles.avatar,
-                      { backgroundColor: paperTheme.colors.surfaceVariant },
-                    ]}
-                  >
-                    <Text style={styles.avatarText}>
-                      {(p.name || "?").slice(0, 1).toUpperCase()}
-                    </Text>
-                  </View>
+                  {p.avatar ? (
+                    <Image
+                      source={avatarImages[p.avatar]}
+                      style={styles.avatar}
+                    />
+                  ) : (
+                    <View
+                      style={[
+                        styles.avatar,
+                        { backgroundColor: paperTheme.colors.surfaceVariant },
+                      ]}
+                    >
+                      <Text style={styles.avatarText}>
+                        {(p.name || "?").slice(0, 1).toUpperCase()}
+                      </Text>
+                    </View>
+                  )}
                   <View style={styles.meta}>
                     <Text variant="titleMedium" numberOfLines={1}>
                       {p.name}

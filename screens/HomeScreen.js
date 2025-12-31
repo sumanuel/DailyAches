@@ -5,9 +5,18 @@ import {
   Text,
   IconButton,
   useTheme as usePaperTheme,
+  Avatar,
 } from "react-native-paper";
 import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
+
+const avatarImages = {
+  "DolorDeCabeza.png": require("../assets/avatars/DolorDeCabeza.png"),
+  "DolorDeEspalda.png": require("../assets/avatars/DolorDeEspalda.png"),
+  "DolorDePiernas.png": require("../assets/avatars/DolorDePiernas.png"),
+  "Mujer feliz.png": require("../assets/avatars/Mujer feliz.png"),
+  "Saltando.png": require("../assets/avatars/Saltando.png"),
+};
 
 const HomeScreen = () => {
   const { user, getTodayRecords, unlockAchievement } = useUser();
@@ -138,6 +147,16 @@ const HomeScreen = () => {
                 <Card.Title
                   title={group.personName}
                   subtitle={relationship || undefined}
+                  left={(props) => (
+                    <Avatar.Image
+                      size={40}
+                      source={
+                        avatarImages[
+                          peopleById[personKey]?.avatar || "Mujer feliz.png"
+                        ]
+                      }
+                    />
+                  )}
                 />
                 <Card.Content>
                   {group.records.map((record, index) => {

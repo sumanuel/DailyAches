@@ -220,7 +220,7 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  const addPerson = (name, relationship) => {
+  const addPerson = (name, relationship, avatar) => {
     const trimmed = (name || "").trim();
     if (!trimmed) return;
     setUser((prevUser) => {
@@ -232,6 +232,7 @@ export const UserProvider = ({ children }) => {
         id: String(Date.now()),
         name: trimmed,
         relationship: relationship || "",
+        avatar: avatar || "Mujer feliz.png",
       };
       const newUser = { ...prevUser, people: [newPerson, ...prevUser.people] };
       saveUserData(newUser);

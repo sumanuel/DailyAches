@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, ScrollView, TouchableOpacity } from "react-native";
 import {
   Card,
   Text,
@@ -12,7 +12,16 @@ import {
   useTheme as usePaperTheme,
   Menu,
 } from "react-native-paper";
+import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
+
+const avatarImages = {
+  "DolorDeCabeza.png": require("../assets/avatars/DolorDeCabeza.png"),
+  "DolorDeEspalda.png": require("../assets/avatars/DolorDeEspalda.png"),
+  "DolorDePiernas.png": require("../assets/avatars/DolorDePiernas.png"),
+  "Mujer feliz.png": require("../assets/avatars/Mujer feliz.png"),
+  "Saltando.png": require("../assets/avatars/Saltando.png"),
+};
 
 const PeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
@@ -22,7 +31,16 @@ const PeopleScreen = ({ navigation }) => {
   const [addOpen, setAddOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newRelationship, setNewRelationship] = useState("");
+  const [selectedAvatar, setSelectedAvatar] = useState("Mujer feliz.png");
   const [menuVisible, setMenuVisible] = useState(false);
+
+  const avatars = [
+    "DolorDeCabeza.png",
+    "DolorDeEspalda.png",
+    "DolorDePiernas.png",
+    "Mujer feliz.png",
+    "Saltando.png",
+  ];
 
   const relationshipOptions = [
     "Esposa",
@@ -42,12 +60,13 @@ const PeopleScreen = ({ navigation }) => {
 
   const openAdd = () => {
     setNewName("");
-    setNewRelationship("Otro");
+    setNewRelationship("");
+    setSelectedAvatar("Mujer feliz.png");
     setAddOpen(true);
   };
 
   const onConfirmAdd = () => {
-    addPerson(newName, newRelationship);
+    addPerson(newName, newRelationship, selectedAvatar);
     setAddOpen(false);
   };
 
@@ -97,16 +116,23 @@ const PeopleScreen = ({ navigation }) => {
             >
               <Card.Content style={styles.row}>
                 <View style={styles.rowLeft}>
-                  <View
-                    style={[
-                      styles.avatar,
-                      { backgroundColor: paperTheme.colors.surfaceVariant },
-                    ]}
-                  >
-                    <Text style={styles.avatarText}>
-                      {(p.name || "?").slice(0, 1).toUpperCase()}
-                    </Text>
-                  </View>
+                  {p.avatar ? (
+                    <Image
+                      source={avatarImages[p.avatar]}
+                      style={styles.avatar}
+                    />
+                  ) : (
+                    <View
+                      style={[
+                        styles.avatar,
+                        { backgroundColor: paperTheme.colors.surfaceVariant },
+                      ]}
+                    >
+                      <Text style={styles.avatarText}>
+                        {(p.name || "?").slice(0, 1).toUpperCase()}
+                      </Text>
+                    </View>
+                  )}
                   <View style={styles.meta}>
                     <Text variant="titleMedium" numberOfLines={1}>
                       {p.name}
@@ -135,9 +161,13 @@ const PeopleScreen = ({ navigation }) => {
       <FAB icon="plus" style={styles.fab} onPress={openAdd} />
 
       <Portal>
-        <Dialog visible={addOpen} onDismiss={() => setAddOpen(false)}>
+        <Dialog
+          visible={addOpen}
+          onDismiss={() => setAddOpen(false)}
+          style={styles.dialog}
+        >
           <Dialog.Title>Agregar persona</Dialog.Title>
-          <Dialog.Content>
+          <Dialog.Content style={styles.dialogContent}>
             <TextInput
               label="Nombre"
               value={newName}
@@ -170,6 +200,29 @@ const PeopleScreen = ({ navigation }) => {
                 />
               ))}
             </Menu>
+            <Text style={{ marginTop: 16, marginBottom: 8 }}>
+              Selecciona un avatar:
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.avatarScroll}
+            >
+              {avatars.map((av) => (
+                <TouchableOpacity
+                  key={av}
+                  onPress={() => setSelectedAvatar(av)}
+                  style={styles.avatarOption}
+                >
+                  <Image source={avatarImages[av]} style={styles.avatarImage} />
+                  {selectedAvatar === av && (
+                    <View style={styles.selectedOverlay}>
+                      <Text style={styles.checkMark}>✓</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setAddOpen(false)}>Cancelar</Button>
@@ -207,6 +260,23 @@ const styles = StyleSheet.create({
   fab: { position: "absolute", right: 16, bottom: 16 },
   input: { marginBottom: 16 },
   relationshipButton: { marginTop: 8 },
+  dialog: { borderRadius: 16 },
+  dialogContent: { paddingVertical: 16 },
+  avatarScroll: { marginBottom: 16 },
+  avatarOption: { marginRight: 12, position: "relative" },
+  avatarImage: { width: 60, height: 60, borderRadius: 30 },
+  selectedOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkMark: { color: "white", fontSize: 24, fontWeight: "bold" },
 });
 
 export default PeopleScreen;
