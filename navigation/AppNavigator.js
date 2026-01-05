@@ -18,6 +18,7 @@ import ProgressScreen from "../screens/ProgressScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import PainSettingsScreen from "../screens/PainSettingsScreen";
+import AddPainTypeScreen from "../screens/AddPainTypeScreen";
 
 import { useTheme } from "../context/ThemeContext";
 
@@ -170,6 +171,11 @@ const MoreStackNavigator = () => {
         name="PainSettings"
         component={PainSettingsScreen}
         options={{ title: "Configurar dolores" }}
+      />
+      <Stack.Screen
+        name="AddPainType"
+        component={AddPainTypeScreen}
+        options={{ title: "Agregar tipo de dolor" }}
       />
     </Stack.Navigator>
   );

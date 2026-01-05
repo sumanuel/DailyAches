@@ -1,62 +1,55 @@
-import React, { useMemo, useState } from "react";
-import { FlatList, StyleSheet, View, TouchableOpacity } from "react-native";
+import React, { useMemo } from "react";
+import { FlatList, StyleSheet, View } from "react-native";
 import {
-  Button,
   Card,
-  Dialog,
+  FAB,
   IconButton,
-  Portal,
   Text,
-  TextInput,
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import { Image } from "expo-image";
+import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
 
 const painImages = {
+  "Alegre.png": require("../assets/resourse_one/Alegre.png"),
+  "Cabeza.png": require("../assets/resourse_one/Cabeza.png"),
+  "Cervical.png": require("../assets/resourse_one/Cervical.png"),
+  "Diarrea.png": require("../assets/resourse_one/Diarrea.png"),
   "DolorDeCabeza.png": require("../assets/resourse_one/DolorDeCabeza.png"),
   "DolorDeEspalda.png": require("../assets/resourse_one/DolorDeEspalda.png"),
   "DolorDePiernas.png": require("../assets/resourse_one/DolorDePiernas.png"),
+  "Espalda.png": require("../assets/resourse_one/Espalda.png"),
+  "Fiebre.png": require("../assets/resourse_one/Fiebre.png"),
+  "Gripe.png": require("../assets/resourse_one/Gripe.png"),
+  "Mamitis.png": require("../assets/resourse_one/Mamitis.png"),
+  "Manos.png": require("../assets/resourse_one/Manos.png"),
+  "Mareo.png": require("../assets/resourse_one/Mareo.png"),
+  "Muela.png": require("../assets/resourse_one/Muela.png"),
   "Mujer feliz.png": require("../assets/resourse_one/Mujer feliz.png"),
+  "Papitis.png": require("../assets/resourse_one/Papitis.png"),
+  "Piernas.png": require("../assets/resourse_one/Piernas.png"),
+  "Resaca.png": require("../assets/resourse_one/Resaca.png"),
+  "Saltando.png": require("../assets/resourse_one/Saltando.png"),
+  "Senos.png": require("../assets/resourse_one/Senos.png"),
+  "Trasnocho.png": require("../assets/resourse_one/Trasnocho.png"),
+  "Vientre.png": require("../assets/resourse_one/Vientre.png"),
+  "Vomito.png": require("../assets/resourse_one/Vomito.png"),
 };
 
 const PainSettingsScreen = () => {
   const paperTheme = usePaperTheme();
-  const { user, addPainType, removePainType, updatePainType } = useUser();
+  const navigation = useNavigation();
+  const { user, removePainType } = useUser();
 
   const painTypes = useMemo(() => user.painTypes || [], [user.painTypes]);
 
-  const [dialogVisible, setDialogVisible] = useState(false);
-  const [newPain, setNewPain] = useState("");
-  const [selectedImage, setSelectedImage] = useState("Mujer feliz.png");
-  const [isEdit, setIsEdit] = useState(false);
-  const [editPain, setEditPain] = useState(null);
-
-  const open = () => {
-    setNewPain("");
-    setSelectedImage("Mujer feliz.png");
-    setIsEdit(false);
-    setEditPain(null);
-    setDialogVisible(true);
+  const openAddScreen = () => {
+    navigation.navigate("AddPainType", { isEdit: false });
   };
 
-  const openEdit = (pain) => {
-    setNewPain(pain.name);
-    setSelectedImage(pain.image);
-    setIsEdit(true);
-    setEditPain(pain);
-    setDialogVisible(true);
-  };
-
-  const close = () => setDialogVisible(false);
-
-  const onAdd = () => {
-    if (isEdit && editPain) {
-      updatePainType(editPain.name, newPain, selectedImage);
-    } else {
-      addPainType(newPain, selectedImage);
-    }
-    close();
+  const openEditScreen = (pain) => {
+    navigation.navigate("AddPainType", { isEdit: true, pain });
   };
 
   return (
@@ -66,14 +59,16 @@ const PainSettingsScreen = () => {
         { backgroundColor: paperTheme.colors.background },
       ]}
     >
-      <Card style={styles.card}>
+      <Card style={styles.headerCard}>
         <Card.Title title="Configurar dolores" />
         <Card.Content>
           <Text style={styles.sub}>
             Estos son los tipos disponibles al registrar un dolor.
           </Text>
         </Card.Content>
+      </Card>
 
+      <Card style={styles.listCard}>
         <FlatList
           data={painTypes}
           keyExtractor={(item) => item.name}
@@ -85,7 +80,7 @@ const PainSettingsScreen = () => {
                 <IconButton
                   icon="pencil"
                   size={20}
-                  onPress={() => openEdit(item)}
+                  onPress={() => openEditScreen(item)}
                   accessibilityLabel={`Editar ${item.name}`}
                 />
                 <IconButton
@@ -107,69 +102,22 @@ const PainSettingsScreen = () => {
           )}
           contentContainerStyle={styles.listContent}
         />
-
-        <Card.Actions>
-          <Button mode="contained" onPress={open}>
-            Agregar dolor
-          </Button>
-        </Card.Actions>
       </Card>
 
-      <Portal>
-        <Dialog visible={dialogVisible} onDismiss={close} style={styles.dialog}>
-          <Dialog.Title style={styles.dialogTitle}>
-            {isEdit ? "Editar tipo de dolor" : "Agregar nuevo tipo de dolor"}
-          </Dialog.Title>
-          <Dialog.Content style={styles.dialogContent}>
-            <TextInput
-              label="Nombre del dolor"
-              value={newPain}
-              onChangeText={setNewPain}
-              style={styles.textInput}
-              mode="outlined"
-              theme={{ colors: { primary: "#9C27B0" } }}
-            />
-            <Text style={styles.imageLabel}>Selecciona una imagen:</Text>
-            <View style={styles.imageSelection}>
-              {Object.keys(painImages).map((img) => (
-                <TouchableOpacity
-                  key={img}
-                  onPress={() => setSelectedImage(img)}
-                  style={styles.imageOption}
-                >
-                  <Image source={painImages[img]} style={styles.imagePreview} />
-                  {selectedImage === img && (
-                    <View style={styles.selectedOverlay}>
-                      <Text style={styles.checkMark}>✓</Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-          </Dialog.Content>
-          <Dialog.Actions style={styles.dialogActions}>
-            <Button onPress={close} style={styles.cancelButton}>
-              Cancelar
-            </Button>
-            <Button
-              mode="contained"
-              onPress={onAdd}
-              disabled={!newPain.trim()}
-              style={styles.addButton}
-              buttonColor="#9C27B0"
-            >
-              {isEdit ? "Actualizar" : "Agregar"}
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+      <FAB
+        icon="plus"
+        onPress={openAddScreen}
+        style={styles.fab}
+        accessibilityLabel="Agregar nuevo tipo de dolor"
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 12 },
-  card: { width: "100%", borderRadius: 16, overflow: "hidden" },
+  headerCard: { borderRadius: 16, overflow: "hidden", marginBottom: 12 },
+  listCard: { flex: 1, borderRadius: 16, overflow: "hidden" },
   sub: { opacity: 0.7, marginBottom: 8 },
   listContent: { paddingHorizontal: 16, paddingBottom: 8 },
   itemRow: {
@@ -182,37 +130,12 @@ const styles = StyleSheet.create({
   itemText: { flex: 1, fontSize: 16 },
   itemActions: { flexDirection: "row" },
   sep: { height: StyleSheet.hairlineWidth, opacity: 0.6 },
-  dialog: { borderRadius: 20 },
-  dialogTitle: { textAlign: "center", fontSize: 18, fontWeight: "bold" },
-  dialogContent: { paddingHorizontal: 24, paddingVertical: 16 },
-  textInput: { marginBottom: 16 },
-  imageLabel: { marginBottom: 8, fontSize: 16, fontWeight: "500" },
-  imageSelection: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 16,
-  },
-  imageOption: { position: "relative" },
-  imagePreview: { width: 50, height: 50, borderRadius: 25 },
-  selectedOverlay: {
+  fab: {
     position: "absolute",
-    top: 0,
-    left: 0,
+    margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(156, 39, 176, 0.8)",
-    borderRadius: 25,
-    alignItems: "center",
-    justifyContent: "center",
   },
-  checkMark: { color: "white", fontSize: 24, fontWeight: "bold" },
-  dialogActions: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-    justifyContent: "space-between",
-  },
-  cancelButton: { marginRight: 8 },
-  addButton: { flex: 1 },
 });
 
 export default PainSettingsScreen;
