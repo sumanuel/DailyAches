@@ -62,6 +62,23 @@ class AuthService {
     return response;
   }
 
+  // Update user profile
+  async updateProfile(profileData) {
+    const response = await HttpService.put(
+      API_ENDPOINTS.AUTH.PROFILE,
+      profileData
+    );
+
+    if (response.success) {
+      return {
+        success: true,
+        user: response.data?.user,
+      };
+    }
+
+    return response;
+  }
+
   // Logout user
   async logout() {
     await this.removeAuthToken();

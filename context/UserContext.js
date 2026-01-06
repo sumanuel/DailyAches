@@ -69,6 +69,8 @@ const defaultPainTypes = [
 const defaultProfile = {
   name: "",
   email: "",
+  phone: "",
+  birth_date: "",
 };
 
 const computeLevel = (points) => {
@@ -145,6 +147,8 @@ export const UserProvider = ({ children }) => {
           profile: {
             name: response.user.name || prevUser.profile.name,
             email: response.user.email || prevUser.profile.email,
+            phone: response.user.phone || prevUser.profile.phone,
+            birth_date: response.user.birth_date || prevUser.profile.birth_date,
           },
         }));
         // Load API data
@@ -367,15 +371,48 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  const updateProfile = (partial) => {
-    setUser((prevUser) => {
-      const newUser = {
-        ...prevUser,
-        profile: { ...prevUser.profile, ...(partial || {}) },
-      };
-      saveUserData(newUser);
-      return newUser;
-    });
+  const updateProfile = async (partial) => {
+    try {
+      const response = await AuthService.updateProfile(partial);
+      if (response.success) {
+        setUser((prevUser) => {
+          const newUser = {
+            ...prevUser,
+            profile: {
+              ...prevUser.profile,
+              name: response.user.name || prevUser.profile.name,
+              email: response.user.email || prevUser.profile.email,
+              phone: response.user.phone || prevUser.profile.phone,
+              birth_date:
+                response.user.birth_date || prevUser.profile.birth_date,
+            },
+          };
+          saveUserData(newUser);
+          return newUser;
+        });
+      } else {
+        // Fallback to local update if API fails
+        setUser((prevUser) => {
+          const newUser = {
+            ...prevUser,
+            profile: { ...prevUser.profile, ...(partial || {}) },
+          };
+          saveUserData(newUser);
+          return newUser;
+        });
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      // Fallback to local update
+      setUser((prevUser) => {
+        const newUser = {
+          ...prevUser,
+          profile: { ...prevUser.profile, ...(partial || {}) },
+        };
+        saveUserData(newUser);
+        return newUser;
+      });
+    }
   };
 
   const addPerson = async (
