@@ -42,10 +42,16 @@ class PainTypesService {
 
   // Update an existing pain type
   async updatePainType(id, name, imageUrl = null) {
+    console.log("PainTypesService.updatePainType called with:", {
+      id,
+      name,
+      imageUrl,
+    });
     const response = await HttpService.put(`/pain-types/${id}`, {
       name: name.trim(),
       image_url: imageUrl?.trim() || null,
     });
+    console.log("PainTypesService.updatePainType HTTP response:", response);
     if (response.success) {
       return {
         success: true,

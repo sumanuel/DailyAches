@@ -58,7 +58,7 @@ const AddPainTypeScreen = ({ navigation, route }) => {
     if (!painName.trim()) return;
 
     if (isEdit && existingPain) {
-      updatePainType(existingPain.name, painName, selectedImage);
+      updatePainType(existingPain.id, painName, selectedImage);
     } else {
       addPainType(painName, selectedImage);
     }

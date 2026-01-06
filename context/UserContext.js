@@ -182,7 +182,7 @@ export const UserProvider = ({ children }) => {
           painTypes: response.painTypes.map((pt) => ({
             id: String(pt.id),
             name: pt.name,
-            image: pt.image_url || "Mujer feliz.png",
+            image: pt.image_url || null,
           })),
         }));
       }
@@ -256,9 +256,7 @@ export const UserProvider = ({ children }) => {
           people: Array.isArray(parsed.people) ? parsed.people : [],
           painTypes: Array.isArray(parsed.painTypes)
             ? parsed.painTypes.map((p) =>
-                typeof p === "string"
-                  ? { name: p, image: "Mujer feliz.png" }
-                  : p
+                typeof p === "string" ? { name: p, image: null } : p
               )
             : defaultPainTypes,
           records: Array.isArray(parsed.records) ? parsed.records : [],
@@ -453,17 +451,26 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  const addPainType = async (name, image = "Mujer feliz.png") => {
+  const addPainType = async (name, image = null) => {
     const trimmed = (name || "").trim();
     if (!trimmed) return;
+
+    console.log("addPainType called with:", { name: trimmed, image });
+
     try {
-      const response = await PainTypesService.createPainType(trimmed, image);
+      const response = await PainTypesService.createPainType(
+        trimmed,
+        image || undefined
+      );
+      console.log("PainTypesService.createPainType response:", response);
+
       if (response.success) {
         const newPainType = {
           id: String(response.painType.id),
           name: response.painType.name,
-          image: response.painType.image_url || "Mujer feliz.png",
+          image: response.painType.image_url || null,
         };
+        console.log("New pain type created:", newPainType);
         setUser((prevUser) => {
           const exists = prevUser.painTypes.some(
             (p) => p.name.toLowerCase() === trimmed.toLowerCase()
@@ -497,14 +504,52 @@ export const UserProvider = ({ children }) => {
   };
 
   const updatePainType = async (painTypeId, newName, newImage) => {
+    console.log("updatePainType called with:", {
+      painTypeId,
+      newName,
+      newImage,
+      typeOfId: typeof painTypeId,
+    });
+
+    // Validate that painTypeId is a valid number
+    if (!painTypeId || isNaN(parseInt(painTypeId))) {
+      console.error(
+        "ERROR: painTypeId must be a valid number, got:",
+        painTypeId
+      );
+      alert(
+        "Error: ID de tipo de dolor inválido. Asegúrate de que sea un número."
+      );
+      return;
+    }
+
     const trimmed = (newName || "").trim();
     if (!trimmed) return;
+
+    // If newImage is not provided or is empty, keep the current image
+    const currentPainType = user.painTypes.find((p) => p.id === painTypeId);
+    const imageToUse =
+      newImage !== undefined && newImage !== null && newImage !== ""
+        ? newImage
+        : currentPainType?.image;
+
+    console.log("Current pain type found:", currentPainType);
+
+    if (!currentPainType) {
+      console.error("ERROR: Pain type not found with ID:", painTypeId);
+      alert(
+        "Error: Tipo de dolor no encontrado. Verifica que el ID sea correcto."
+      );
+      return;
+    }
+
     try {
       const response = await PainTypesService.updatePainType(
         painTypeId,
         trimmed,
-        newImage
+        imageToUse
       );
+      console.log("PainTypesService.updatePainType response:", response);
       if (response.success) {
         setUser((prevUser) => {
           const newUser = {
@@ -514,7 +559,7 @@ export const UserProvider = ({ children }) => {
                 ? {
                     ...p,
                     name: response.painType.name,
-                    image: response.painType.image_url || "Mujer feliz.png",
+                    image: response.painType.image_url || null,
                   }
                 : p
             ),
@@ -530,7 +575,7 @@ export const UserProvider = ({ children }) => {
         const newUser = {
           ...prevUser,
           painTypes: prevUser.painTypes.map((p) =>
-            p.id === painTypeId ? { ...p, name: trimmed, image: newImage } : p
+            p.id === painTypeId ? { ...p, name: trimmed, image: imageToUse } : p
           ),
         };
         saveUserData(newUser);

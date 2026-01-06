@@ -86,7 +86,7 @@ const PainSettingsScreen = () => {
                 <IconButton
                   icon="delete"
                   size={20}
-                  onPress={() => removePainType(item.name)}
+                  onPress={() => removePainType(item.id)}
                   accessibilityLabel={`Eliminar ${item.name}`}
                 />
               </View>
