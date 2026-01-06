@@ -18,7 +18,12 @@ function getDevHost() {
 function getDevBaseUrl() {
   // Android emulator needs 10.0.2.2 to reach the host machine.
   if (Platform.OS === "android" && !Constants.isDevice) {
-    return "http://10.0.2.2:3000/api";
+    return "http://192.168.1.6:3000/api"; // Replace with your PC's IP
+  }
+
+  // For physical devices (like Expo Go on phone), use the host IP
+  if (Constants.isDevice) {
+    return "http://192.168.1.6:3000/api"; // Replace with your PC's IP
   }
 
   const host = getDevHost();
