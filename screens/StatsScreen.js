@@ -109,7 +109,7 @@ const StatsScreen = ({ route }) => {
   useEffect(() => {
     // Load records from API when screen opens
     loadRecordsFromAPI();
-  }, [loadRecordsFromAPI]);
+  }, []); // Remove loadRecordsFromAPI from dependencies
 
   const applyPreset = (p) => {
     setPreset(p);

@@ -61,7 +61,7 @@ const HomeScreen = () => {
     // Load data from API when screen opens
     loadPeopleFromAPI();
     loadRecordsFromAPI();
-  }, [loadPeopleFromAPI, loadRecordsFromAPI]);
+  }, []); // Remove loadPeopleFromAPI and loadRecordsFromAPI from dependencies
 
   const todayRecords = useMemo(() => getTodayRecords(), [user.records]);
 

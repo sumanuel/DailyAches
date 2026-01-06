@@ -53,7 +53,7 @@ const PeopleScreen = ({ navigation }) => {
   useEffect(() => {
     // Load people from API when screen opens
     loadPeopleFromAPI();
-  }, [loadPeopleFromAPI]);
+  }, []); // Remove loadPeopleFromAPI from dependencies
 
   return (
     <View

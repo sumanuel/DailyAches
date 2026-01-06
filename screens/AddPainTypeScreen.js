@@ -44,7 +44,7 @@ const painImages = {
 
 const AddPainTypeScreen = ({ navigation, route }) => {
   const paperTheme = usePaperTheme();
-  const { addPainType, updatePainType } = useUser();
+  const { addPainType, updatePainType, user } = useUser();
 
   const isEdit = route.params?.isEdit || false;
   const existingPain = route.params?.pain || null;
@@ -53,17 +53,52 @@ const AddPainTypeScreen = ({ navigation, route }) => {
   const [selectedImage, setSelectedImage] = useState(
     existingPain?.image || "Mujer feliz.png"
   );
+  const [error, setError] = useState("");
 
-  const handleSave = () => {
-    if (!painName.trim()) return;
-
-    if (isEdit && existingPain) {
-      updatePainType(existingPain.id, painName, selectedImage);
-    } else {
-      addPainType(painName, selectedImage);
+  const handleSave = async () => {
+    const trimmedName = painName.trim();
+    if (!trimmedName) {
+      setError("El nombre del dolor es obligatorio");
+      return;
     }
 
-    navigation.goBack();
+    // Validar duplicados (solo para creación, no para edición)
+    if (!isEdit) {
+      const exists = user.painTypes?.some(
+        (p) => p.name.toLowerCase() === trimmedName.toLowerCase()
+      );
+      if (exists) {
+        setError("Ya existe un tipo de dolor con este nombre");
+        return;
+      }
+    }
+
+    // Para edición, validar que no haya otro con el mismo nombre
+    if (isEdit && existingPain) {
+      const exists = user.painTypes?.some(
+        (p) =>
+          p.id !== existingPain.id &&
+          p.name.toLowerCase() === trimmedName.toLowerCase()
+      );
+      if (exists) {
+        setError("Ya existe otro tipo de dolor con este nombre");
+        return;
+      }
+    }
+
+    setError(""); // Limpiar error
+
+    try {
+      if (isEdit && existingPain) {
+        await updatePainType(existingPain.id, trimmedName, selectedImage);
+      } else {
+        await addPainType(trimmedName, selectedImage);
+      }
+      navigation.goBack();
+    } catch (error) {
+      console.error("Error saving pain type:", error);
+      setError(error.message || "Error al guardar el tipo de dolor");
+    }
   };
 
   const renderImageGrid = () => {
@@ -114,12 +149,21 @@ const AddPainTypeScreen = ({ navigation, route }) => {
         <TextInput
           label="Nombre del dolor"
           value={painName}
-          onChangeText={setPainName}
+          onChangeText={(text) => {
+            setPainName(text);
+            if (error) setError(""); // Limpiar error al escribir
+          }}
           style={styles.textInput}
           mode="outlined"
           theme={{ colors: { primary: paperTheme.colors.primary } }}
           autoFocus={!isEdit}
         />
+
+        {error ? (
+          <Text style={[styles.errorText, { color: paperTheme.colors.error }]}>
+            {error}
+          </Text>
+        ) : null}
 
         <Text
           style={[styles.sectionTitle, { color: paperTheme.colors.onSurface }]}
@@ -221,6 +265,11 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
+  },
+  errorText: {
+    fontSize: 14,
+    marginTop: 4,
+    marginBottom: 8,
   },
 });
 

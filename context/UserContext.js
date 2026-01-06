@@ -515,7 +515,13 @@ export const UserProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error adding pain type:", error);
-      // Fallback to local addition
+
+      // Check if it's a duplicate error (409)
+      if (error.response?.status === 409) {
+        throw new Error("Ya existe un tipo de dolor con este nombre");
+      }
+
+      // Fallback to local addition for other errors
       setUser((prevUser) => {
         const exists = prevUser.painTypes.some(
           (p) => p.name.toLowerCase() === trimmed.toLowerCase()
@@ -599,7 +605,13 @@ export const UserProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error updating pain type:", error);
-      // Fallback to local update
+
+      // Check if it's a duplicate error (409)
+      if (error.response?.status === 409) {
+        throw new Error("Ya existe un tipo de dolor con este nombre");
+      }
+
+      // Fallback to local update for other errors
       setUser((prevUser) => {
         const newUser = {
           ...prevUser,
@@ -626,7 +638,29 @@ export const UserProvider = ({ children }) => {
 
   const removePainType = async (painTypeId) => {
     try {
-      await PainTypesService.deletePainType(painTypeId);
+      const response = await PainTypesService.deletePainType(painTypeId);
+      if (!response.success) {
+        // Check if it's a validation error (pain type in use) - don't remove locally
+        if (
+          response.status === 409 &&
+          response.error.includes("being used in existing records")
+        ) {
+          return { success: false, error: response.error };
+        }
+
+        // For other API errors, still remove locally but indicate failure
+        setUser((prevUser) => {
+          const newUser = {
+            ...prevUser,
+            painTypes: prevUser.painTypes.filter((p) => p.id !== painTypeId),
+          };
+          saveUserData(newUser);
+          return newUser;
+        });
+        return { success: false, error: response.error };
+      }
+
+      // API success
       setUser((prevUser) => {
         const newUser = {
           ...prevUser,
@@ -635,17 +669,11 @@ export const UserProvider = ({ children }) => {
         saveUserData(newUser);
         return newUser;
       });
+      return { success: true };
     } catch (error) {
       console.error("Error removing pain type:", error);
-      // Fallback to local removal
-      setUser((prevUser) => {
-        const newUser = {
-          ...prevUser,
-          painTypes: prevUser.painTypes.filter((p) => p.id !== painTypeId),
-        };
-        saveUserData(newUser);
-        return newUser;
-      });
+      // For network/other errors, don't remove locally
+      return { success: false, error: error.message };
     }
   };
 

@@ -30,7 +30,7 @@ const HistoryPeopleScreen = ({ navigation }) => {
   useEffect(() => {
     // Load people from API when screen opens
     loadPeopleFromAPI();
-  }, [loadPeopleFromAPI]);
+  }, []); // Remove loadPeopleFromAPI from dependencies
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

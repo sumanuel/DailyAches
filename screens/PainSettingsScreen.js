@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, View, Alert } from "react-native";
 import {
   Card,
   FAB,
@@ -47,7 +47,7 @@ const PainSettingsScreen = () => {
   useEffect(() => {
     // Load pain types from API when screen opens
     loadPainTypesFromAPI();
-  }, [loadPainTypesFromAPI]);
+  }, []); // Remove loadPainTypesFromAPI from dependencies
 
   const openAddScreen = () => {
     navigation.navigate("AddPainType", { isEdit: false });
@@ -55,6 +55,50 @@ const PainSettingsScreen = () => {
 
   const openEditScreen = (pain) => {
     navigation.navigate("AddPainType", { isEdit: true, pain });
+  };
+
+  const handleDeletePainType = async (painType) => {
+    Alert.alert(
+      "Eliminar tipo de dolor",
+      `¿Estás seguro de que quieres eliminar "${painType.name}"?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const result = await removePainType(painType.id);
+              if (result.success) {
+                Alert.alert("Éxito", "Tipo de dolor eliminado correctamente");
+              } else {
+                // Check if the error is because the pain type is being used
+                if (
+                  result.error &&
+                  result.error.includes("being used in existing records")
+                ) {
+                  Alert.alert(
+                    "No se puede eliminar",
+                    "Este tipo de dolor no se puede eliminar porque ya está siendo usado en registros existentes."
+                  );
+                } else {
+                  Alert.alert(
+                    "Advertencia",
+                    "El tipo de dolor se eliminó localmente, pero puede que no se haya sincronizado con el servidor."
+                  );
+                }
+              }
+            } catch (error) {
+              console.error("Error deleting pain type:", error);
+              Alert.alert(
+                "Error",
+                "No se pudo eliminar el tipo de dolor. Inténtalo de nuevo."
+              );
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -91,7 +135,7 @@ const PainSettingsScreen = () => {
                 <IconButton
                   icon="delete"
                   size={20}
-                  onPress={() => removePainType(item.id)}
+                  onPress={() => handleDeletePainType(item)}
                   accessibilityLabel={`Eliminar ${item.name}`}
                 />
               </View>

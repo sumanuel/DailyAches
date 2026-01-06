@@ -88,7 +88,7 @@ const RecordPainScreen = ({ navigation, route }) => {
   useEffect(() => {
     // Load pain types from API when screen opens
     loadPainTypesFromAPI();
-  }, [loadPainTypesFromAPI]);
+  }, []); // Remove loadPainTypesFromAPI from dependencies
 
   useEffect(() => {
     if (record) {
