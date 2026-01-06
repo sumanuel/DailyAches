@@ -26,6 +26,41 @@ const painImages = {
   "DolorDeEspalda.png": require("../assets/resourse_one/DolorDeEspalda.png"),
   "DolorDePiernas.png": require("../assets/resourse_one/DolorDePiernas.png"),
   "Mujer feliz.png": require("../assets/resourse_one/Mujer feliz.png"),
+  "Cabeza.png": require("../assets/resourse_one/Cabeza.png"),
+  "Espalda.png": require("../assets/resourse_one/Espalda.png"),
+  "Piernas.png": require("../assets/resourse_one/Piernas.png"),
+  "Alegre.png": require("../assets/resourse_one/Alegre.png"),
+  "Saltando.png": require("../assets/resourse_one/Saltando.png"),
+};
+
+// Función para obtener la imagen correcta para un tipo de dolor
+const getPainImage = (painType) => {
+  // Mapear por nombre del tipo de dolor (esta es la forma más confiable)
+  const nameMappings = {
+    "Dolor de cabeza": "DolorDeCabeza.png",
+    "Dolor de espalda": "DolorDeEspalda.png",
+    "Dolor menstrual": "DolorDePiernas.png",
+    "Dolor de estómago": "DolorDePiernas.png",
+    "Dolor de garganta": "DolorDePiernas.png",
+    "Dolor de dientes": "DolorDePiernas.png",
+    Otro: "Mujer feliz.png",
+  };
+
+  // Si el pain type tiene un image específico configurado, úsalo
+  if (
+    painType.image &&
+    typeof painType.image === "string" &&
+    painType.image.trim()
+  ) {
+    const directImage = painImages[painType.image];
+    if (directImage) {
+      return directImage;
+    }
+  }
+
+  // De lo contrario, usa el mapeo por nombre
+  const mappedImage = nameMappings[painType.name] || "Mujer feliz.png";
+  return painImages[mappedImage] || painImages["Mujer feliz.png"];
 };
 
 const schema = yup.object({
@@ -171,25 +206,32 @@ const RecordPainScreen = ({ navigation, route }) => {
             keyExtractor={(item) => item.name}
             numColumns={3}
             scrollEnabled={false}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.painOption,
-                  selectedPainType?.name === item.name &&
-                    styles.selectedPainOption,
-                ]}
-                onPress={() => {
-                  setSelectedPainType(item);
-                  setValue("pain", item.name);
-                }}
-              >
-                <Image
-                  source={painImages[item.image]}
-                  style={styles.painImage}
-                />
-                <Text style={styles.painText}>{item.name}</Text>
-              </TouchableOpacity>
-            )}
+            renderItem={({ item }) => {
+              const imageSource = getPainImage(item);
+
+              return (
+                <TouchableOpacity
+                  style={[
+                    styles.painOption,
+                    selectedPainType?.name === item.name &&
+                      styles.selectedPainOption,
+                  ]}
+                  onPress={() => {
+                    setSelectedPainType(item);
+                    setValue("pain", item.name);
+                  }}
+                >
+                  <Image
+                    source={imageSource}
+                    style={styles.painImage}
+                    onError={() =>
+                      console.log(`Error loading image for: ${item.name}`)
+                    }
+                  />
+                  <Text style={styles.painText}>{item.name}</Text>
+                </TouchableOpacity>
+              );
+            }}
             contentContainerStyle={styles.painGrid}
             showsVerticalScrollIndicator={false}
           />
