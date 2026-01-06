@@ -50,6 +50,7 @@ export const API_ENDPOINTS = {
     REGISTER: "/auth/register",
     ME: "/auth/me",
   },
+  PEOPLE: "/people",
   ADMIN: {
     USERS: "/admin/users",
     BOOTSTRAP: "/admin/bootstrap",

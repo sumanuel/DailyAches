@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AuthService from "../utils/authService";
+import PeopleService from "../utils/peopleService";
 
 const UserContext = createContext();
 
@@ -150,11 +151,31 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  const loadPeopleFromAPI = async () => {
+    try {
+      const response = await PeopleService.getPeople();
+      if (response.success) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          people: response.people.map((p) => ({
+            id: String(p.id),
+            name: p.name,
+            relationship: p.relation || "",
+            avatar: p.image_url || "Mujer feliz.png",
+          })),
+        }));
+      }
+    } catch (error) {
+      console.error("Error loading people from API:", error);
+    }
+  };
+
   const login = async (email, password) => {
     const response = await AuthService.login(email, password);
     if (response.success) {
       setIsAuthenticated(true);
       await loadUserProfile();
+      await loadPeopleFromAPI();
     }
     return response;
   };
@@ -164,6 +185,7 @@ export const UserProvider = ({ children }) => {
     if (response.success) {
       setIsAuthenticated(true);
       await loadUserProfile();
+      await loadPeopleFromAPI();
     }
     return response;
   };
@@ -221,6 +243,14 @@ export const UserProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error loading user data:", error);
+    }
+  };
+
+  const saveUserData = async (userData) => {
+    try {
+      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+    } catch (error) {
+      console.error("Error saving user data:", error);
     }
   };
 
@@ -298,52 +328,83 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  const addPerson = (name, relationship, avatar) => {
+  const addPerson = async (name, relationship, avatar) => {
     const trimmed = (name || "").trim();
     if (!trimmed) return;
-    setUser((prevUser) => {
-      const exists = prevUser.people.some(
-        (p) => (p.name || "").toLowerCase() === trimmed.toLowerCase()
+    try {
+      const response = await PeopleService.createPerson(
+        trimmed,
+        relationship,
+        avatar
       );
-      if (exists) return prevUser;
-      const newPerson = {
-        id: String(Date.now()),
-        name: trimmed,
-        relationship: relationship || "",
-        avatar: avatar || "Mujer feliz.png",
-      };
-      const newUser = { ...prevUser, people: [newPerson, ...prevUser.people] };
-      saveUserData(newUser);
-      return newUser;
-    });
+      if (response.success) {
+        const newPerson = {
+          id: String(response.person.id),
+          name: response.person.name,
+          relationship: response.person.relation || "",
+          avatar: response.person.image_url || "Mujer feliz.png",
+        };
+        setUser((prevUser) => {
+          const newUser = {
+            ...prevUser,
+            people: [newPerson, ...prevUser.people],
+          };
+          saveUserData(newUser);
+          return newUser;
+        });
+      }
+    } catch (error) {
+      console.error("Error adding person:", error);
+    }
   };
 
-  const removePerson = (personId) => {
-    setUser((prevUser) => {
-      const newUser = {
-        ...prevUser,
-        people: prevUser.people.filter((p) => p.id !== personId),
-        records: prevUser.records.filter((r) => r.personId !== personId),
-      };
-      saveUserData(newUser);
-      return newUser;
-    });
+  const removePerson = async (personId) => {
+    try {
+      await PeopleService.deletePerson(personId);
+      setUser((prevUser) => {
+        const newUser = {
+          ...prevUser,
+          people: prevUser.people.filter((p) => p.id !== personId),
+          records: prevUser.records.filter((r) => r.personId !== personId),
+        };
+        saveUserData(newUser);
+        return newUser;
+      });
+    } catch (error) {
+      console.error("Error removing person:", error);
+    }
   };
 
-  const updatePerson = (personId, updates) => {
-    setUser((prevUser) => {
-      const newPeople = prevUser.people.map((p) =>
-        p.id === personId ? { ...p, ...updates } : p
+  const updatePerson = async (personId, updates) => {
+    try {
+      const response = await PeopleService.updatePerson(
+        personId,
+        updates.name,
+        updates.relationship,
+        updates.avatar
       );
-      const newRecords = prevUser.records.map((r) =>
-        r.personId === personId
-          ? { ...r, personName: updates.name || r.personName }
-          : r
-      );
-      const newUser = { ...prevUser, people: newPeople, records: newRecords };
-      saveUserData(newUser);
-      return newUser;
-    });
+      if (response.success) {
+        setUser((prevUser) => {
+          const newPeople = prevUser.people.map((p) =>
+            p.id === personId ? { ...p, ...updates } : p
+          );
+          const newRecords = prevUser.records.map((r) =>
+            r.personId === personId
+              ? { ...r, personName: updates.name || r.personName }
+              : r
+          );
+          const newUser = {
+            ...prevUser,
+            people: newPeople,
+            records: newRecords,
+          };
+          saveUserData(newUser);
+          return newUser;
+        });
+      }
+    } catch (error) {
+      console.error("Error updating person:", error);
+    }
   };
 
   const updateRecord = (recordId, updates) => {
