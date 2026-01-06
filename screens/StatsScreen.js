@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { StyleSheet, View, ScrollView, Modal } from "react-native";
 import {
   Avatar,
@@ -95,7 +95,7 @@ const getPresetRange = (preset, now = new Date()) => {
 
 const StatsScreen = ({ route }) => {
   const paperTheme = usePaperTheme();
-  const { user, getTodayRecords } = useUser();
+  const { user, getTodayRecords, loadRecordsFromAPI } = useUser();
   const { personId, personName } = route?.params || {};
   const [tab, setTab] = useState("today"); // today | history
   const [preset, setPreset] = useState("this_month"); // this_month | prev_month | this_week | custom
@@ -105,6 +105,11 @@ const StatsScreen = ({ route }) => {
   const [rangeOpen, setRangeOpen] = useState(false);
   const [selectingStart, setSelectingStart] = useState(true); // true for start, false for end
   const [tempRange, setTempRange] = useState(historyRange);
+
+  useEffect(() => {
+    // Load records from API when screen opens
+    loadRecordsFromAPI();
+  }, [loadRecordsFromAPI]);
 
   const applyPreset = (p) => {
     setPreset(p);

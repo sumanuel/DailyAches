@@ -793,6 +793,9 @@ export const UserProvider = ({ children }) => {
         createRecordAPI,
         updateRecordAPI,
         deleteRecordAPI,
+        loadPeopleFromAPI,
+        loadPainTypesFromAPI,
+        loadRecordsFromAPI,
         getLevelProgress,
         getTodayRecords,
       }}

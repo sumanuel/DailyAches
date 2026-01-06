@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import {
   Card,
@@ -23,9 +23,14 @@ const avatarImages = {
 
 const HistoryPeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
-  const { user } = useUser();
+  const { user, loadPeopleFromAPI } = useUser();
 
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    // Load people from API when screen opens
+    loadPeopleFromAPI();
+  }, [loadPeopleFromAPI]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
