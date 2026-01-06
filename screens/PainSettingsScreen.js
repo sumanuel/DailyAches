@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import {
   Card,
@@ -40,9 +40,14 @@ const painImages = {
 const PainSettingsScreen = () => {
   const paperTheme = usePaperTheme();
   const navigation = useNavigation();
-  const { user, removePainType } = useUser();
+  const { user, removePainType, loadPainTypesFromAPI } = useUser();
 
   const painTypes = useMemo(() => user.painTypes || [], [user.painTypes]);
+
+  useEffect(() => {
+    // Load pain types from API when screen opens
+    loadPainTypesFromAPI();
+  }, [loadPainTypesFromAPI]);
 
   const openAddScreen = () => {
     navigation.navigate("AddPainType", { isEdit: false });

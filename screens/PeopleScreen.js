@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { StyleSheet, View, ScrollView, TouchableOpacity } from "react-native";
 import {
   Card,
@@ -24,7 +24,8 @@ const avatarImages = {
 
 const PeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
-  const { user, addPerson, removePerson, updatePerson } = useUser();
+  const { user, addPerson, removePerson, updatePerson, loadPeopleFromAPI } =
+    useUser();
 
   const [query, setQuery] = useState("");
 
@@ -48,6 +49,11 @@ const PeopleScreen = ({ navigation }) => {
       personName: person.name,
     });
   };
+
+  useEffect(() => {
+    // Load people from API when screen opens
+    loadPeopleFromAPI();
+  }, [loadPeopleFromAPI]);
 
   return (
     <View

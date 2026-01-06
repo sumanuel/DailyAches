@@ -31,7 +31,14 @@ const painImages = {
 };
 
 const HomeScreen = () => {
-  const { user, getTodayRecords, unlockAchievement, deleteRecord } = useUser();
+  const {
+    user,
+    getTodayRecords,
+    unlockAchievement,
+    deleteRecord,
+    loadPeopleFromAPI,
+    loadRecordsFromAPI,
+  } = useUser();
   const paperTheme = usePaperTheme();
   const navigation = useNavigation();
   const [dailyRecords, setDailyRecords] = useState([]);
@@ -49,6 +56,12 @@ const HomeScreen = () => {
     "¡Sorpresa! No registraste ningún dolor hoy. ¿Estás bien? 😂",
     "¡Día perfecto! Sin dolores reportados. ¡Felicidades!",
   ];
+
+  useEffect(() => {
+    // Load data from API when screen opens
+    loadPeopleFromAPI();
+    loadRecordsFromAPI();
+  }, [loadPeopleFromAPI, loadRecordsFromAPI]);
 
   const todayRecords = useMemo(() => getTodayRecords(), [user.records]);
 

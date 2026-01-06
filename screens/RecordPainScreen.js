@@ -69,7 +69,8 @@ const schema = yup.object({
 });
 
 const RecordPainScreen = ({ navigation, route }) => {
-  const { user, createRecordAPI, updateRecordAPI } = useUser();
+  const { user, createRecordAPI, updateRecordAPI, loadPainTypesFromAPI } =
+    useUser();
   const paperTheme = usePaperTheme();
   const [customPain, setCustomPain] = useState("");
   const [isEdit, setIsEdit] = useState(false);
@@ -83,6 +84,11 @@ const RecordPainScreen = ({ navigation, route }) => {
   } = route?.params || {};
   const personId = paramPersonId || (record ? record.personId : null);
   const personName = paramPersonName || (record ? record.personName : null);
+
+  useEffect(() => {
+    // Load pain types from API when screen opens
+    loadPainTypesFromAPI();
+  }, [loadPainTypesFromAPI]);
 
   useEffect(() => {
     if (record) {
