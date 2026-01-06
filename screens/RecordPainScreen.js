@@ -22,15 +22,29 @@ import * as yup from "yup";
 import { useUser } from "../context/UserContext";
 
 const painImages = {
+  "Alegre.png": require("../assets/resourse_one/Alegre.png"),
+  "Cabeza.png": require("../assets/resourse_one/Cabeza.png"),
+  "Cervical.png": require("../assets/resourse_one/Cervical.png"),
+  "Diarrea.png": require("../assets/resourse_one/Diarrea.png"),
   "DolorDeCabeza.png": require("../assets/resourse_one/DolorDeCabeza.png"),
   "DolorDeEspalda.png": require("../assets/resourse_one/DolorDeEspalda.png"),
   "DolorDePiernas.png": require("../assets/resourse_one/DolorDePiernas.png"),
-  "Mujer feliz.png": require("../assets/resourse_one/Mujer feliz.png"),
-  "Cabeza.png": require("../assets/resourse_one/Cabeza.png"),
   "Espalda.png": require("../assets/resourse_one/Espalda.png"),
+  "Fiebre.png": require("../assets/resourse_one/Fiebre.png"),
+  "Gripe.png": require("../assets/resourse_one/Gripe.png"),
+  "Mamitis.png": require("../assets/resourse_one/Mamitis.png"),
+  "Manos.png": require("../assets/resourse_one/Manos.png"),
+  "Mareo.png": require("../assets/resourse_one/Mareo.png"),
+  "Muela.png": require("../assets/resourse_one/Muela.png"),
+  "Mujer feliz.png": require("../assets/resourse_one/Mujer feliz.png"),
+  "Papitis.png": require("../assets/resourse_one/Papitis.png"),
   "Piernas.png": require("../assets/resourse_one/Piernas.png"),
-  "Alegre.png": require("../assets/resourse_one/Alegre.png"),
+  "Resaca.png": require("../assets/resourse_one/Resaca.png"),
   "Saltando.png": require("../assets/resourse_one/Saltando.png"),
+  "Senos.png": require("../assets/resourse_one/Senos.png"),
+  "Trasnocho.png": require("../assets/resourse_one/Trasnocho.png"),
+  "Vientre.png": require("../assets/resourse_one/Vientre.png"),
+  "Vomito.png": require("../assets/resourse_one/Vomito.png"),
 };
 
 // Función para obtener la imagen correcta para un tipo de dolor
