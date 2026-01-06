@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AuthService from "../utils/authService";
 import PeopleService from "../utils/peopleService";
 import PainTypesService from "../utils/painTypesService";
+import RecordsService from "../utils/recordsService";
 
 const UserContext = createContext();
 
@@ -146,6 +147,10 @@ export const UserProvider = ({ children }) => {
             email: response.user.email || prevUser.profile.email,
           },
         }));
+        // Load API data
+        await loadPeopleFromAPI();
+        await loadPainTypesFromAPI();
+        await loadRecordsFromAPI();
       }
     } catch (error) {
       console.error("Error loading user profile:", error);
@@ -191,6 +196,29 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  const loadRecordsFromAPI = async () => {
+    try {
+      const response = await RecordsService.getRecords();
+      if (response.success && response.records) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          records: response.records.map((r) => ({
+            id: String(r.id),
+            personId: String(r.person_id),
+            painTypeId: String(r.pain_type_id),
+            pain: r.pain_type_name,
+            personName: r.person_name,
+            painLevel: r.pain_level,
+            notes: r.notes,
+            createdAt: r.created_at,
+          })),
+        }));
+      }
+    } catch (error) {
+      console.error("Error loading records from API:", error);
+    }
+  };
+
   const login = async (email, password) => {
     const response = await AuthService.login(email, password);
     if (response.success) {
@@ -198,6 +226,7 @@ export const UserProvider = ({ children }) => {
       await loadUserProfile();
       await loadPeopleFromAPI();
       await loadPainTypesFromAPI();
+      await loadRecordsFromAPI();
     }
     return response;
   };
@@ -671,6 +700,54 @@ export const UserProvider = ({ children }) => {
     });
   };
 
+  const createRecordAPI = async (recordData) => {
+    try {
+      const response = await RecordsService.createRecord(recordData);
+      if (response.success) {
+        // Reload records from API to get updated data
+        await loadRecordsFromAPI();
+        // Update local stats
+        addPoints(10);
+        incrementRecords();
+        return { success: true, record: response.record };
+      }
+      return response;
+    } catch (error) {
+      console.error("Error creating record:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const updateRecordAPI = async (recordId, recordData) => {
+    try {
+      const response = await RecordsService.updateRecord(recordId, recordData);
+      if (response.success) {
+        // Reload records from API to get updated data
+        await loadRecordsFromAPI();
+        return { success: true, record: response.record };
+      }
+      return response;
+    } catch (error) {
+      console.error("Error updating record:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const deleteRecordAPI = async (recordId) => {
+    try {
+      const response = await RecordsService.deleteRecord(recordId);
+      if (response.success) {
+        // Reload records from API to get updated data
+        await loadRecordsFromAPI();
+        return { success: true };
+      }
+      return response;
+    } catch (error) {
+      console.error("Error deleting record:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
   const getLevelProgress = () => {
     const next = getNextLevelRequirement(user.level);
     if (!next) return { progress: 1, nextLevel: null, remaining: 0 };
@@ -713,6 +790,9 @@ export const UserProvider = ({ children }) => {
         removePainType,
         updatePainType,
         addRecord,
+        createRecordAPI,
+        updateRecordAPI,
+        deleteRecordAPI,
         getLevelProgress,
         getTodayRecords,
       }}
