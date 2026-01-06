@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AuthService from "../utils/authService";
 import PeopleService from "../utils/peopleService";
+import PainTypesService from "../utils/painTypesService";
 
 const UserContext = createContext();
 
@@ -172,12 +173,31 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  const loadPainTypesFromAPI = async () => {
+    try {
+      const response = await PainTypesService.getPainTypes();
+      if (response.success) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          painTypes: response.painTypes.map((pt) => ({
+            id: String(pt.id),
+            name: pt.name,
+            image: pt.image_url || "Mujer feliz.png",
+          })),
+        }));
+      }
+    } catch (error) {
+      console.error("Error loading pain types from API:", error);
+    }
+  };
+
   const login = async (email, password) => {
     const response = await AuthService.login(email, password);
     if (response.success) {
       setIsAuthenticated(true);
       await loadUserProfile();
       await loadPeopleFromAPI();
+      await loadPainTypesFromAPI();
     }
     return response;
   };
@@ -188,6 +208,7 @@ export const UserProvider = ({ children }) => {
       setIsAuthenticated(true);
       await loadUserProfile();
       await loadPeopleFromAPI();
+      await loadPainTypesFromAPI();
     }
     return response;
   };
@@ -432,37 +453,90 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  const addPainType = (name, image = "Mujer feliz.png") => {
+  const addPainType = async (name, image = "Mujer feliz.png") => {
     const trimmed = (name || "").trim();
     if (!trimmed) return;
-    setUser((prevUser) => {
-      const exists = prevUser.painTypes.some(
-        (p) => p.name.toLowerCase() === trimmed.toLowerCase()
-      );
-      if (exists) return prevUser;
-      const newPainType = { name: trimmed, image };
-      const newUser = {
-        ...prevUser,
-        painTypes: [newPainType, ...prevUser.painTypes],
-      };
-      saveUserData(newUser);
-      return newUser;
-    });
+    try {
+      const response = await PainTypesService.createPainType(trimmed, image);
+      if (response.success) {
+        const newPainType = {
+          id: String(response.painType.id),
+          name: response.painType.name,
+          image: response.painType.image_url || "Mujer feliz.png",
+        };
+        setUser((prevUser) => {
+          const exists = prevUser.painTypes.some(
+            (p) => p.name.toLowerCase() === trimmed.toLowerCase()
+          );
+          if (exists) return prevUser;
+          const newUser = {
+            ...prevUser,
+            painTypes: [newPainType, ...prevUser.painTypes],
+          };
+          saveUserData(newUser);
+          return newUser;
+        });
+      }
+    } catch (error) {
+      console.error("Error adding pain type:", error);
+      // Fallback to local addition
+      setUser((prevUser) => {
+        const exists = prevUser.painTypes.some(
+          (p) => p.name.toLowerCase() === trimmed.toLowerCase()
+        );
+        if (exists) return prevUser;
+        const newPainType = { id: String(Date.now()), name: trimmed, image };
+        const newUser = {
+          ...prevUser,
+          painTypes: [newPainType, ...prevUser.painTypes],
+        };
+        saveUserData(newUser);
+        return newUser;
+      });
+    }
   };
 
-  const updatePainType = (oldName, newName, newImage) => {
+  const updatePainType = async (painTypeId, newName, newImage) => {
     const trimmed = (newName || "").trim();
     if (!trimmed) return;
-    setUser((prevUser) => {
-      const newUser = {
-        ...prevUser,
-        painTypes: prevUser.painTypes.map((p) =>
-          p.name === oldName ? { name: trimmed, image: newImage } : p
-        ),
-      };
-      saveUserData(newUser);
-      return newUser;
-    });
+    try {
+      const response = await PainTypesService.updatePainType(
+        painTypeId,
+        trimmed,
+        newImage
+      );
+      if (response.success) {
+        setUser((prevUser) => {
+          const newUser = {
+            ...prevUser,
+            painTypes: prevUser.painTypes.map((p) =>
+              p.id === painTypeId
+                ? {
+                    ...p,
+                    name: response.painType.name,
+                    image: response.painType.image_url || "Mujer feliz.png",
+                  }
+                : p
+            ),
+          };
+          saveUserData(newUser);
+          return newUser;
+        });
+      }
+    } catch (error) {
+      console.error("Error updating pain type:", error);
+      // Fallback to local update
+      setUser((prevUser) => {
+        const newUser = {
+          ...prevUser,
+          painTypes: prevUser.painTypes.map((p) =>
+            p.id === painTypeId ? { ...p, name: trimmed, image: newImage } : p
+          ),
+        };
+        saveUserData(newUser);
+        return newUser;
+      });
+    }
   };
 
   const deleteRecord = (recordId) => {
@@ -476,15 +550,29 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  const removePainType = (painName) => {
-    setUser((prevUser) => {
-      const newUser = {
-        ...prevUser,
-        painTypes: prevUser.painTypes.filter((p) => p.name !== painName),
-      };
-      saveUserData(newUser);
-      return newUser;
-    });
+  const removePainType = async (painTypeId) => {
+    try {
+      await PainTypesService.deletePainType(painTypeId);
+      setUser((prevUser) => {
+        const newUser = {
+          ...prevUser,
+          painTypes: prevUser.painTypes.filter((p) => p.id !== painTypeId),
+        };
+        saveUserData(newUser);
+        return newUser;
+      });
+    } catch (error) {
+      console.error("Error removing pain type:", error);
+      // Fallback to local removal
+      setUser((prevUser) => {
+        const newUser = {
+          ...prevUser,
+          painTypes: prevUser.painTypes.filter((p) => p.id !== painTypeId),
+        };
+        saveUserData(newUser);
+        return newUser;
+      });
+    }
   };
 
   const addRecord = ({ personId, personName, pain, notes, image }) => {
