@@ -26,6 +26,9 @@ const avatarImages = {
   "DolorDePiernas.png": require("../assets/avatars/DolorDePiernas.png"),
   "Mujer feliz.png": require("../assets/avatars/Mujer feliz.png"),
   "Saltando.png": require("../assets/avatars/Saltando.png"),
+  "Alegre.png": require("../assets/avatars/Alegre.png"),
+  "Mareo.png": require("../assets/avatars/Mareo.png"),
+  "Trasnocho.png": require("../assets/avatars/Trasnocho.png"),
 };
 
 const AddPersonScreen = ({ navigation, route }) => {
@@ -55,6 +58,9 @@ const AddPersonScreen = ({ navigation, route }) => {
     "DolorDePiernas.png",
     "Mujer feliz.png",
     "Saltando.png",
+    "Alegre.png",
+    "Mareo.png",
+    "Trasnocho.png",
   ];
 
   const relationshipOptions = [
