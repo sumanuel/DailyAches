@@ -50,25 +50,31 @@ const HomeScreen = () => {
     "¡Día perfecto! Sin dolores reportados. ¡Felicidades!",
   ];
 
+  const todayRecords = useMemo(() => getTodayRecords(), [user.records]);
+
+  // Memoizar el mensaje para evitar cambios constantes
+  const currentMessage = useMemo(() => {
+    if (todayRecords.length === 0) {
+      return surpriseMessages[0]; // Usar mensaje fijo en lugar de aleatorio
+    } else {
+      return defaultMessages[0]; // Usar mensaje fijo en lugar de aleatorio
+    }
+  }, [todayRecords.length]);
+
+  const currentImageUri = useMemo(() => {
+    if (todayRecords.length === 0) {
+      return require("../assets/avatars/Saltando.png");
+    } else {
+      return require("../assets/resourse_one/DolorDeCabeza.png");
+    }
+  }, [todayRecords.length]);
+
   useFocusEffect(
     useCallback(() => {
-      const todayRecords = getTodayRecords();
       setDailyRecords(todayRecords);
-
-      if (todayRecords.length === 0) {
-        // Mensaje de sorpresa si no hay registros
-        const randomSurprise =
-          surpriseMessages[Math.floor(Math.random() * surpriseMessages.length)];
-        setMessage(randomSurprise);
-        setImageUri(require("../assets/avatars/Saltando.png"));
-      } else {
-        // Mensajes dinámicos basados en registros
-        const randomDefault =
-          defaultMessages[Math.floor(Math.random() * defaultMessages.length)];
-        setMessage(randomDefault);
-        setImageUri(require("../assets/resourse_one/DolorDeCabeza.png"));
-      }
-    }, [getTodayRecords, user.records])
+      setMessage(currentMessage);
+      setImageUri(currentImageUri);
+    }, [todayRecords, currentMessage, currentImageUri])
   );
 
   const peopleById = useMemo(() => {
@@ -102,9 +108,7 @@ const HomeScreen = () => {
           style: "destructive",
           onPress: () => {
             deleteRecord(record.id);
-            // Refresh the records
-            const todayRecords = getTodayRecords();
-            setDailyRecords(todayRecords);
+            // El estado se actualizará automáticamente a través del useMemo
           },
         },
       ]
