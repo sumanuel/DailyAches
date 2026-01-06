@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ScrollView, Alert } from "react-native";
+import { StyleSheet, View, ScrollView, Alert, Platform } from "react-native";
 import {
   Button,
   Card,
@@ -20,6 +20,19 @@ const ProfileScreen = () => {
   const [birthDate, setBirthDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const styles = StyleSheet.create({
+    container: { padding: 12, paddingBottom: 24 },
+    card: { width: "100%", borderRadius: 16, overflow: "hidden" },
+    input: { marginBottom: 12 },
+    label: {
+      fontSize: 12,
+      color: paperTheme.colors.onSurfaceVariant,
+      marginBottom: 8,
+    },
+    hint: { opacity: 0.7, marginTop: 4 },
+    button: { marginTop: 16 },
+  });
 
   useEffect(() => {
     setName(user.profile?.name || "");
@@ -81,20 +94,21 @@ const ProfileScreen = () => {
             keyboardType="phone-pad"
             style={styles.input}
           />
+          <Text variant="bodySmall" style={styles.label}>
+            Fecha de nacimiento
+          </Text>
           <Button
             mode="outlined"
             onPress={() => setShowDatePicker(true)}
             style={styles.input}
           >
-            {birthDate
-              ? `Fecha de nacimiento: ${birthDate}`
-              : "Seleccionar fecha de nacimiento"}
+            {birthDate || "Seleccionar fecha"}
           </Button>
           {showDatePicker && (
             <DateTimePicker
               value={birthDate ? new Date(birthDate) : new Date()}
               mode="date"
-              display="default"
+              display={Platform.OS === "android" ? "calendar" : "default"}
               onChange={onDateChange}
             />
           )}
@@ -115,13 +129,5 @@ const ProfileScreen = () => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { padding: 12, paddingBottom: 24 },
-  card: { width: "100%", borderRadius: 16, overflow: "hidden" },
-  input: { marginBottom: 12 },
-  hint: { opacity: 0.7, marginTop: 4 },
-  button: { marginTop: 16 },
-});
 
 export default ProfileScreen;
