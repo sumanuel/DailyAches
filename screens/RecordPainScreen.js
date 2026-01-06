@@ -30,11 +30,6 @@ const painImages = {
 
 const schema = yup.object({
   pain: yup.string().required("Selecciona un dolor"),
-  painLevel: yup
-    .number()
-    .min(1, "El nivel debe ser al menos 1")
-    .max(10, "El nivel debe ser máximo 10")
-    .required("Selecciona el nivel de dolor"),
   notes: yup.string(),
 });
 
@@ -60,7 +55,6 @@ const RecordPainScreen = ({ navigation, route }) => {
       setEditRecord(record);
       // Prefill
       setValue("pain", record.pain);
-      setValue("painLevel", record.painLevel || 5);
       setValue("notes", record.notes);
       const matchingPain = painTypes.find((p) => p.name === record.pain);
       if (matchingPain) {
@@ -88,7 +82,6 @@ const RecordPainScreen = ({ navigation, route }) => {
     resolver: yupResolver(schema),
     defaultValues: {
       pain: isEdit && editRecord ? editRecord.pain : "",
-      painLevel: isEdit && editRecord ? editRecord.painLevel || 5 : 5,
       notes: isEdit && editRecord ? editRecord.notes : "",
     },
   });
@@ -102,7 +95,7 @@ const RecordPainScreen = ({ navigation, route }) => {
       const recordData = {
         person_id: personId,
         pain_type_id: selectedPainType.id,
-        pain_level: data.painLevel,
+        pain_level: 5, // Default pain level
         notes: data.notes,
       };
 
@@ -206,40 +199,6 @@ const RecordPainScreen = ({ navigation, route }) => {
             </Text>
           )}
 
-          <Text style={styles.sectionTitle}>Nivel de dolor (1-10)</Text>
-          <Controller
-            control={control}
-            name="painLevel"
-            render={({ field: { onChange, value } }) => (
-              <View style={styles.painLevelContainer}>
-                {Array.from({ length: 10 }, (_, i) => i + 1).map((level) => (
-                  <TouchableOpacity
-                    key={level}
-                    style={[
-                      styles.painLevelButton,
-                      value === level && styles.selectedPainLevelButton,
-                    ]}
-                    onPress={() => onChange(level)}
-                  >
-                    <Text
-                      style={[
-                        styles.painLevelText,
-                        value === level && styles.selectedPainLevelText,
-                      ]}
-                    >
-                      {level}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          />
-          {errors.painLevel && (
-            <Text style={[styles.error, { color: paperTheme.colors.error }]}>
-              {errors.painLevel.message}
-            </Text>
-          )}
-
           <Controller
             control={control}
             name="notes"
@@ -290,41 +249,6 @@ const styles = StyleSheet.create({
   painImage: { width: 60, height: 60, borderRadius: 30, marginBottom: 8 },
   painText: { fontSize: 14, textAlign: "center", fontWeight: "500" },
   input: { marginTop: 12 },
-  sectionTitle: {
-    marginTop: 16,
-    marginBottom: 8,
-    fontWeight: "700",
-    fontSize: 16,
-  },
-  painLevelContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
-  painLevelButton: {
-    width: 35,
-    height: 35,
-    borderRadius: 17.5,
-    justifyContent: "center",
-    alignItems: "center",
-    margin: 4,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "#f9f9f9",
-  },
-  selectedPainLevelButton: {
-    backgroundColor: "#9C27B0",
-    borderColor: "#9C27B0",
-  },
-  painLevelText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-  },
-  selectedPainLevelText: {
-    color: "#fff",
-  },
   button: { marginTop: 24, marginBottom: 8 },
   error: { fontSize: 12, marginTop: 6 },
 });
