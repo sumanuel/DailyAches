@@ -1,23 +1,31 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, Alert } from "react-native";
 import {
   TextInput,
   Button,
   Text,
   Card,
   useTheme as usePaperTheme,
+  ActivityIndicator,
 } from "react-native-paper";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useUser } from "../context/UserContext";
 
 const schema = yup.object({
-  email: yup.string().email("Email inválido"),
-  password: yup.string().min(6, "Contraseña debe tener al menos 6 caracteres"),
+  email: yup.string().email("Email inválido").required("Email es requerido"),
+  password: yup
+    .string()
+    .min(6, "Contraseña debe tener al menos 6 caracteres")
+    .required("Contraseña es requerida"),
 });
 
 const LoginScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
+  const { login } = useUser();
+  const [loading, setLoading] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -26,11 +34,31 @@ const LoginScreen = ({ navigation }) => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data) => {
-    // Lógica de login (simulado, sin validación)
-    console.log(data);
-    // Navegar al área principal sin importar las credenciales
-    navigation.getParent()?.replace("Main");
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      const response = await login(data.email, data.password);
+
+      if (response.success) {
+        // Login successful - navigate to main app
+        navigation.getParent()?.replace("Main");
+      } else {
+        // Show error message
+        Alert.alert(
+          "Error de inicio de sesión",
+          response.error || "Credenciales inválidas",
+          [{ text: "OK" }]
+        );
+      }
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Ha ocurrido un error inesperado. Inténtalo de nuevo.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -86,8 +114,20 @@ const LoginScreen = ({ navigation }) => {
             mode="contained"
             onPress={handleSubmit(onSubmit)}
             style={styles.button}
+            disabled={loading}
           >
-            Iniciar Sesión
+            {loading ? (
+              <>
+                <ActivityIndicator
+                  size="small"
+                  color="white"
+                  style={styles.loader}
+                />
+                Iniciando sesión...
+              </>
+            ) : (
+              "Iniciar Sesión"
+            )}
           </Button>
           <Button onPress={() => navigation.navigate("Register")}>
             ¿No tienes cuenta? Regístrate
@@ -114,6 +154,9 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 12,
+  },
+  loader: {
+    marginRight: 8,
   },
   error: {
     fontSize: 12,

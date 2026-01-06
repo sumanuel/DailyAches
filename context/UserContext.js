@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import AuthService from "../utils/authService";
 
 const UserContext = createContext();
 
@@ -101,9 +102,90 @@ export const UserProvider = ({ children }) => {
     records: [],
   });
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+
   useEffect(() => {
-    loadUserData();
+    initializeApp();
   }, []);
+
+  const initializeApp = async () => {
+    try {
+      // Check if user is authenticated
+      const isAuth = await AuthService.isAuthenticated();
+      setIsAuthenticated(isAuth);
+
+      if (isAuth) {
+        // Load user profile from API
+        await loadUserProfile();
+      } else {
+        // Load local data if not authenticated
+        await loadUserData();
+      }
+    } catch (error) {
+      console.error("Error initializing app:", error);
+      // Fallback to local data
+      await loadUserData();
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const loadUserProfile = async () => {
+    try {
+      const response = await AuthService.getCurrentUser();
+      if (response.success && response.user) {
+        // Load local data and merge with API user data
+        await loadUserData();
+        setUser((prevUser) => ({
+          ...prevUser,
+          profile: {
+            name: response.user.name || prevUser.profile.name,
+            email: response.user.email || prevUser.profile.email,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Error loading user profile:", error);
+    }
+  };
+
+  const login = async (email, password) => {
+    const response = await AuthService.login(email, password);
+    if (response.success) {
+      setIsAuthenticated(true);
+      await loadUserProfile();
+    }
+    return response;
+  };
+
+  const register = async (email, password, name) => {
+    const response = await AuthService.register(email, password, name);
+    if (response.success) {
+      setIsAuthenticated(true);
+      await loadUserProfile();
+    }
+    return response;
+  };
+
+  const logout = async () => {
+    const response = await AuthService.logout();
+    if (response.success) {
+      setIsAuthenticated(false);
+      // Reset user to default state
+      setUser({
+        points: 0,
+        level: 1,
+        recordsCount: 0,
+        achievements: achievements,
+        profile: defaultProfile,
+        people: [],
+        painTypes: defaultPainTypes,
+        records: [],
+      });
+    }
+    return response;
+  };
 
   const loadUserData = async () => {
     try {
@@ -139,14 +221,6 @@ export const UserProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error loading user data:", error);
-    }
-  };
-
-  const saveUserData = async (newUser) => {
-    try {
-      await AsyncStorage.setItem("userData", JSON.stringify(newUser));
-    } catch (error) {
-      console.error("Error saving user data:", error);
     }
   };
 
@@ -413,6 +487,11 @@ export const UserProvider = ({ children }) => {
     <UserContext.Provider
       value={{
         user,
+        isAuthenticated,
+        authLoading,
+        login,
+        register,
+        logout,
         addPoints,
         incrementRecords,
         unlockAchievement,

@@ -1,15 +1,17 @@
-import React from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import {
   TextInput,
   Button,
   Text,
   Card,
   useTheme as usePaperTheme,
+  ActivityIndicator,
 } from "react-native-paper";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import AuthService from "../utils/authService";
 
 const schema = yup.object({
   name: yup.string().required("Nombre es requerido"),
@@ -26,6 +28,8 @@ const schema = yup.object({
 
 const RegisterScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
+  const [loading, setLoading] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -34,11 +38,42 @@ const RegisterScreen = ({ navigation }) => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data) => {
-    // Lógica de registro (llamar a API)
-    console.log(data);
-    // Navegar al Login si registro exitoso
-    navigation.navigate("Login");
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      const response = await AuthService.register(
+        data.email,
+        data.password,
+        data.name
+      );
+
+      if (response.success) {
+        Alert.alert(
+          "Registro exitoso",
+          "Tu cuenta ha sido creada correctamente. Ahora puedes iniciar sesión.",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.navigate("Login"),
+            },
+          ]
+        );
+      } else {
+        Alert.alert(
+          "Error de registro",
+          response.error || "Ha ocurrido un error al crear tu cuenta.",
+          [{ text: "OK" }]
+        );
+      }
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Ha ocurrido un error inesperado. Inténtalo de nuevo.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -131,8 +166,20 @@ const RegisterScreen = ({ navigation }) => {
             mode="contained"
             onPress={handleSubmit(onSubmit)}
             style={styles.button}
+            disabled={loading}
           >
-            Registrarse
+            {loading ? (
+              <>
+                <ActivityIndicator
+                  size="small"
+                  color="white"
+                  style={styles.loader}
+                />
+                Registrando...
+              </>
+            ) : (
+              "Registrarse"
+            )}
           </Button>
           <Button onPress={() => navigation.navigate("Login")}>
             ¿Ya tienes cuenta? Inicia Sesión
@@ -156,6 +203,9 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 12,
+  },
+  loader: {
+    marginRight: 8,
   },
   error: {
     fontSize: 12,
