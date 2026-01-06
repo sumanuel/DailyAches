@@ -26,11 +26,19 @@ class PeopleService {
   }
 
   // Create a new person
-  async createPerson(name, relation = null, imageUrl = null) {
+  async createPerson(
+    name,
+    relation = null,
+    imageUrl = null,
+    phone = null,
+    whatsappEnabled = false
+  ) {
     const response = await HttpService.post("/people", {
       name: name.trim(),
       relation: relation?.trim() || null,
       image_url: imageUrl?.trim() || null,
+      phone: phone?.trim() || null,
+      whatsapp_enabled: whatsappEnabled,
     });
     if (response.success) {
       return {
@@ -42,11 +50,20 @@ class PeopleService {
   }
 
   // Update a person
-  async updatePerson(id, name, relation = null, imageUrl = null) {
+  async updatePerson(
+    id,
+    name,
+    relation = null,
+    imageUrl = null,
+    phone = null,
+    whatsappEnabled = false
+  ) {
     const response = await HttpService.put(`/people/${id}`, {
       name: name.trim(),
       relation: relation?.trim() || null,
       image_url: imageUrl?.trim() || null,
+      phone: phone?.trim() || null,
+      whatsapp_enabled: whatsappEnabled,
     });
     if (response.success) {
       return {

@@ -6,11 +6,7 @@ import {
   TextInput,
   IconButton,
   FAB,
-  Portal,
-  Dialog,
-  Button,
   useTheme as usePaperTheme,
-  Menu,
 } from "react-native-paper";
 import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
@@ -28,48 +24,13 @@ const PeopleScreen = ({ navigation }) => {
   const { user, addPerson, removePerson, updatePerson } = useUser();
 
   const [query, setQuery] = useState("");
-  const [addOpen, setAddOpen] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newRelationship, setNewRelationship] = useState("");
-  const [selectedAvatar, setSelectedAvatar] = useState("Mujer feliz.png");
-  const [menuVisible, setMenuVisible] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
-  const [editPerson, setEditPerson] = useState(null);
-
-  const avatars = [
-    "DolorDeCabeza.png",
-    "DolorDeEspalda.png",
-    "DolorDePiernas.png",
-    "Mujer feliz.png",
-    "Saltando.png",
-  ];
-
-  const relationshipOptions = [
-    "Esposa",
-    "Novia",
-    "Madre",
-    "Hermana",
-    "Prima",
-    "Amiga",
-    "Otro",
-  ];
 
   const openAdd = () => {
-    setNewName("");
-    setNewRelationship("");
-    setSelectedAvatar("Mujer feliz.png");
-    setIsEdit(false);
-    setEditPerson(null);
-    setAddOpen(true);
+    navigation.navigate("AddPerson");
   };
 
   const openEdit = (person) => {
-    setNewName(person.name);
-    setNewRelationship(person.relationship);
-    setSelectedAvatar(person.avatar);
-    setIsEdit(true);
-    setEditPerson(person);
-    setAddOpen(true);
+    navigation.navigate("AddPerson", { person });
   };
 
   const filtered = useMemo(() => {
@@ -77,19 +38,6 @@ const PeopleScreen = ({ navigation }) => {
     if (!q) return user.people;
     return user.people.filter((p) => (p.name || "").toLowerCase().includes(q));
   }, [query, user.people]);
-
-  const onConfirmAdd = () => {
-    if (isEdit && editPerson) {
-      updatePerson(editPerson.id, {
-        name: newName,
-        relationship: newRelationship,
-        avatar: selectedAvatar,
-      });
-    } else {
-      addPerson(newName, newRelationship, selectedAvatar);
-    }
-    setAddOpen(false);
-  };
 
   const onSelectPerson = (person) => {
     navigation.navigate("RecordPain", {
@@ -187,79 +135,6 @@ const PeopleScreen = ({ navigation }) => {
       </View>
 
       <FAB icon="plus" style={styles.fab} onPress={openAdd} />
-
-      <Portal>
-        <Dialog
-          visible={addOpen}
-          onDismiss={() => setAddOpen(false)}
-          style={styles.dialog}
-        >
-          <Dialog.Title>
-            {isEdit ? "Editar persona" : "Agregar persona"}
-          </Dialog.Title>
-          <Dialog.Content style={styles.dialogContent}>
-            <TextInput
-              label="Nombre"
-              value={newName}
-              onChangeText={setNewName}
-              autoFocus
-              style={styles.input}
-            />
-            <Menu
-              visible={menuVisible}
-              onDismiss={() => setMenuVisible(false)}
-              anchor={
-                <Button
-                  mode="outlined"
-                  onPress={() => setMenuVisible(true)}
-                  style={styles.relationshipButton}
-                  icon="chevron-down"
-                >
-                  Parentezco: {newRelationship}
-                </Button>
-              }
-            >
-              {relationshipOptions.map((option) => (
-                <Menu.Item
-                  key={option}
-                  onPress={() => {
-                    setNewRelationship(option);
-                    setMenuVisible(false);
-                  }}
-                  title={option}
-                />
-              ))}
-            </Menu>
-            <Text style={{ marginTop: 16, marginBottom: 8 }}>
-              Selecciona un avatar:
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.avatarScroll}
-            >
-              {avatars.map((av) => (
-                <TouchableOpacity
-                  key={av}
-                  onPress={() => setSelectedAvatar(av)}
-                  style={styles.avatarOption}
-                >
-                  <Image source={avatarImages[av]} style={styles.avatarImage} />
-                  {selectedAvatar === av && (
-                    <View style={styles.selectedOverlay}>
-                      <Text style={styles.checkMark}>✓</Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setAddOpen(false)}>Cancelar</Button>
-            <Button onPress={onConfirmAdd}>Guardar</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
     </View>
   );
 };

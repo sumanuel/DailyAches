@@ -19,6 +19,7 @@ import ProfileScreen from "../screens/ProfileScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import PainSettingsScreen from "../screens/PainSettingsScreen";
 import AddPainTypeScreen from "../screens/AddPainTypeScreen";
+import AddPersonScreen from "../screens/AddPersonScreen";
 
 import { useTheme } from "../context/ThemeContext";
 
@@ -97,6 +98,13 @@ const RegistroStackNavigator = () => {
         name="People"
         component={PeopleScreen}
         options={{ title: "Registro" }}
+      />
+      <Stack.Screen
+        name="AddPerson"
+        component={AddPersonScreen}
+        options={({ route }) => ({
+          title: route?.params?.person ? "Editar Persona" : "Agregar Persona",
+        })}
       />
       <Stack.Screen
         name="RecordPain"

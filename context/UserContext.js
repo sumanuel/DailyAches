@@ -162,6 +162,8 @@ export const UserProvider = ({ children }) => {
             name: p.name,
             relationship: p.relation || "",
             avatar: p.image_url || "Mujer feliz.png",
+            phone: p.phone || "",
+            whatsappEnabled: p.whatsapp_enabled || false,
           })),
         }));
       }
@@ -328,14 +330,22 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  const addPerson = async (name, relationship, avatar) => {
+  const addPerson = async (
+    name,
+    relationship,
+    avatar,
+    phone,
+    whatsappEnabled
+  ) => {
     const trimmed = (name || "").trim();
     if (!trimmed) return;
     try {
       const response = await PeopleService.createPerson(
         trimmed,
         relationship,
-        avatar
+        avatar,
+        phone,
+        whatsappEnabled
       );
       if (response.success) {
         const newPerson = {
@@ -343,6 +353,8 @@ export const UserProvider = ({ children }) => {
           name: response.person.name,
           relationship: response.person.relation || "",
           avatar: response.person.image_url || "Mujer feliz.png",
+          phone: response.person.phone || "",
+          whatsappEnabled: response.person.whatsapp_enabled || false,
         };
         setUser((prevUser) => {
           const newUser = {
@@ -381,7 +393,9 @@ export const UserProvider = ({ children }) => {
         personId,
         updates.name,
         updates.relationship,
-        updates.avatar
+        updates.avatar,
+        updates.phone,
+        updates.whatsappEnabled
       );
       if (response.success) {
         setUser((prevUser) => {
