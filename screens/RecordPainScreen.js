@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { View, StyleSheet, Alert, Pressable, FlatList } from "react-native";
 import {
-  TextInput,
   Button,
   Text,
   Card,
@@ -14,6 +13,7 @@ import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import IllustrationBadge from "../components/IllustrationBadge";
+import AppTextField from "../components/AppTextField";
 import {
   getPainIllustration,
   resolvePainIllustrationKey,
@@ -167,12 +167,12 @@ const RecordPainScreen = ({ navigation, route }) => {
         style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
       >
         <Card.Content>
-          <TextInput
-            label="Buscar dolor"
+          <AppTextField
+            label="Dolor"
             value={searchQuery}
             onChangeText={setSearchQuery}
             style={styles.searchInput}
-            mode="outlined"
+            placeholder="Filtrar por nombre"
           />
 
           <FlatList
@@ -238,14 +238,14 @@ const RecordPainScreen = ({ navigation, route }) => {
             control={control}
             name="notes"
             render={({ field: { onChange, value } }) => (
-              <TextInput
+              <AppTextField
                 label="Notas adicionales (opcional)"
                 value={value}
                 onChangeText={onChange}
                 multiline
                 numberOfLines={3}
                 style={styles.input}
-                mode="outlined"
+                contentStyle={styles.notesContent}
               />
             )}
           />
@@ -288,6 +288,7 @@ const styles = StyleSheet.create({
   painImage: { width: 60, height: 60, borderRadius: 30, marginBottom: 8 },
   painText: { fontSize: 14, textAlign: "center", fontWeight: "500" },
   input: { marginTop: 12 },
+  notesContent: { minHeight: 72, textAlignVertical: "top" },
   button: { marginTop: 24, marginBottom: 8, borderRadius: 16 },
   error: { fontSize: 12, marginTop: 6 },
 });

@@ -14,6 +14,7 @@ import * as yup from "yup";
 import AuthService from "../utils/authService";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
+import AppTextField from "../components/AppTextField";
 
 const schema = yup.object({
   name: yup.string().required("Nombre es requerido"),
@@ -107,13 +108,12 @@ const RegisterScreen = ({ navigation }) => {
             control={control}
             name="name"
             render={({ field: { onChange, value } }) => (
-              <TextInput
+              <AppTextField
                 label="Nombre"
                 value={value}
                 onChangeText={onChange}
                 error={!!errors.name}
                 style={styles.input}
-                mode="outlined"
               />
             )}
           />
@@ -127,13 +127,12 @@ const RegisterScreen = ({ navigation }) => {
             control={control}
             name="email"
             render={({ field: { onChange, value } }) => (
-              <TextInput
+              <AppTextField
                 label="Email"
                 value={value}
                 onChangeText={onChange}
                 error={!!errors.email}
                 style={styles.input}
-                mode="outlined"
               />
             )}
           />
@@ -147,14 +146,13 @@ const RegisterScreen = ({ navigation }) => {
             control={control}
             name="password"
             render={({ field: { onChange, value } }) => (
-              <TextInput
+              <AppTextField
                 label="Contraseña"
                 value={value}
                 onChangeText={onChange}
                 secureTextEntry
                 error={!!errors.password}
                 style={styles.input}
-                mode="outlined"
               />
             )}
           />
@@ -168,14 +166,13 @@ const RegisterScreen = ({ navigation }) => {
             control={control}
             name="confirmPassword"
             render={({ field: { onChange, value } }) => (
-              <TextInput
+              <AppTextField
                 label="Confirmar Contraseña"
                 value={value}
                 onChangeText={onChange}
                 secureTextEntry
                 error={!!errors.confirmPassword}
                 style={styles.input}
-                mode="outlined"
               />
             )}
           />

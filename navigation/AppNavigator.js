@@ -22,6 +22,7 @@ import AddPainTypeScreen from "../screens/AddPainTypeScreen";
 import AddPersonScreen from "../screens/AddPersonScreen";
 
 import { useTheme } from "../context/ThemeContext";
+import { useUser } from "../context/UserContext";
 
 const RootStack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
@@ -229,11 +230,20 @@ const MainTabsNavigator = () => {
 
 const AppNavigator = () => {
   const { navigationTheme } = useTheme();
+  const { isAuthenticated, authLoading } = useUser();
+
+  if (authLoading) {
+    return null;
+  }
+
   return (
     <NavigationContainer theme={navigationTheme}>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        <RootStack.Screen name="Auth" component={AuthStackNavigator} />
-        <RootStack.Screen name="Main" component={MainTabsNavigator} />
+        {isAuthenticated ? (
+          <RootStack.Screen name="Main" component={MainTabsNavigator} />
+        ) : (
+          <RootStack.Screen name="Auth" component={AuthStackNavigator} />
+        )}
       </RootStack.Navigator>
     </NavigationContainer>
   );

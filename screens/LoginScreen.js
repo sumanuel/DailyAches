@@ -14,6 +14,7 @@ import * as yup from "yup";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
+import AppTextField from "../components/AppTextField";
 
 const schema = yup.object({
   email: yup.string().email("Email inválido").required("Email es requerido"),
@@ -90,13 +91,12 @@ const LoginScreen = ({ navigation }) => {
             control={control}
             name="email"
             render={({ field: { onChange, value } }) => (
-              <TextInput
+              <AppTextField
                 label="Email"
                 value={value}
                 onChangeText={onChange}
                 error={!!errors.email}
                 style={styles.input}
-                mode="outlined"
               />
             )}
           />
@@ -110,14 +110,13 @@ const LoginScreen = ({ navigation }) => {
             control={control}
             name="password"
             render={({ field: { onChange, value } }) => (
-              <TextInput
+              <AppTextField
                 label="Contraseña"
                 value={value}
                 onChangeText={onChange}
                 secureTextEntry
                 error={!!errors.password}
                 style={styles.input}
-                mode="outlined"
               />
             )}
           />

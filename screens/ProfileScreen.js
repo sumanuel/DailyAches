@@ -4,13 +4,13 @@ import {
   Button,
   Card,
   Text,
-  TextInput,
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
+import AppTextField from "../components/AppTextField";
 
 const ProfileScreen = () => {
   const paperTheme = usePaperTheme();
@@ -86,27 +86,24 @@ const ProfileScreen = () => {
           <Text variant="titleLarge" style={styles.formTitle}>
             Perfil
           </Text>
-          <TextInput
+          <AppTextField
             label="Email"
             value={email}
             editable={false}
             style={styles.input}
-            mode="outlined"
           />
-          <TextInput
+          <AppTextField
             label="Nombre"
             value={name}
             onChangeText={setName}
             style={styles.input}
-            mode="outlined"
           />
-          <TextInput
+          <AppTextField
             label="Teléfono"
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
             style={styles.input}
-            mode="outlined"
           />
           <Text variant="bodySmall" style={styles.label}>
             Fecha de nacimiento

@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View, Alert, Share } from "react-native";
 import {
+  Button,
   Card,
   List,
   Text,
@@ -12,7 +13,7 @@ import HeroPanel from "../components/HeroPanel";
 
 const MoreScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
-  const { user, unlockAchievement, getTodayRecords } = useUser();
+  const { user, unlockAchievement, getTodayRecords, logout } = useUser();
   const todayCount = getTodayRecords().length;
 
   const handleShareToFacebook = async () => {
@@ -35,12 +36,28 @@ const MoreScreen = ({ navigation }) => {
     }
   };
 
+  const handleLogout = () => {
+    Alert.alert("Cerrar sesión", "¿Deseas cerrar la sesión actual?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Cerrar sesión",
+        style: "destructive",
+        onPress: async () => {
+          const response = await logout();
+          if (response?.success) {
+            navigation.getParent()?.getParent()?.replace("Auth");
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <AppScreen contentContainerStyle={styles.content}>
       <HeroPanel
         eyebrow="CENTRO DE CONTROL"
-        title="Mas cosas que hacer cuando el cuerpo anda creativo"
-        description="Ajusta tu cuenta, revisa tu progreso o comparte el resumen del dia con el drama justo y la elegancia suficiente."
+        title="Ajustes, progreso y salida rapida"
+        description="Desde aqui se revisa el progreso, se ajusta la cuenta y se accede a las opciones mas utiles sin tener que recorrer toda la app."
       >
         <View style={styles.heroStats}>
           <Text
@@ -68,47 +85,133 @@ const MoreScreen = ({ navigation }) => {
         </View>
       </HeroPanel>
 
+      <View style={styles.statsPanel}>
+        <Card
+          style={[
+            styles.statCard,
+            { backgroundColor: paperTheme.colors.primaryContainer },
+          ]}
+        >
+          <Card.Content>
+            <Text
+              style={[
+                styles.statKicker,
+                { color: paperTheme.colors.onPrimaryContainer },
+              ]}
+            >
+              PUNTOS
+            </Text>
+            <Text variant="headlineSmall" style={styles.statValue}>
+              {user.points}
+            </Text>
+            <Text style={{ color: paperTheme.colors.onPrimaryContainer }}>
+              Acumulados por registros y logros
+            </Text>
+          </Card.Content>
+        </Card>
+        <Card
+          style={[
+            styles.statCard,
+            { backgroundColor: paperTheme.colors.secondaryContainer },
+          ]}
+        >
+          <Card.Content>
+            <Text
+              style={[
+                styles.statKicker,
+                { color: paperTheme.colors.onSecondaryContainer },
+              ]}
+            >
+              HOY
+            </Text>
+            <Text variant="headlineSmall" style={styles.statValue}>
+              {todayCount}
+            </Text>
+            <Text style={{ color: paperTheme.colors.onSecondaryContainer }}>
+              Achaques registrados en el dia
+            </Text>
+          </Card.Content>
+        </Card>
+      </View>
+
       <Card
         style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
       >
         <List.Item
           title="Progreso"
           description="Logros, nivel y puntos acumulados"
-          left={(props) => <List.Icon {...props} icon="chart-line-variant" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
+          left={(props) => <List.Icon {...props} icon="chart-arc" />}
+          right={(props) => <List.Icon {...props} icon="arrow-right" />}
           onPress={() => navigation.navigate("Progress")}
         />
         <View style={styles.divider} />
         <List.Item
           title="Perfil"
-          description="Tus datos principales y ajustes personales"
-          left={(props) => <List.Icon {...props} icon="account-outline" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
+          description="Datos principales y ajustes personales"
+          left={(props) => (
+            <List.Icon {...props} icon="badge-account-outline" />
+          )}
+          right={(props) => <List.Icon {...props} icon="arrow-right" />}
           onPress={() => navigation.navigate("Profile")}
         />
-        <View style={styles.divider} />
+      </Card>
+
+      <Card
+        style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+      >
         <List.Item
           title="Configuración"
           description="Tema y preferencias generales"
-          left={(props) => <List.Icon {...props} icon="cog-outline" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
+          left={(props) => <List.Icon {...props} icon="tune-variant" />}
+          right={(props) => <List.Icon {...props} icon="arrow-right" />}
           onPress={() => navigation.navigate("Settings")}
         />
         <View style={styles.divider} />
         <List.Item
           title="Configurar dolores"
-          description="Edita el catalogo de molestias disponibles"
-          left={(props) => <List.Icon {...props} icon="format-list-bulleted" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
+          description="Editar el catalogo de molestias disponibles"
+          left={(props) => (
+            <List.Icon {...props} icon="clipboard-list-outline" />
+          )}
+          right={(props) => <List.Icon {...props} icon="arrow-right" />}
           onPress={() => navigation.navigate("PainSettings")}
         />
         <View style={styles.divider} />
         <List.Item
           title="Compartir en Facebook"
-          description="Saca pecho si hoy hubo valentia o paz"
+          description="Compartir un resumen del dia"
           left={(props) => <List.Icon {...props} icon="facebook" />}
+          right={(props) => (
+            <List.Icon {...props} icon="share-variant-outline" />
+          )}
           onPress={handleShareToFacebook}
         />
+      </Card>
+
+      <Card
+        style={[
+          styles.logoutCard,
+          { backgroundColor: paperTheme.colors.surface },
+        ]}
+      >
+        <Card.Content>
+          <Text variant="titleMedium" style={styles.logoutTitle}>
+            Sesión
+          </Text>
+          <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
+            Si la persona actual ya termino, desde aqui puede cerrarse la
+            sesion.
+          </Text>
+          <Button
+            mode="outlined"
+            icon="logout"
+            style={styles.logoutButton}
+            contentStyle={styles.logoutButtonContent}
+            onPress={handleLogout}
+          >
+            Cerrar sesión
+          </Button>
+        </Card.Content>
       </Card>
 
       <Text style={styles.footer}>DailyAches</Text>
@@ -128,8 +231,21 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     overflow: "hidden",
   },
+  statsPanel: { flexDirection: "row", gap: 12, marginBottom: 16 },
+  statCard: { flex: 1, borderRadius: 24, overflow: "hidden" },
+  statKicker: {
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.9,
+    marginBottom: 6,
+  },
+  statValue: { fontWeight: "900", marginBottom: 4 },
   card: { marginBottom: 16, borderRadius: 24, overflow: "hidden" },
   divider: { height: StyleSheet.hairlineWidth, opacity: 0.2 },
+  logoutCard: { borderRadius: 24, overflow: "hidden" },
+  logoutTitle: { marginBottom: 6, fontWeight: "800" },
+  logoutButton: { marginTop: 16, borderRadius: 16 },
+  logoutButtonContent: { minHeight: 44 },
   footer: { textAlign: "center", marginTop: 24, opacity: 0.7 },
 });
 

@@ -1,15 +1,11 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import {
-  TextInput,
-  Button,
-  Card,
-  useTheme as usePaperTheme,
-} from "react-native-paper";
+import { Button, Card, useTheme as usePaperTheme } from "react-native-paper";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import IllustrationBadge from "../components/IllustrationBadge";
+import AppTextField from "../components/AppTextField";
 import {
   getPainIllustration,
   painIllustrationKeys,
@@ -132,7 +128,7 @@ const AddPainTypeScreen = ({ navigation, route }) => {
         ]}
       >
         <Card.Content>
-          <TextInput
+          <AppTextField
             label="Nombre del dolor"
             value={painName}
             onChangeText={(text) => {
@@ -140,7 +136,6 @@ const AddPainTypeScreen = ({ navigation, route }) => {
               if (error) setError("");
             }}
             style={styles.textInput}
-            mode="outlined"
             autoFocus={!isEdit}
           />
 

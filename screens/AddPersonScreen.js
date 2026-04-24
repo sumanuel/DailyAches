@@ -9,7 +9,6 @@ import {
 import {
   Card,
   Text,
-  TextInput,
   Button,
   useTheme as usePaperTheme,
   Checkbox,
@@ -19,6 +18,7 @@ import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import IllustrationBadge from "../components/IllustrationBadge";
+import AppTextField from "../components/AppTextField";
 import {
   avatarIllustrationKeys,
   getAvatarIllustration,
@@ -115,8 +115,7 @@ const AddPersonScreen = ({ navigation, route }) => {
               {isEdit ? "Editar Persona" : "Agregar Persona"}
             </Text>
 
-            <TextInput
-              mode="outlined"
+            <AppTextField
               label="Nombre *"
               value={name}
               onChangeText={setName}
@@ -140,8 +139,7 @@ const AddPersonScreen = ({ navigation, route }) => {
               ))}
             </List.Accordion>
 
-            <TextInput
-              mode="outlined"
+            <AppTextField
               label="Número de teléfono"
               value={phone}
               onChangeText={setPhone}
