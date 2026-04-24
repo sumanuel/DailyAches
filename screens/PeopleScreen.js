@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { StyleSheet, View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, View, ScrollView, Alert } from "react-native";
 import {
   Card,
   Text,
@@ -10,6 +10,8 @@ import {
 } from "react-native-paper";
 import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const avatarImages = {
   "DolorDeCabeza.png": require("../assets/avatars/DolorDeCabeza.png"),
@@ -51,22 +53,67 @@ const PeopleScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    // Load people from API when screen opens
     loadPeopleFromAPI();
-  }, []); // Remove loadPeopleFromAPI from dependencies
+  }, []);
+
+  const handleRemovePerson = (person) => {
+    Alert.alert(
+      "Eliminar persona",
+      `¿Quitamos a ${person.name} de tu radar de achaques?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () => removePerson(person.id),
+        },
+      ],
+    );
+  };
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: paperTheme.colors.background },
-      ]}
-    >
-      <Card style={styles.searchCard}>
+    <AppScreen scroll={false} contentContainerStyle={styles.container}>
+      <HeroPanel
+        eyebrow="PERSONAS"
+        title="Tu elenco oficial del drama corporal"
+        description="Busca rapido, agrega nuevas personas y entra directo a registrar lo que el cuerpo decidio improvisar hoy."
+      >
+        <View style={styles.heroStats}>
+          <Text
+            style={[
+              styles.heroChip,
+              {
+                backgroundColor: paperTheme.colors.accentSun,
+                color: paperTheme.colors.onSurface,
+              },
+            ]}
+          >
+            Activas: {filtered.length}
+          </Text>
+          <Text
+            style={[
+              styles.heroChip,
+              {
+                backgroundColor: paperTheme.colors.accentMint,
+                color: paperTheme.colors.onSurface,
+              },
+            ]}
+          >
+            Total: {user.people.length}
+          </Text>
+        </View>
+      </HeroPanel>
+
+      <Card
+        style={[
+          styles.searchCard,
+          { backgroundColor: paperTheme.colors.surface },
+        ]}
+      >
         <Card.Content style={styles.searchContent}>
           <TextInput
             mode="outlined"
-            placeholder="Buscar persona..."
+            placeholder="Buscar persona o complicidad..."
             value={query}
             onChangeText={setQuery}
             style={styles.searchInput}
@@ -75,13 +122,33 @@ const PeopleScreen = ({ navigation }) => {
         </Card.Content>
       </Card>
 
-      <View style={styles.list}>
+      <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
         {filtered.length === 0 ? (
-          <Card style={styles.card}>
+          <Card
+            style={[
+              styles.emptyCard,
+              { backgroundColor: paperTheme.colors.surface },
+            ]}
+          >
             <Card.Content>
-              <Text variant="titleMedium">Sin personas</Text>
-              <Text variant="bodyMedium" style={styles.muted}>
-                Toca el botón + para agregar a quién le va a doler hoy.
+              <Text variant="titleMedium" style={styles.emptyTitle}>
+                Todavia no hay elenco
+              </Text>
+              <Text
+                variant="bodyMedium"
+                style={[
+                  styles.muted,
+                  { color: paperTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                Agrega a alguien para empezar a registrar dolores con elegancia
+                y un poco de humor.
+              </Text>
+              <Text
+                style={[styles.emptyHint, { color: paperTheme.colors.primary }]}
+              >
+                El boton + ya esta listo para fichar a la primera victima del
+                dia.
               </Text>
             </Card.Content>
           </Card>
@@ -89,7 +156,10 @@ const PeopleScreen = ({ navigation }) => {
           filtered.map((p) => (
             <Card
               key={p.id}
-              style={styles.card}
+              style={[
+                styles.card,
+                { backgroundColor: paperTheme.colors.surface },
+              ]}
               onPress={() => onSelectPerson(p)}
             >
               <Card.Content style={styles.row}>
@@ -118,10 +188,18 @@ const PeopleScreen = ({ navigation }) => {
                     <Text
                       style={{
                         color: paperTheme.colors.onSurfaceVariant,
-                        marginTop: 2,
+                        marginTop: 4,
                       }}
                     >
-                      Toca para registrar
+                      {p.relationship || "Relacion sin etiqueta"}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.ctaText,
+                        { color: paperTheme.colors.primary },
+                      ]}
+                    >
+                      Toca para registrar el achaque del momento
                     </Text>
                   </View>
                 </View>
@@ -133,7 +211,7 @@ const PeopleScreen = ({ navigation }) => {
                   />
                   <IconButton
                     icon="trash-can-outline"
-                    onPress={() => removePerson(p.id)}
+                    onPress={() => handleRemovePerson(p)}
                     accessibilityLabel="Eliminar persona"
                   />
                 </View>
@@ -141,20 +219,42 @@ const PeopleScreen = ({ navigation }) => {
             </Card>
           ))
         )}
-      </View>
+      </ScrollView>
 
-      <FAB icon="plus" style={styles.fab} onPress={openAdd} />
-    </View>
+      <FAB
+        icon="plus"
+        style={[styles.fab, { backgroundColor: paperTheme.colors.primary }]}
+        color={paperTheme.colors.onPrimary}
+        onPress={openAdd}
+      />
+    </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 12 },
-  searchCard: { borderRadius: 16, overflow: "hidden" },
+  container: { flex: 1 },
+  heroStats: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  heroChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: "800",
+    overflow: "hidden",
+  },
+  searchCard: { borderRadius: 24, overflow: "hidden" },
   searchContent: { paddingVertical: 6 },
   searchInput: { backgroundColor: "transparent" },
-  list: { gap: 10, paddingBottom: 96, marginTop: 12 },
-  card: { width: "100%", borderRadius: 16, overflow: "hidden" },
+  list: { flex: 1, marginTop: 12 },
+  emptyCard: { borderRadius: 24, overflow: "hidden" },
+  emptyTitle: { marginBottom: 6, fontWeight: "800" },
+  emptyHint: { marginTop: 12, fontWeight: "700" },
+  card: {
+    width: "100%",
+    borderRadius: 24,
+    overflow: "hidden",
+    marginBottom: 12,
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -162,35 +262,17 @@ const styles = StyleSheet.create({
   },
   rowLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 52,
+    height: 52,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: { fontSize: 18, fontWeight: "700" },
   meta: { flex: 1 },
-  muted: { opacity: 0.7, marginTop: 2 },
+  ctaText: { marginTop: 6, fontSize: 12, fontWeight: "700" },
+  muted: { marginTop: 2, lineHeight: 20 },
   fab: { position: "absolute", right: 16, bottom: 16 },
-  input: { marginBottom: 16 },
-  relationshipButton: { marginTop: 8 },
-  dialog: { borderRadius: 16 },
-  dialogContent: { paddingVertical: 16 },
-  avatarScroll: { marginBottom: 16 },
-  avatarOption: { marginRight: 12, position: "relative" },
-  avatarImage: { width: 60, height: 60, borderRadius: 30 },
-  selectedOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkMark: { color: "white", fontSize: 24, fontWeight: "bold" },
   actions: { flexDirection: "row" },
 });
 

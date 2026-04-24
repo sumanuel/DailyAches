@@ -4,6 +4,7 @@ import {
   Card,
   Text,
   IconButton,
+  Button,
   useTheme as usePaperTheme,
   Avatar,
 } from "react-native-paper";
@@ -87,7 +88,7 @@ const HomeScreen = () => {
       setDailyRecords(todayRecords);
       setMessage(currentMessage);
       setImageUri(currentImageUri);
-    }, [todayRecords, currentMessage, currentImageUri])
+    }, [todayRecords, currentMessage, currentImageUri]),
   );
 
   const peopleById = useMemo(() => {
@@ -110,6 +111,31 @@ const HomeScreen = () => {
     return `${hh}:${minutes} ${ampm}`;
   };
 
+  const handleShareRecord = async (record) => {
+    try {
+      const shareLines = [
+        `Registro de dolor de ${record.personName || "persona"}`,
+        `Dolor: ${record.pain}`,
+      ];
+
+      if (record.notes) {
+        shareLines.push(`Notas: ${record.notes}`);
+      }
+
+      if (record.createdAt) {
+        shareLines.push(`Hora: ${formatTime(record.createdAt)}`);
+      }
+
+      await Share.share({
+        message: shareLines.join("\n"),
+      });
+
+      unlockAchievement(5);
+    } catch (error) {
+      Alert.alert("No se pudo compartir", "Intenta de nuevo en un momento.");
+    }
+  };
+
   const handleDeleteRecord = (record) => {
     Alert.alert(
       "Eliminar registro",
@@ -124,7 +150,7 @@ const HomeScreen = () => {
             // El estado se actualizará automáticamente a través del useMemo
           },
         },
-      ]
+      ],
     );
   };
 
@@ -136,9 +162,24 @@ const HomeScreen = () => {
           acc[key] = { personName: record.personName, records: [] };
         acc[key].records.push(record);
         return acc;
-      }, {})
+      }, {}),
     );
   }, [dailyRecords]);
+
+  const todayCount = dailyRecords.length;
+  const totalPeople = user.people?.length || 0;
+  const heroTitle =
+    todayCount === 0 ? "Hoy manda la paz" : "Radar del drama corporal";
+  const heroDescription =
+    todayCount === 0
+      ? "Todavía no hay achaques fichados. Si el cuerpo sigue cooperando, puedes presumir de día zen con una sonrisa culpable."
+      : "Tu resumen diario ya está servido: quién se quejó, qué dolió y a qué hora empezó la novela del cuerpo.";
+  const moodChip =
+    todayCount === 0 ? "Humor terapéutico activado" : "Hoy hubo contenido";
+  const forecastChip =
+    todayCount === 0
+      ? "Pronóstico: cero drama"
+      : "Pronóstico: mimo y seguimiento";
 
   return (
     <ScrollView
@@ -148,35 +189,208 @@ const HomeScreen = () => {
       ]}
       contentContainerStyle={styles.content}
     >
-      <Card style={styles.card}>
+      <Card
+        style={[
+          styles.heroCard,
+          { backgroundColor: paperTheme.colors.surface },
+        ]}
+      >
         <Card.Content>
-          <Text variant="titleLarge" style={styles.title}>
-            ¡Bienvenido a DailyAches! 😊
-          </Text>
-          <Text
+          <View
             style={[
-              styles.level,
-              { color: paperTheme.colors.onSurfaceVariant },
+              styles.heroGlow,
+              { backgroundColor: paperTheme.colors.heroBackdrop },
             ]}
-          >
-            Nivel: {user.level} | Puntos: {user.points}
-          </Text>
-          <Text variant="titleMedium" style={styles.message}>
-            {message}
-          </Text>
-          {dailyRecords.length === 0 && (
+          />
+          <View
+            style={[
+              styles.heroBubbleTop,
+              { backgroundColor: paperTheme.colors.accentSun },
+            ]}
+          />
+          <View
+            style={[
+              styles.heroBubbleBottom,
+              { backgroundColor: paperTheme.colors.accentMint },
+            ]}
+          />
+          <View style={styles.heroPillsRow}>
+            <Text
+              style={[
+                styles.heroPill,
+                {
+                  backgroundColor: paperTheme.colors.primaryContainer,
+                  color: paperTheme.colors.onPrimaryContainer,
+                },
+              ]}
+            >
+              {moodChip}
+            </Text>
+            <Text
+              style={[
+                styles.heroPill,
+                {
+                  backgroundColor: paperTheme.colors.accentBerry,
+                  color: paperTheme.colors.onSurface,
+                },
+              ]}
+            >
+              {forecastChip}
+            </Text>
+          </View>
+          <View style={styles.heroHeader}>
+            <View style={styles.heroCopy}>
+              <Text
+                style={[styles.eyebrow, { color: paperTheme.colors.primary }]}
+              >
+                DAILYACHES, PERO CON PERSONALIDAD
+              </Text>
+              <Text variant="headlineSmall" style={styles.heroTitle}>
+                {heroTitle}
+              </Text>
+              <Text
+                style={[
+                  styles.heroText,
+                  { color: paperTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                {heroDescription}
+              </Text>
+            </View>
             <Image
               source={imageUri}
-              style={styles.image}
-              placeholder={require("../assets/splash-icon.png")} // Placeholder local si existe
+              style={styles.heroImage}
+              placeholder={require("../assets/splash-icon.png")}
               contentFit="contain"
             />
+          </View>
+
+          <View style={styles.statsRow}>
+            <View
+              style={[
+                styles.statTile,
+                { backgroundColor: paperTheme.colors.primaryContainer },
+              ]}
+            >
+              <Text style={styles.statEmoji}>🩹</Text>
+              <Text style={styles.statValue}>{todayCount}</Text>
+              <Text
+                style={[
+                  styles.statLabel,
+                  { color: paperTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                Registros hoy
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.statTile,
+                { backgroundColor: paperTheme.colors.secondaryContainer },
+              ]}
+            >
+              <Text style={styles.statEmoji}>⚡</Text>
+              <Text style={styles.statValue}>{user.points}</Text>
+              <Text
+                style={[
+                  styles.statLabel,
+                  { color: paperTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                Puntos
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.statTile,
+                { backgroundColor: paperTheme.colors.accentMint },
+              ]}
+            >
+              <Text style={styles.statEmoji}>🫶</Text>
+              <Text style={styles.statValue}>{totalPeople}</Text>
+              <Text
+                style={[
+                  styles.statLabel,
+                  { color: paperTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                Personas
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.summaryRow}>
+            <Text
+              style={[
+                styles.levelBadge,
+                {
+                  backgroundColor: paperTheme.colors.accentSky,
+                  color: paperTheme.colors.onSurface,
+                },
+              ]}
+            >
+              Nivel {user.level}
+            </Text>
+            <Text
+              style={[
+                styles.summaryMessage,
+                { color: paperTheme.colors.onSurfaceVariant },
+              ]}
+            >
+              {message}
+            </Text>
+          </View>
+
+          <Button
+            mode="contained"
+            icon="plus-circle-outline"
+            onPress={() => navigation.navigate("RecordPain")}
+            contentStyle={styles.primaryActionContent}
+            style={styles.primaryAction}
+          >
+            Registrar dolor
+          </Button>
+
+          {dailyRecords.length === 0 && (
+            <View
+              style={[
+                styles.emptyState,
+                { backgroundColor: paperTheme.colors.surfaceVariant },
+              ]}
+            >
+              <Text variant="titleMedium" style={styles.emptyTitle}>
+                Cero registros, cero caos
+              </Text>
+              <Text
+                style={[
+                  styles.emptyText,
+                  { color: paperTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                Cuando aparezca el primer dolor, este espacio se convierte en tu
+                tablero de seguimiento con un poco menos de drama y bastante más
+                claridad.
+              </Text>
+            </View>
           )}
         </Card.Content>
       </Card>
 
       {dailyRecords.length > 0 && (
         <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              Bitácora del día
+            </Text>
+            <Text
+              style={[
+                styles.sectionHint,
+                { color: paperTheme.colors.onSurfaceVariant },
+              ]}
+            >
+              {todayCount} registro{todayCount === 1 ? "" : "s"}
+            </Text>
+          </View>
           {groupedByPerson.map(([personKey, group]) => {
             const relationship = peopleById[personKey]?.relationship;
             return (
@@ -190,7 +404,7 @@ const HomeScreen = () => {
                 <Card.Title
                   title={group.personName}
                   subtitle={relationship || undefined}
-                  titleStyle={{ fontWeight: "bold", fontSize: 18 }}
+                  titleStyle={styles.personTitle}
                   left={(props) => (
                     <Avatar.Image
                       size={40}
@@ -231,7 +445,19 @@ const HomeScreen = () => {
                                 variant="titleMedium"
                                 style={styles.painTitle}
                               >
-                                😣 {record.pain}
+                                {record.pain}
+                              </Text>
+                              <Text
+                                style={[
+                                  styles.relationshipTag,
+                                  {
+                                    backgroundColor:
+                                      paperTheme.colors.primaryContainer,
+                                    color: paperTheme.colors.onPrimaryContainer,
+                                  },
+                                ]}
+                              >
+                                {relationship}
                               </Text>
                             </View>
                             <View style={styles.painActions}>
@@ -251,15 +477,22 @@ const HomeScreen = () => {
                           </View>
 
                           {timeLabel ? (
-                            <Text style={styles.timeBelow}>{timeLabel}</Text>
+                            <Text
+                              style={[
+                                styles.timeBelow,
+                                { color: paperTheme.colors.onSurfaceVariant },
+                              ]}
+                            >
+                              Registrado a las {timeLabel}
+                            </Text>
                           ) : null}
 
                           {record.notes ? (
                             <Text
-                              style={{
-                                color: paperTheme.colors.onSurfaceVariant,
-                                marginTop: 2,
-                              }}
+                              style={[
+                                styles.noteText,
+                                { color: paperTheme.colors.onSurfaceVariant },
+                              ]}
                             >
                               {record.notes}
                             </Text>
@@ -280,39 +513,140 @@ const HomeScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { padding: 12, paddingBottom: 24 },
-  section: { marginTop: 2 },
-  card: { borderRadius: 16, overflow: "hidden", marginBottom: 12 },
-  title: { textAlign: "center" },
-  level: { textAlign: "center", marginTop: 6, fontWeight: "700" },
-  message: { textAlign: "center", marginTop: 10 },
-  image: { width: "100%", height: 200, borderRadius: 14, marginTop: 12 },
-  painCard: { marginTop: 8, borderRadius: 14, overflow: "hidden" },
-  cardContent: { paddingHorizontal: 8, paddingVertical: 8 },
-  painHeader: {
+  content: { padding: 16, paddingBottom: 28 },
+  section: { marginTop: 6 },
+  heroGlow: {
+    position: "absolute",
+    top: -42,
+    right: -30,
+    width: 170,
+    height: 170,
+    borderRadius: 999,
+    opacity: 0.9,
+  },
+  heroBubbleTop: {
+    position: "absolute",
+    top: 54,
+    right: 88,
+    width: 28,
+    height: 28,
+    borderRadius: 999,
+    opacity: 0.8,
+  },
+  heroBubbleBottom: {
+    position: "absolute",
+    bottom: 24,
+    right: 28,
+    width: 56,
+    height: 56,
+    borderRadius: 999,
+    opacity: 0.8,
+  },
+  heroPillsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 14,
+  },
+  heroPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    fontSize: 11,
+    fontWeight: "800",
+    overflow: "hidden",
+  },
+  sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    paddingHorizontal: 2,
+  },
+  sectionTitle: { fontWeight: "700" },
+  sectionHint: { fontSize: 13, fontWeight: "600" },
+  card: { borderRadius: 16, overflow: "hidden", marginBottom: 12 },
+  heroCard: {
+    borderRadius: 30,
+    overflow: "hidden",
+    marginBottom: 14,
+    position: "relative",
+  },
+  heroHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  heroCopy: { flex: 1, gap: 6 },
+  eyebrow: { fontSize: 12, fontWeight: "800", letterSpacing: 1.2 },
+  heroTitle: { fontWeight: "900", lineHeight: 30 },
+  heroText: { lineHeight: 21, maxWidth: 250 },
+  heroImage: { width: 132, height: 132 },
+  statsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 18,
+  },
+  statTile: {
+    flex: 1,
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+  },
+  statEmoji: { fontSize: 18, marginBottom: 6 },
+  statValue: { fontSize: 22, fontWeight: "800" },
+  statLabel: { marginTop: 4, fontSize: 12, fontWeight: "600" },
+  summaryRow: { marginTop: 16, gap: 10 },
+  levelBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  summaryMessage: { lineHeight: 20 },
+  primaryAction: { marginTop: 16, borderRadius: 16 },
+  primaryActionContent: { minHeight: 48 },
+  emptyState: {
+    marginTop: 14,
+    borderRadius: 20,
+    padding: 16,
+    gap: 6,
+  },
+  emptyTitle: { fontWeight: "700" },
+  emptyText: { lineHeight: 20 },
+  painCard: {
+    marginTop: 8,
+    borderRadius: 18,
+    overflow: "hidden",
+  },
+  painHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: 8,
   },
   painInfo: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    gap: 6,
   },
   recordImage: { width: 40, height: 40, borderRadius: 20 },
-  painTitle: {},
-  timeLabel: {
-    fontSize: 12,
-    color: "#666",
-    marginLeft: 8,
+  personTitle: { fontWeight: "800", fontSize: 18 },
+  painTitle: { fontWeight: "700" },
+  relationshipTag: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    fontSize: 11,
+    fontWeight: "800",
   },
   timeBelow: {
     fontSize: 12,
-    color: "#666",
-    marginTop: 4,
+    marginTop: 8,
     alignSelf: "flex-start",
   },
+  noteText: { marginTop: 6, lineHeight: 19 },
   painActions: { flexDirection: "row" },
 });
 

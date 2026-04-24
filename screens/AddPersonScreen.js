@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import {
   StyleSheet,
   View,
-  ScrollView,
-  TouchableOpacity,
+  Pressable,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -15,10 +14,11 @@ import {
   useTheme as usePaperTheme,
   Checkbox,
   List,
-  IconButton,
 } from "react-native-paper";
 import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const avatarImages = {
   "DolorDeCabeza.png": require("../assets/avatars/DolorDeCabeza.png"),
@@ -41,14 +41,14 @@ const AddPersonScreen = ({ navigation, route }) => {
 
   const [name, setName] = useState(editPerson?.name || "");
   const [relationship, setRelationship] = useState(
-    editPerson?.relationship || ""
+    editPerson?.relationship || "",
   );
   const [phone, setPhone] = useState(editPerson?.phone || "");
   const [whatsappEnabled, setWhatsappEnabled] = useState(
-    editPerson?.whatsappEnabled || false
+    editPerson?.whatsappEnabled || false,
   );
   const [selectedAvatar, setSelectedAvatar] = useState(
-    editPerson?.avatar || "Mujer feliz.png"
+    editPerson?.avatar || "Mujer feliz.png",
   );
   const [expanded, setExpanded] = useState(false);
 
@@ -95,7 +95,7 @@ const AddPersonScreen = ({ navigation, route }) => {
         personData.relationship,
         personData.avatar,
         personData.phone,
-        personData.whatsappEnabled
+        personData.whatsappEnabled,
       );
     }
 
@@ -112,20 +112,25 @@ const AddPersonScreen = ({ navigation, route }) => {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView
-        style={[
-          styles.container,
-          { backgroundColor: paperTheme.colors.background },
-        ]}
-        contentContainerStyle={styles.contentContainer}
-      >
-        <Card style={styles.card}>
+      <AppScreen contentContainerStyle={styles.contentContainer}>
+        <HeroPanel
+          eyebrow={isEdit ? "EDITAR PERSONA" : "NUEVA PERSONA"}
+          title={
+            isEdit
+              ? "Ajusta la ficha del personaje"
+              : "Agrega a alguien a tu radar"
+          }
+          description="Ponle nombre, relacion y avatar para que registrar dolores sea rapido y visualmente claro."
+        />
+
+        <Card
+          style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+        >
           <Card.Content>
             <Text variant="titleLarge" style={styles.title}>
               {isEdit ? "Editar Persona" : "Agregar Persona"}
             </Text>
 
-            {/* Name Input */}
             <TextInput
               mode="outlined"
               label="Nombre *"
@@ -134,7 +139,6 @@ const AddPersonScreen = ({ navigation, route }) => {
               style={styles.input}
             />
 
-            {/* Relationship Selection */}
             <List.Accordion
               title="Relación"
               description={relationship || "Seleccionar relación"}
@@ -152,7 +156,6 @@ const AddPersonScreen = ({ navigation, route }) => {
               ))}
             </List.Accordion>
 
-            {/* Phone Input */}
             <TextInput
               mode="outlined"
               label="Número de teléfono"
@@ -163,7 +166,6 @@ const AddPersonScreen = ({ navigation, route }) => {
               placeholder="Ej: +58 412 123 4567"
             />
 
-            {/* WhatsApp Checkbox */}
             <View style={styles.checkboxSection}>
               <Checkbox
                 status={whatsappEnabled ? "checked" : "unchecked"}
@@ -178,18 +180,27 @@ const AddPersonScreen = ({ navigation, route }) => {
               </Text>
             </View>
 
-            {/* Avatar Selection */}
             <View style={styles.avatarSection}>
               <Text variant="titleMedium" style={styles.sectionTitle}>
                 Avatar
               </Text>
               <View style={styles.avatarGrid}>
                 {avatars.map((avatar) => (
-                  <TouchableOpacity
+                  <Pressable
                     key={avatar}
                     onPress={() => setSelectedAvatar(avatar)}
                     style={[
                       styles.avatarOption,
+                      {
+                        backgroundColor:
+                          selectedAvatar === avatar
+                            ? paperTheme.colors.primaryContainer
+                            : paperTheme.colors.surfaceVariant,
+                        borderColor:
+                          selectedAvatar === avatar
+                            ? paperTheme.colors.primary
+                            : "transparent",
+                      },
                       selectedAvatar === avatar && styles.selectedAvatar,
                     ]}
                   >
@@ -197,12 +208,11 @@ const AddPersonScreen = ({ navigation, route }) => {
                       source={avatarImages[avatar]}
                       style={styles.avatarImage}
                     />
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </View>
             </View>
 
-            {/* Action Buttons */}
             <View style={styles.buttonContainer}>
               <Button
                 mode="outlined"
@@ -222,7 +232,7 @@ const AddPersonScreen = ({ navigation, route }) => {
             </View>
           </Card.Content>
         </Card>
-      </ScrollView>
+      </AppScreen>
     </KeyboardAvoidingView>
   );
 };
@@ -232,16 +242,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
+    paddingBottom: 24,
   },
   card: {
-    borderRadius: 12,
-    elevation: 4,
+    borderRadius: 24,
   },
   title: {
     textAlign: "center",
     marginBottom: 24,
-    fontWeight: "600",
+    fontWeight: "800",
   },
   avatarSection: {
     marginBottom: 24,
@@ -253,21 +262,22 @@ const styles = StyleSheet.create({
   avatarGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
   },
   avatarOption: {
     alignItems: "center",
     margin: 8,
     padding: 8,
-    borderRadius: 8,
+    borderRadius: 18,
+    borderWidth: 2,
   },
   selectedAvatar: {
-    backgroundColor: "#e3f2fd",
+    transform: [{ scale: 1.03 }],
   },
   avatarImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
   },
   input: {
     marginBottom: 16,
@@ -296,6 +306,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 8,
+    borderRadius: 16,
   },
 });
 

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, ScrollView } from "react-native";
 import {
   Card,
   Text,
@@ -9,6 +9,8 @@ import {
 } from "react-native-paper";
 import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const avatarImages = {
   "DolorDeCabeza.png": require("../assets/avatars/DolorDeCabeza.png"),
@@ -28,15 +30,14 @@ const HistoryPeopleScreen = ({ navigation }) => {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    // Load people from API when screen opens
     loadPeopleFromAPI();
-  }, []); // Remove loadPeopleFromAPI from dependencies
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return user.people || [];
     return (user.people || []).filter((p) =>
-      (p.name || "").toLowerCase().includes(q)
+      (p.name || "").toLowerCase().includes(q),
     );
   }, [query, user.people]);
 
@@ -48,17 +49,35 @@ const HistoryPeopleScreen = ({ navigation }) => {
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: paperTheme.colors.background },
-      ]}
-    >
-      <Card style={styles.searchCard}>
+    <AppScreen contentContainerStyle={styles.container}>
+      <HeroPanel
+        eyebrow="HISTORIAL"
+        title="Busca a quien quieras investigar"
+        description="Entra en cualquier persona para revisar el archivo completo de molestias, fechas y capitulos del cuerpo."
+      >
+        <Text
+          style={[
+            styles.heroChip,
+            {
+              backgroundColor: paperTheme.colors.accentBerry,
+              color: paperTheme.colors.onSurface,
+            },
+          ]}
+        >
+          Coincidencias: {filtered.length}
+        </Text>
+      </HeroPanel>
+
+      <Card
+        style={[
+          styles.searchCard,
+          { backgroundColor: paperTheme.colors.surface },
+        ]}
+      >
         <Card.Content style={styles.searchContent}>
           <TextInput
             mode="outlined"
-            placeholder="Buscar persona..."
+            placeholder="Buscar persona para ver historial..."
             value={query}
             onChangeText={setQuery}
             style={styles.searchInput}
@@ -67,18 +86,27 @@ const HistoryPeopleScreen = ({ navigation }) => {
         </Card.Content>
       </Card>
 
-      <View style={styles.list}>
+      <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
         {filtered.length === 0 ? (
-          <Card style={styles.card}>
+          <Card
+            style={[
+              styles.card,
+              { backgroundColor: paperTheme.colors.surface },
+            ]}
+          >
             <Card.Content>
-              <Text variant="titleMedium">Sin personas</Text>
+              <Text variant="titleMedium" style={styles.emptyTitle}>
+                Sin expedientes todavia
+              </Text>
               <Text
                 style={{
                   color: paperTheme.colors.onSurfaceVariant,
                   marginTop: 4,
+                  lineHeight: 20,
                 }}
               >
-                Agrega una persona en “Registro” para ver su historial.
+                Agrega una persona en Registro para empezar a llenar el archivo
+                historico.
               </Text>
             </Card.Content>
           </Card>
@@ -86,7 +114,10 @@ const HistoryPeopleScreen = ({ navigation }) => {
           filtered.map((p) => (
             <Card
               key={p.id}
-              style={styles.card}
+              style={[
+                styles.card,
+                { backgroundColor: paperTheme.colors.surface },
+              ]}
               onPress={() => onSelectPerson(p)}
             >
               <Card.Content style={styles.row}>
@@ -115,10 +146,18 @@ const HistoryPeopleScreen = ({ navigation }) => {
                     <Text
                       style={{
                         color: paperTheme.colors.onSurfaceVariant,
-                        marginTop: 2,
+                        marginTop: 4,
                       }}
                     >
-                      Toca para ver historial
+                      {p.relationship || "Relacion sin etiqueta"}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.ctaText,
+                        { color: paperTheme.colors.primary },
+                      ]}
+                    >
+                      Toca para ver el historial completo
                     </Text>
                   </View>
                 </View>
@@ -127,18 +166,32 @@ const HistoryPeopleScreen = ({ navigation }) => {
             </Card>
           ))
         )}
-      </View>
-    </View>
+      </ScrollView>
+    </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 12 },
-  searchCard: { borderRadius: 16, overflow: "hidden" },
+  container: { flex: 1 },
+  heroChip: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: "800",
+    overflow: "hidden",
+  },
+  searchCard: { borderRadius: 24, overflow: "hidden" },
   searchContent: { paddingVertical: 6 },
   searchInput: { backgroundColor: "transparent" },
-  list: { gap: 10, paddingBottom: 24, marginTop: 12 },
-  card: { width: "100%", borderRadius: 16, overflow: "hidden" },
+  list: { flex: 1, marginTop: 12 },
+  card: {
+    width: "100%",
+    borderRadius: 24,
+    overflow: "hidden",
+    marginBottom: 12,
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -146,14 +199,16 @@ const styles = StyleSheet.create({
   },
   rowLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 52,
+    height: 52,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: { fontSize: 18, fontWeight: "700" },
   meta: { flex: 1 },
+  emptyTitle: { fontWeight: "800" },
+  ctaText: { marginTop: 6, fontSize: 12, fontWeight: "700" },
 });
 
 export default HistoryPeopleScreen;

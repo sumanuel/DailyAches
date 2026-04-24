@@ -9,6 +9,8 @@ import {
 } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useUser } from "../context/UserContext";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const ProfileScreen = () => {
   const paperTheme = usePaperTheme();
@@ -22,8 +24,9 @@ const ProfileScreen = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const styles = StyleSheet.create({
-    container: { padding: 12, paddingBottom: 24 },
-    card: { width: "100%", borderRadius: 16, overflow: "hidden" },
+    container: { paddingBottom: 24 },
+    card: { width: "100%", borderRadius: 24, overflow: "hidden" },
+    formTitle: { marginBottom: 16, fontWeight: "800" },
     input: { marginBottom: 12 },
     label: {
       fontSize: 12,
@@ -31,7 +34,7 @@ const ProfileScreen = () => {
       marginBottom: 8,
     },
     hint: { opacity: 0.7, marginTop: 4 },
-    button: { marginTop: 16 },
+    button: { marginTop: 16, borderRadius: 16 },
   });
 
   useEffect(() => {
@@ -68,24 +71,34 @@ const ProfileScreen = () => {
   };
 
   return (
-    <ScrollView
-      style={[{ backgroundColor: paperTheme.colors.background }]}
-      contentContainerStyle={styles.container}
-    >
-      <Card style={styles.card}>
-        <Card.Title title="Perfil" />
+    <AppScreen contentContainerStyle={styles.container}>
+      <HeroPanel
+        compact
+        eyebrow="TU FICHA"
+        title="Perfil con datos, no con drama"
+        description="Aqui ajustas lo basico para que DailyAches te acompañe mejor y sepa un poco mas de ti."
+      />
+
+      <Card
+        style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+      >
         <Card.Content>
+          <Text variant="titleLarge" style={styles.formTitle}>
+            Perfil
+          </Text>
           <TextInput
             label="Email"
             value={email}
             editable={false}
             style={styles.input}
+            mode="outlined"
           />
           <TextInput
             label="Nombre"
             value={name}
             onChangeText={setName}
             style={styles.input}
+            mode="outlined"
           />
           <TextInput
             label="Teléfono"
@@ -93,6 +106,7 @@ const ProfileScreen = () => {
             onChangeText={setPhone}
             keyboardType="phone-pad"
             style={styles.input}
+            mode="outlined"
           />
           <Text variant="bodySmall" style={styles.label}>
             Fecha de nacimiento
@@ -126,7 +140,7 @@ const ProfileScreen = () => {
           </Button>
         </Card.Content>
       </Card>
-    </ScrollView>
+    </AppScreen>
   );
 };
 

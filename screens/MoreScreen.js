@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, ScrollView, Alert, Share } from "react-native";
+import { StyleSheet, View, Alert, Share } from "react-native";
 import {
   Card,
   List,
@@ -7,10 +7,13 @@ import {
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import { useUser } from "../context/UserContext";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const MoreScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
   const { user, unlockAchievement, getTodayRecords } = useUser();
+  const todayCount = getTodayRecords().length;
 
   const handleShareToFacebook = async () => {
     const dailyRecords = getTodayRecords();
@@ -33,21 +36,44 @@ const MoreScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView
-      style={[
-        styles.container,
-        { backgroundColor: paperTheme.colors.background },
-      ]}
-      contentContainerStyle={styles.content}
-    >
-      <Text variant="headlineSmall" style={styles.title}>
-        Más opciones
-      </Text>
+    <AppScreen contentContainerStyle={styles.content}>
+      <HeroPanel
+        eyebrow="CENTRO DE CONTROL"
+        title="Mas cosas que hacer cuando el cuerpo anda creativo"
+        description="Ajusta tu cuenta, revisa tu progreso o comparte el resumen del dia con el drama justo y la elegancia suficiente."
+      >
+        <View style={styles.heroStats}>
+          <Text
+            style={[
+              styles.heroChip,
+              {
+                backgroundColor: paperTheme.colors.accentSky,
+                color: paperTheme.colors.onSurface,
+              },
+            ]}
+          >
+            Nivel {user.level}
+          </Text>
+          <Text
+            style={[
+              styles.heroChip,
+              {
+                backgroundColor: paperTheme.colors.accentMint,
+                color: paperTheme.colors.onSurface,
+              },
+            ]}
+          >
+            Hoy: {todayCount} registro{todayCount === 1 ? "" : "s"}
+          </Text>
+        </View>
+      </HeroPanel>
 
-      {/* Settings Section */}
-      <Card style={styles.card}>
+      <Card
+        style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+      >
         <List.Item
           title="Progreso"
+          description="Logros, nivel y puntos acumulados"
           left={(props) => <List.Icon {...props} icon="chart-line-variant" />}
           right={(props) => <List.Icon {...props} icon="chevron-right" />}
           onPress={() => navigation.navigate("Progress")}
@@ -55,6 +81,7 @@ const MoreScreen = ({ navigation }) => {
         <View style={styles.divider} />
         <List.Item
           title="Perfil"
+          description="Tus datos principales y ajustes personales"
           left={(props) => <List.Icon {...props} icon="account-outline" />}
           right={(props) => <List.Icon {...props} icon="chevron-right" />}
           onPress={() => navigation.navigate("Profile")}
@@ -62,6 +89,7 @@ const MoreScreen = ({ navigation }) => {
         <View style={styles.divider} />
         <List.Item
           title="Configuración"
+          description="Tema y preferencias generales"
           left={(props) => <List.Icon {...props} icon="cog-outline" />}
           right={(props) => <List.Icon {...props} icon="chevron-right" />}
           onPress={() => navigation.navigate("Settings")}
@@ -69,6 +97,7 @@ const MoreScreen = ({ navigation }) => {
         <View style={styles.divider} />
         <List.Item
           title="Configurar dolores"
+          description="Edita el catalogo de molestias disponibles"
           left={(props) => <List.Icon {...props} icon="format-list-bulleted" />}
           right={(props) => <List.Icon {...props} icon="chevron-right" />}
           onPress={() => navigation.navigate("PainSettings")}
@@ -76,21 +105,30 @@ const MoreScreen = ({ navigation }) => {
         <View style={styles.divider} />
         <List.Item
           title="Compartir en Facebook"
+          description="Saca pecho si hoy hubo valentia o paz"
           left={(props) => <List.Icon {...props} icon="facebook" />}
           onPress={handleShareToFacebook}
         />
       </Card>
 
       <Text style={styles.footer}>DailyAches</Text>
-    </ScrollView>
+    </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 },
-  title: { marginBottom: 12 },
-  card: { marginBottom: 16, borderRadius: 16, overflow: "hidden" },
+  content: { paddingBottom: 24 },
+  heroStats: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  heroChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: "800",
+    overflow: "hidden",
+  },
+  card: { marginBottom: 16, borderRadius: 24, overflow: "hidden" },
   divider: { height: StyleSheet.hairlineWidth, opacity: 0.2 },
   footer: { textAlign: "center", marginTop: 24, opacity: 0.7 },
 });

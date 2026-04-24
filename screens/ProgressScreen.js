@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, ScrollView, FlatList } from "react-native";
+import { StyleSheet, View, FlatList } from "react-native";
 import {
   Card,
   List,
@@ -8,6 +8,8 @@ import {
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import { useUser } from "../context/UserContext";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const ProgressScreen = () => {
   const paperTheme = usePaperTheme();
@@ -44,19 +46,16 @@ const ProgressScreen = () => {
   );
 
   return (
-    <ScrollView
-      style={[
-        styles.container,
-        { backgroundColor: paperTheme.colors.background },
-      ]}
-      contentContainerStyle={styles.content}
-    >
-      <Text variant="headlineSmall" style={styles.title}>
-        Mi Progreso
-      </Text>
+    <AppScreen contentContainerStyle={styles.content}>
+      <HeroPanel
+        eyebrow="TU MARCADOR"
+        title="Subes de nivel aunque el cuerpo proteste"
+        description="Cada registro y cada logro suma. Aqui ves que tan lejos has llegado en tu carrera oficial de supervivencia con estilo."
+      />
 
-      {/* Level Section */}
-      <Card style={styles.card}>
+      <Card
+        style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+      >
         <Card.Title title="Nivel y puntos" />
         <Card.Content>
           <View style={styles.row}>
@@ -74,8 +73,9 @@ const ProgressScreen = () => {
         </Card.Content>
       </Card>
 
-      {/* Achievements Section */}
-      <Card style={styles.card}>
+      <Card
+        style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+      >
         <Card.Title title="Logros" />
         <Card.Content>
           <Text style={styles.subtitle}>
@@ -90,15 +90,14 @@ const ProgressScreen = () => {
           />
         </Card.Content>
       </Card>
-    </ScrollView>
+    </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 },
-  title: { marginBottom: 12 },
-  card: { marginBottom: 16, borderRadius: 16, overflow: "hidden" },
+  content: { paddingBottom: 24 },
+  card: { marginBottom: 16, borderRadius: 24, overflow: "hidden" },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -106,7 +105,12 @@ const styles = StyleSheet.create({
   },
   progress: { marginTop: 12, height: 10, borderRadius: 6 },
   sub: { marginTop: 8, opacity: 0.7 },
-  subtitle: { fontSize: 16, marginBottom: 10, textAlign: "center" },
+  subtitle: {
+    fontSize: 15,
+    marginBottom: 10,
+    textAlign: "center",
+    lineHeight: 20,
+  },
   unlockedItem: { opacity: 1 },
   lockedItem: { opacity: 0.7 },
   unlockedPoints: { fontWeight: "bold" },

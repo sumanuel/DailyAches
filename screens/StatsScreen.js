@@ -9,6 +9,8 @@ import {
 } from "react-native-paper";
 import { Calendar } from "react-native-calendars";
 import { useUser } from "../context/UserContext";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const monthShortEs = [
   "ene",
@@ -100,16 +102,15 @@ const StatsScreen = ({ route }) => {
   const [tab, setTab] = useState("today"); // today | history
   const [preset, setPreset] = useState("this_month"); // this_month | prev_month | this_week | custom
   const [historyRange, setHistoryRange] = useState(() =>
-    getPresetRange("this_month")
+    getPresetRange("this_month"),
   );
   const [rangeOpen, setRangeOpen] = useState(false);
   const [selectingStart, setSelectingStart] = useState(true); // true for start, false for end
   const [tempRange, setTempRange] = useState(historyRange);
 
   useEffect(() => {
-    // Load records from API when screen opens
     loadRecordsFromAPI();
-  }, []); // Remove loadRecordsFromAPI from dependencies
+  }, []);
 
   const applyPreset = (p) => {
     setPreset(p);
@@ -255,14 +256,19 @@ const StatsScreen = ({ route }) => {
 
   if (!personId || !personName) {
     return (
-      <ScrollView
-        style={[
-          styles.container,
-          { backgroundColor: paperTheme.colors.background },
-        ]}
-        contentContainerStyle={styles.content}
-      >
-        <Card style={styles.emptyCard}>
+      <AppScreen contentContainerStyle={styles.content}>
+        <HeroPanel
+          compact
+          eyebrow="SIN PERSONA"
+          title="Primero elige a quien vas a investigar"
+          description="Vuelve atras, selecciona una persona y aqui veras su historial ordenado por fechas y episodios."
+        />
+        <Card
+          style={[
+            styles.emptyCard,
+            { backgroundColor: paperTheme.colors.surface },
+          ]}
+        >
           <Card.Content>
             <Text variant="titleMedium">Selecciona una persona</Text>
             <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
@@ -270,36 +276,29 @@ const StatsScreen = ({ route }) => {
             </Text>
           </Card.Content>
         </Card>
-      </ScrollView>
+      </AppScreen>
     );
   }
 
   return (
-    <ScrollView
-      style={[
-        styles.container,
-        { backgroundColor: paperTheme.colors.background },
-      ]}
-      contentContainerStyle={styles.content}
-    >
-      <Card style={styles.headerCard}>
-        <Card.Content style={styles.headerContent}>
-          <Avatar.Icon
-            size={44}
-            icon="history"
-            style={{ backgroundColor: paperTheme.colors.surfaceVariant }}
-            color={paperTheme.colors.onSurfaceVariant}
-          />
-          <View style={styles.headerText}>
-            <Text variant="titleMedium" style={styles.headerTitle}>
-              📊 {personName} ({count})
-            </Text>
-            <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
-              Historial de dolores para esta persona.
-            </Text>
-          </View>
-        </Card.Content>
-      </Card>
+    <AppScreen contentContainerStyle={styles.content}>
+      <HeroPanel
+        eyebrow="HISTORIAL DETALLADO"
+        title={`${personName} en cifras y episodios`}
+        description="Alterna entre el resumen de hoy y el archivo historico para leer el comportamiento del dolor sin perder contexto."
+      >
+        <Text
+          style={[
+            styles.heroChip,
+            {
+              backgroundColor: paperTheme.colors.accentSun,
+              color: paperTheme.colors.onSurface,
+            },
+          ]}
+        >
+          Registros: {count}
+        </Text>
+      </HeroPanel>
 
       <View
         style={[
@@ -326,7 +325,12 @@ const StatsScreen = ({ route }) => {
       </View>
 
       {tab === "history" && (
-        <Card style={styles.filtersCard}>
+        <Card
+          style={[
+            styles.filtersCard,
+            { backgroundColor: paperTheme.colors.surface },
+          ]}
+        >
           <Card.Content>
             <View style={styles.rangeRow}>
               <View style={styles.rangeCol}>
@@ -497,7 +501,12 @@ const StatsScreen = ({ route }) => {
       </Modal>
 
       {count === 0 ? (
-        <Card style={styles.emptyCard}>
+        <Card
+          style={[
+            styles.emptyCard,
+            { backgroundColor: paperTheme.colors.surface },
+          ]}
+        >
           <Card.Content>
             <Text variant="titleMedium">
               {tab === "today"
@@ -512,17 +521,22 @@ const StatsScreen = ({ route }) => {
       ) : (
         <View style={styles.recordsList}>{records.map(renderRecord)}</View>
       )}
-    </ScrollView>
+    </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 12, paddingBottom: 24 },
-  headerCard: { borderRadius: 16, overflow: "hidden" },
-  headerContent: { flexDirection: "row", alignItems: "center", gap: 12 },
-  headerText: { flex: 1 },
-  headerTitle: { fontWeight: "800" },
+  heroChip: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: "800",
+    overflow: "hidden",
+  },
 
   segment: {
     flexDirection: "row",
@@ -534,7 +548,7 @@ const styles = StyleSheet.create({
   segmentBtn: { flex: 1, borderRadius: 12 },
   segmentBtnContent: { height: 40 },
 
-  filtersCard: { marginTop: 12, borderRadius: 16, overflow: "hidden" },
+  filtersCard: { marginTop: 12, borderRadius: 24, overflow: "hidden" },
   rangeRow: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
   rangeCol: { flex: 1, gap: 6 },
   calendarBtn: { alignSelf: "stretch" },
@@ -548,7 +562,7 @@ const styles = StyleSheet.create({
   },
 
   recordsList: { marginTop: 12, gap: 10 },
-  recordCard: { borderRadius: 16, overflow: "hidden" },
+  recordCard: { borderRadius: 24, overflow: "hidden" },
   recordRowTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   recordIcon: { borderRadius: 12 },
   recordMain: { flex: 1 },
@@ -567,7 +581,7 @@ const styles = StyleSheet.create({
   kv: { flex: 1 },
   kvLabel: { fontSize: 10, letterSpacing: 0.6, fontWeight: "700" },
 
-  emptyCard: { marginTop: 12, borderRadius: 16, overflow: "hidden" },
+  emptyCard: { marginTop: 12, borderRadius: 24, overflow: "hidden" },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",

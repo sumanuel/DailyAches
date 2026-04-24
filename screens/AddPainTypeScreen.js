@@ -1,20 +1,15 @@
 import React, { useState } from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-} from "react-native";
-import {
-  Appbar,
   TextInput,
   Button,
+  Card,
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const painImages = {
   "Alegre.png": require("../assets/resourse_one/Alegre.png"),
@@ -51,7 +46,7 @@ const AddPainTypeScreen = ({ navigation, route }) => {
 
   const [painName, setPainName] = useState(existingPain?.name || "");
   const [selectedImage, setSelectedImage] = useState(
-    existingPain?.image || "Mujer feliz.png"
+    existingPain?.image || "Mujer feliz.png",
   );
   const [error, setError] = useState("");
 
@@ -62,10 +57,9 @@ const AddPainTypeScreen = ({ navigation, route }) => {
       return;
     }
 
-    // Validar duplicados (solo para creación, no para edición)
     if (!isEdit) {
       const exists = user.painTypes?.some(
-        (p) => p.name.toLowerCase() === trimmedName.toLowerCase()
+        (p) => p.name.toLowerCase() === trimmedName.toLowerCase(),
       );
       if (exists) {
         setError("Ya existe un tipo de dolor con este nombre");
@@ -73,12 +67,11 @@ const AddPainTypeScreen = ({ navigation, route }) => {
       }
     }
 
-    // Para edición, validar que no haya otro con el mismo nombre
     if (isEdit && existingPain) {
       const exists = user.painTypes?.some(
         (p) =>
           p.id !== existingPain.id &&
-          p.name.toLowerCase() === trimmedName.toLowerCase()
+          p.name.toLowerCase() === trimmedName.toLowerCase(),
       );
       if (exists) {
         setError("Ya existe otro tipo de dolor con este nombre");
@@ -86,7 +79,7 @@ const AddPainTypeScreen = ({ navigation, route }) => {
       }
     }
 
-    setError(""); // Limpiar error
+    setError("");
 
     try {
       if (isEdit && existingPain) {
@@ -107,11 +100,21 @@ const AddPainTypeScreen = ({ navigation, route }) => {
     return (
       <View style={styles.imagesGrid}>
         {images.map((img) => (
-          <TouchableOpacity
+          <Pressable
             key={img}
             onPress={() => setSelectedImage(img)}
             style={[
               styles.imageOption,
+              {
+                borderColor:
+                  selectedImage === img
+                    ? paperTheme.colors.primary
+                    : "transparent",
+                backgroundColor:
+                  selectedImage === img
+                    ? paperTheme.colors.primaryContainer
+                    : paperTheme.colors.surfaceVariant,
+              },
               selectedImage === img && styles.imageOptionSelected,
             ]}
           >
@@ -121,97 +124,96 @@ const AddPainTypeScreen = ({ navigation, route }) => {
                 <Text style={styles.checkMark}>✓</Text>
               </View>
             )}
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
     );
   };
 
   return (
-    <SafeAreaView
-      style={[
-        styles.container,
-        { backgroundColor: paperTheme.colors.background },
-      ]}
-    >
-      <Appbar.Header style={{ backgroundColor: paperTheme.colors.surface }}>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content
-          title={isEdit ? "Editar tipo de dolor" : "Agregar tipo de dolor"}
-        />
-      </Appbar.Header>
+    <AppScreen contentContainerStyle={styles.content}>
+      <HeroPanel
+        eyebrow={isEdit ? "EDITAR TIPO" : "NUEVO TIPO"}
+        title={
+          isEdit
+            ? "Dale un mejor nombre al achaque"
+            : "Agrega un dolor con identidad propia"
+        }
+        description="Elige un nombre claro y una imagen que lo haga reconocible en un vistazo."
+      />
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
+      <Card
+        style={[
+          styles.formCard,
+          { backgroundColor: paperTheme.colors.surface },
+        ]}
       >
-        <TextInput
-          label="Nombre del dolor"
-          value={painName}
-          onChangeText={(text) => {
-            setPainName(text);
-            if (error) setError(""); // Limpiar error al escribir
-          }}
-          style={styles.textInput}
-          mode="outlined"
-          theme={{ colors: { primary: paperTheme.colors.primary } }}
-          autoFocus={!isEdit}
-        />
-
-        {error ? (
-          <Text style={[styles.errorText, { color: paperTheme.colors.error }]}>
-            {error}
-          </Text>
-        ) : null}
-
-        <Text
-          style={[styles.sectionTitle, { color: paperTheme.colors.onSurface }]}
-        >
-          Selecciona una imagen:
-        </Text>
-
-        {renderImageGrid()}
-
-        <View style={styles.buttonContainer}>
-          <Button
+        <Card.Content>
+          <TextInput
+            label="Nombre del dolor"
+            value={painName}
+            onChangeText={(text) => {
+              setPainName(text);
+              if (error) setError("");
+            }}
+            style={styles.textInput}
             mode="outlined"
-            onPress={() => navigation.goBack()}
-            style={styles.cancelButton}
+            autoFocus={!isEdit}
+          />
+
+          {error ? (
+            <Text
+              style={[styles.errorText, { color: paperTheme.colors.error }]}
+            >
+              {error}
+            </Text>
+          ) : null}
+
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: paperTheme.colors.onSurface },
+            ]}
           >
-            Cancelar
-          </Button>
-          <Button
-            mode="contained"
-            onPress={handleSave}
-            disabled={!painName.trim()}
-            style={styles.saveButton}
-          >
-            {isEdit ? "Actualizar" : "Agregar"}
-          </Button>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+            Selecciona una imagen:
+          </Text>
+
+          {renderImageGrid()}
+
+          <View style={styles.buttonContainer}>
+            <Button
+              mode="outlined"
+              onPress={() => navigation.goBack()}
+              style={styles.cancelButton}
+            >
+              Cancelar
+            </Button>
+            <Button
+              mode="contained"
+              onPress={handleSave}
+              disabled={!painName.trim()}
+              style={styles.saveButton}
+            >
+              {isEdit ? "Actualizar" : "Agregar"}
+            </Button>
+          </View>
+        </Card.Content>
+      </Card>
+    </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
   content: {
-    padding: 16,
     paddingBottom: 32,
   },
+  formCard: { borderRadius: 24, overflow: "hidden" },
   textInput: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "800",
     marginBottom: 16,
   },
   imagesGrid: {
@@ -232,7 +234,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   imageOptionSelected: {
-    borderColor: "#6B45C4",
+    transform: [{ scale: 1.03 }],
   },
   imagePreview: {
     width: 60,
@@ -245,7 +247,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(107, 69, 196, 0.8)",
+    backgroundColor: "rgba(0,0,0,0.2)",
     borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
@@ -262,9 +264,11 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
+    borderRadius: 16,
   },
   saveButton: {
     flex: 1,
+    borderRadius: 16,
   },
   errorText: {
     fontSize: 14,

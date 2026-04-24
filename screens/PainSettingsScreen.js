@@ -10,6 +10,8 @@ import {
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const painImages = {
   "Alegre.png": require("../assets/resourse_one/Alegre.png"),
@@ -45,9 +47,8 @@ const PainSettingsScreen = () => {
   const painTypes = useMemo(() => user.painTypes || [], [user.painTypes]);
 
   useEffect(() => {
-    // Load pain types from API when screen opens
     loadPainTypesFromAPI();
-  }, []); // Remove loadPainTypesFromAPI from dependencies
+  }, []);
 
   const openAddScreen = () => {
     navigation.navigate("AddPainType", { isEdit: false });
@@ -79,12 +80,12 @@ const PainSettingsScreen = () => {
                 ) {
                   Alert.alert(
                     "No se puede eliminar",
-                    "Este tipo de dolor no se puede eliminar porque ya está siendo usado en registros existentes."
+                    "Este tipo de dolor no se puede eliminar porque ya está siendo usado en registros existentes.",
                   );
                 } else {
                   Alert.alert(
                     "Advertencia",
-                    "El tipo de dolor se eliminó localmente, pero puede que no se haya sincronizado con el servidor."
+                    "El tipo de dolor se eliminó localmente, pero puede que no se haya sincronizado con el servidor.",
                   );
                 }
               }
@@ -92,39 +93,73 @@ const PainSettingsScreen = () => {
               console.error("Error deleting pain type:", error);
               Alert.alert(
                 "Error",
-                "No se pudo eliminar el tipo de dolor. Inténtalo de nuevo."
+                "No se pudo eliminar el tipo de dolor. Inténtalo de nuevo.",
               );
             }
           },
         },
-      ]
+      ],
     );
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: paperTheme.colors.background },
-      ]}
-    >
-      <Card style={styles.headerCard}>
-        <Card.Title title="Configurar dolores" />
-        <Card.Content>
-          <Text style={styles.sub}>
-            Estos son los tipos disponibles al registrar un dolor.
-          </Text>
-        </Card.Content>
-      </Card>
+    <AppScreen scroll={false} contentContainerStyle={styles.container}>
+      <HeroPanel
+        eyebrow="CATALOGO DE DOLORES"
+        title="Ordena el menu del drama corporal"
+        description="Edita nombres e imagenes para que registrar un dolor sea rapido, claro y con personalidad."
+      >
+        <Text
+          style={[
+            styles.heroChip,
+            {
+              backgroundColor: paperTheme.colors.accentBerry,
+              color: paperTheme.colors.onSurface,
+            },
+          ]}
+        >
+          Tipos: {painTypes.length}
+        </Text>
+      </HeroPanel>
 
-      <Card style={styles.listCard}>
+      <Card
+        style={[
+          styles.listCard,
+          { backgroundColor: paperTheme.colors.surface },
+        ]}
+      >
         <FlatList
           data={painTypes}
           keyExtractor={(item) => item.name}
+          ListEmptyComponent={
+            <View style={styles.emptyWrap}>
+              <Text variant="titleMedium" style={styles.emptyTitle}>
+                No hay tipos cargados
+              </Text>
+              <Text
+                style={{
+                  color: paperTheme.colors.onSurfaceVariant,
+                  textAlign: "center",
+                }}
+              >
+                Agrega uno nuevo para empezar a personalizar el registro.
+              </Text>
+            </View>
+          }
           renderItem={({ item }) => (
             <View style={styles.itemRow}>
               <Image source={painImages[item.image]} style={styles.itemImage} />
-              <Text style={styles.itemText}>{item.name}</Text>
+              <View style={styles.itemMeta}>
+                <Text style={styles.itemText}>{item.name}</Text>
+                <Text
+                  style={{
+                    color: paperTheme.colors.onSurfaceVariant,
+                    fontSize: 12,
+                  }}
+                >
+                  Disponible para nuevos registros
+                </Text>
+              </View>
               <View style={styles.itemActions}>
                 <IconButton
                   icon="pencil"
@@ -156,32 +191,42 @@ const PainSettingsScreen = () => {
       <FAB
         icon="plus"
         onPress={openAddScreen}
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: paperTheme.colors.primary }]}
+        color={paperTheme.colors.onPrimary}
         accessibilityLabel="Agregar nuevo tipo de dolor"
       />
-    </View>
+    </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 12 },
-  headerCard: { borderRadius: 16, overflow: "hidden", marginBottom: 12 },
-  listCard: { flex: 1, borderRadius: 16, overflow: "hidden" },
-  sub: { opacity: 0.7, marginBottom: 8 },
+  container: { flex: 1 },
+  heroChip: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: "800",
+    overflow: "hidden",
+  },
+  listCard: { flex: 1, borderRadius: 24, overflow: "hidden" },
   listContent: { paddingHorizontal: 16, paddingBottom: 8 },
+  emptyWrap: { paddingVertical: 32, alignItems: "center", gap: 8 },
+  emptyTitle: { fontWeight: "800" },
   itemRow: {
-    paddingVertical: 12,
+    paddingVertical: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  itemImage: { width: 40, height: 40, borderRadius: 20, marginRight: 12 },
-  itemText: { flex: 1, fontSize: 16 },
+  itemImage: { width: 48, height: 48, borderRadius: 18, marginRight: 12 },
+  itemMeta: { flex: 1 },
+  itemText: { fontSize: 16, fontWeight: "700" },
   itemActions: { flexDirection: "row" },
   sep: { height: StyleSheet.hairlineWidth, opacity: 0.6 },
   fab: {
     position: "absolute",
-    margin: 16,
     right: 0,
     bottom: 0,
   },

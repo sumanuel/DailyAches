@@ -1,6 +1,8 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
+const FALLBACK_DEV_API_URL = "http://192.168.1.8:3000/api";
+
 function getDevHost() {
   const hostUri =
     Constants.expoConfig?.hostUri ||
@@ -15,21 +17,38 @@ function getDevHost() {
   return "localhost";
 }
 
+function normalizeBaseUrl(url) {
+  if (typeof url !== "string") return null;
+  const trimmed = url.trim().replace(/\/$/, "");
+  if (!trimmed) return null;
+  return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
+}
+
 function getDevBaseUrl() {
-  // Android emulator needs 10.0.2.2 to reach the host machine.
+  const envBaseUrl = normalizeBaseUrl(process.env.EXPO_PUBLIC_API_URL);
+  if (envBaseUrl) {
+    return envBaseUrl;
+  }
+
+  // Android emulator should use the special alias to reach the host machine. Jesús IP consola API
   if (Platform.OS === "android" && !Constants.isDevice) {
-    return "http://192.168.1.6:3000/api"; // Replace with your PC's IP
+    return "http://192.168.1.8:3000/api";
   }
 
-  // For physical devices (like Expo Go on phone), use the host IP
+  // Physical devices need a stable LAN address. Avoid auto-detected virtual
+  // adapters like 172.30.x.x from Hyper-V/WSL because phones cannot route to
+  // them reliably.
   if (Constants.isDevice) {
-    return "http://192.168.1.6:3000/api"; // Replace with your PC's IP
+    return FALLBACK_DEV_API_URL;
   }
 
-  const host = getDevHost();
-  const baseUrl = `http://${host}:3000/api`;
-  console.log("API Base URL:", baseUrl); // Agregar log para depurar
-  return baseUrl;
+  // iOS simulator / web dev can usually reach the host resolved by Expo.
+  if (!Constants.isDevice) {
+    const host = getDevHost();
+    return `http://${host}:3000/api`;
+  }
+
+  return FALLBACK_DEV_API_URL;
 }
 
 // API Configuration
@@ -39,7 +58,7 @@ export const API_CONFIG = {
 };
 
 // Notes:
-// - Physical device on LAN: uses Metro host IP (e.g. http://192.168.1.6:3000/api)
+// - Physical device on LAN: uses Metro host IP (e.g. http://192.168.1.8:3000/api)
 // - Android emulator: http://10.0.2.2:3000/api
 // - If Metro runs in tunnel mode, set a fixed API URL manually.
 

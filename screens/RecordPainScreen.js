@@ -1,18 +1,10 @@
 import React, { useMemo, useState, useEffect } from "react";
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
+import { View, StyleSheet, Alert, Pressable, FlatList } from "react-native";
 import {
   TextInput,
   Button,
   Text,
   Card,
-  RadioButton,
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import { Image } from "expo-image";
@@ -20,6 +12,8 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useUser } from "../context/UserContext";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const painImages = {
   "Alegre.png": require("../assets/resourse_one/Alegre.png"),
@@ -86,7 +80,6 @@ const RecordPainScreen = ({ navigation, route }) => {
   const { user, createRecordAPI, updateRecordAPI, loadPainTypesFromAPI } =
     useUser();
   const paperTheme = usePaperTheme();
-  const [customPain, setCustomPain] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const [editRecord, setEditRecord] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -100,9 +93,8 @@ const RecordPainScreen = ({ navigation, route }) => {
   const personName = paramPersonName || (record ? record.personName : null);
 
   useEffect(() => {
-    // Load pain types from API when screen opens
     loadPainTypesFromAPI();
-  }, []); // Remove loadPainTypesFromAPI from dependencies
+  }, []);
 
   useEffect(() => {
     if (record) {
@@ -123,7 +115,7 @@ const RecordPainScreen = ({ navigation, route }) => {
   const filteredPainTypes = useMemo(() => {
     if (!searchQuery.trim()) return painTypes;
     return painTypes.filter((pain) =>
-      pain.name.toLowerCase().includes(searchQuery.toLowerCase())
+      pain.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [painTypes, searchQuery]);
 
@@ -131,7 +123,6 @@ const RecordPainScreen = ({ navigation, route }) => {
     control,
     handleSubmit,
     formState: { errors },
-    watch,
     setValue,
   } = useForm({
     resolver: yupResolver(schema),
@@ -141,16 +132,14 @@ const RecordPainScreen = ({ navigation, route }) => {
     },
   });
 
-  const selectedPain = watch("pain");
-
   const onSubmit = async (data) => {
-    if (!selectedPainType) return; // Should not happen
+    if (!selectedPainType) return;
 
     try {
       const recordData = {
         person_id: personId,
         pain_type_id: selectedPainType.id,
-        pain_level: 5, // Default pain level
+        pain_level: 5,
         notes: data.notes,
       };
 
@@ -158,20 +147,20 @@ const RecordPainScreen = ({ navigation, route }) => {
         await updateRecordAPI(editRecord.id, recordData);
         Alert.alert(
           "¡Actualizado!",
-          `Registro actualizado para ${personName}: ${selectedPainType.name}`
+          `Registro actualizado para ${personName}: ${selectedPainType.name}`,
         );
       } else {
         await createRecordAPI(recordData);
         Alert.alert(
           "¡Registrado!",
-          `Dolor registrado para ${personName}: ${selectedPainType.name}`
+          `Dolor registrado para ${personName}: ${selectedPainType.name}`,
         );
       }
       navigation.goBack();
     } catch (error) {
       Alert.alert(
         "Error",
-        "No se pudo guardar el registro. Inténtalo de nuevo."
+        "No se pudo guardar el registro. Inténtalo de nuevo.",
       );
       console.error("Error saving record:", error);
     }
@@ -179,14 +168,16 @@ const RecordPainScreen = ({ navigation, route }) => {
 
   if (!personId || !personName) {
     return (
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: paperTheme.colors.background },
-        ]}
-      >
-        <Card style={styles.card}>
-          <Card.Title title="Registrar" />
+      <AppScreen>
+        <HeroPanel
+          compact
+          eyebrow="ANTES DE EMPEZAR"
+          title="Falta elegir a la persona"
+          description="Primero entra a Registro y selecciona a alguien. Luego ya podemos documentar el achaque con categoria y estilo."
+        />
+        <Card
+          style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+        >
           <Card.Content>
             <Text>Selecciona una persona primero desde “Registro”.</Text>
             <Button
@@ -198,29 +189,44 @@ const RecordPainScreen = ({ navigation, route }) => {
             </Button>
           </Card.Content>
         </Card>
-      </View>
+      </AppScreen>
     );
   }
 
   return (
-    <ScrollView
-      style={[{ backgroundColor: paperTheme.colors.background }]}
-      contentContainerStyle={styles.container}
-    >
-      <Card style={styles.card}>
-        <Card.Title
-          title={isEdit ? "Editar registro" : "Registrar"}
-          subtitle={personName}
-        />
+    <AppScreen contentContainerStyle={styles.container}>
+      <HeroPanel
+        eyebrow={isEdit ? "EDITAR REGISTRO" : "NUEVO REGISTRO"}
+        title={`${personName} entra al radar de hoy`}
+        description="Elige el tipo de molestia, deja una nota si hace falta y guarda el capitulo de hoy sin perder claridad."
+      >
+        {selectedPainType ? (
+          <Text
+            style={[
+              styles.selectionChip,
+              {
+                backgroundColor: paperTheme.colors.accentSun,
+                color: paperTheme.colors.onSurface,
+              },
+            ]}
+          >
+            Seleccionado: {selectedPainType.name}
+          </Text>
+        ) : null}
+      </HeroPanel>
+
+      <Card
+        style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+      >
         <Card.Content>
           <TextInput
-            label="Buscar"
+            label="Buscar dolor"
             value={searchQuery}
             onChangeText={setSearchQuery}
             style={styles.searchInput}
             mode="outlined"
-            theme={{ colors: { primary: "#9C27B0" } }}
           />
+
           <FlatList
             data={filteredPainTypes}
             keyExtractor={(item) => item.name}
@@ -228,13 +234,20 @@ const RecordPainScreen = ({ navigation, route }) => {
             scrollEnabled={false}
             renderItem={({ item }) => {
               const imageSource = getPainImage(item);
+              const isSelected = selectedPainType?.name === item.name;
 
               return (
-                <TouchableOpacity
+                <Pressable
                   style={[
                     styles.painOption,
-                    selectedPainType?.name === item.name &&
-                      styles.selectedPainOption,
+                    {
+                      backgroundColor: isSelected
+                        ? paperTheme.colors.primaryContainer
+                        : paperTheme.colors.surfaceVariant,
+                      borderColor: isSelected
+                        ? paperTheme.colors.primary
+                        : "transparent",
+                    },
                   ]}
                   onPress={() => {
                     setSelectedPainType(item);
@@ -248,8 +261,19 @@ const RecordPainScreen = ({ navigation, route }) => {
                       console.log(`Error loading image for: ${item.name}`)
                     }
                   />
-                  <Text style={styles.painText}>{item.name}</Text>
-                </TouchableOpacity>
+                  <Text
+                    style={[
+                      styles.painText,
+                      {
+                        color: isSelected
+                          ? paperTheme.colors.onPrimaryContainer
+                          : paperTheme.colors.onSurface,
+                      },
+                    ]}
+                  >
+                    {item.name}
+                  </Text>
+                </Pressable>
               );
             }}
             contentContainerStyle={styles.painGrid}
@@ -272,6 +296,7 @@ const RecordPainScreen = ({ navigation, route }) => {
                 multiline
                 numberOfLines={3}
                 style={styles.input}
+                mode="outlined"
               />
             )}
           />
@@ -285,14 +310,22 @@ const RecordPainScreen = ({ navigation, route }) => {
           </Button>
         </Card.Content>
       </Card>
-    </ScrollView>
+    </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 16, paddingBottom: 32 },
-  card: { borderRadius: 20, overflow: "hidden", elevation: 4 },
-  label: { marginTop: 8, marginBottom: 12, fontWeight: "700", fontSize: 16 },
+  container: { paddingBottom: 32 },
+  selectionChip: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: "800",
+    overflow: "hidden",
+  },
+  card: { borderRadius: 24, overflow: "hidden" },
   searchInput: { marginBottom: 16 },
   painGrid: { paddingVertical: 8 },
   painOption: {
@@ -300,18 +333,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 12,
     margin: 4,
-    borderRadius: 12,
-    backgroundColor: "transparent",
-  },
-  selectedPainOption: {
-    backgroundColor: "#f0f0f0",
+    borderRadius: 20,
     borderWidth: 2,
-    borderColor: "#9C27B0",
   },
   painImage: { width: 60, height: 60, borderRadius: 30, marginBottom: 8 },
   painText: { fontSize: 14, textAlign: "center", fontWeight: "500" },
   input: { marginTop: 12 },
-  button: { marginTop: 24, marginBottom: 8 },
+  button: { marginTop: 24, marginBottom: 8, borderRadius: 16 },
   error: { fontSize: 12, marginTop: 6 },
 });
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Alert } from "react-native";
+import { StyleSheet, Alert } from "react-native";
 import {
   TextInput,
   Button,
@@ -12,6 +12,8 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useUser } from "../context/UserContext";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const schema = yup.object({
   email: yup.string().email("Email inválido").required("Email es requerido"),
@@ -40,21 +42,19 @@ const LoginScreen = ({ navigation }) => {
       const response = await login(data.email, data.password);
 
       if (response.success) {
-        // Login successful - navigate to main app
         navigation.getParent()?.replace("Main");
       } else {
-        // Show error message
         Alert.alert(
           "Error de inicio de sesión",
           response.error || "Credenciales inválidas",
-          [{ text: "OK" }]
+          [{ text: "OK" }],
         );
       }
     } catch (error) {
       Alert.alert(
         "Error",
         "Ha ocurrido un error inesperado. Inténtalo de nuevo.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
     } finally {
       setLoading(false);
@@ -62,17 +62,30 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: paperTheme.colors.background },
-      ]}
-    >
-      <Card style={styles.card}>
+    <AppScreen scroll={false} contentContainerStyle={styles.container}>
+      <HeroPanel
+        compact
+        eyebrow="BIENVENIDO DE NUEVO"
+        title="Tu cuerpo ya puede empezar a chismear"
+        description="Entra para registrar molestias, seguir el drama del día y mantener el humor incluso cuando el cuerpo no coopera."
+      />
+
+      <Card
+        style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+      >
         <Card.Content>
           <Text variant="titleLarge" style={styles.title}>
             Iniciar Sesión
           </Text>
+          <Text
+            style={[
+              styles.subtitle,
+              { color: paperTheme.colors.onSurfaceVariant },
+            ]}
+          >
+            Usa tu cuenta para volver a tu tablero con estilo.
+          </Text>
+
           <Controller
             control={control}
             name="email"
@@ -83,6 +96,7 @@ const LoginScreen = ({ navigation }) => {
                 onChangeText={onChange}
                 error={!!errors.email}
                 style={styles.input}
+                mode="outlined"
               />
             )}
           />
@@ -91,6 +105,7 @@ const LoginScreen = ({ navigation }) => {
               {errors.email.message}
             </Text>
           )}
+
           <Controller
             control={control}
             name="password"
@@ -102,6 +117,7 @@ const LoginScreen = ({ navigation }) => {
                 secureTextEntry
                 error={!!errors.password}
                 style={styles.input}
+                mode="outlined"
               />
             )}
           />
@@ -110,6 +126,7 @@ const LoginScreen = ({ navigation }) => {
               {errors.password.message}
             </Text>
           )}
+
           <Button
             mode="contained"
             onPress={handleSubmit(onSubmit)}
@@ -129,15 +146,21 @@ const LoginScreen = ({ navigation }) => {
               "Iniciar Sesión"
             )}
           </Button>
-          <Button onPress={() => navigation.navigate("Register")}>
+          <Button
+            style={styles.linkButton}
+            onPress={() => navigation.navigate("Register")}
+          >
             ¿No tienes cuenta? Regístrate
           </Button>
-          <Button onPress={() => navigation.navigate("ForgotPassword")}>
+          <Button
+            style={styles.linkButton}
+            onPress={() => navigation.navigate("ForgotPassword")}
+          >
             Olvidé mi contraseña
           </Button>
         </Card.Content>
       </Card>
-    </View>
+    </AppScreen>
   );
 };
 
@@ -145,15 +168,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    padding: 12,
   },
-  card: { borderRadius: 16, overflow: "hidden" },
-  title: { textAlign: "center", marginBottom: 16 },
+  card: { borderRadius: 28, overflow: "hidden" },
+  title: { textAlign: "center", marginBottom: 8, fontWeight: "800" },
+  subtitle: { textAlign: "center", marginBottom: 18, lineHeight: 20 },
   input: {
     marginBottom: 10,
   },
   button: {
-    marginTop: 12,
+    marginTop: 16,
+    borderRadius: 16,
+  },
+  linkButton: {
+    marginTop: 4,
   },
   loader: {
     marginRight: 8,

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import { StyleSheet, Alert } from "react-native";
 import {
   TextInput,
   Button,
@@ -12,6 +12,8 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import AuthService from "../utils/authService";
+import AppScreen from "../components/AppScreen";
+import HeroPanel from "../components/HeroPanel";
 
 const schema = yup.object({
   name: yup.string().required("Nombre es requerido"),
@@ -44,7 +46,7 @@ const RegisterScreen = ({ navigation }) => {
       const response = await AuthService.register(
         data.email,
         data.password,
-        data.name
+        data.name,
       );
 
       if (response.success) {
@@ -56,20 +58,20 @@ const RegisterScreen = ({ navigation }) => {
               text: "OK",
               onPress: () => navigation.navigate("Login"),
             },
-          ]
+          ],
         );
       } else {
         Alert.alert(
           "Error de registro",
           response.error || "Ha ocurrido un error al crear tu cuenta.",
-          [{ text: "OK" }]
+          [{ text: "OK" }],
         );
       }
     } catch (error) {
       Alert.alert(
         "Error",
         "Ha ocurrido un error inesperado. Inténtalo de nuevo.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
     } finally {
       setLoading(false);
@@ -77,17 +79,30 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={[
-        styles.container,
-        { backgroundColor: paperTheme.colors.background },
-      ]}
-    >
-      <Card style={styles.card}>
+    <AppScreen contentContainerStyle={styles.container}>
+      <HeroPanel
+        compact
+        eyebrow="NUEVA CUENTA"
+        title="Crea tu club oficial de achaques"
+        description="Prepara tu espacio para registrar dolores con un tono ligero, seguir avances y no perderte ningún episodio del cuerpo."
+      />
+
+      <Card
+        style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+      >
         <Card.Content>
           <Text variant="titleLarge" style={styles.title}>
             Registro
           </Text>
+          <Text
+            style={[
+              styles.subtitle,
+              { color: paperTheme.colors.onSurfaceVariant },
+            ]}
+          >
+            Con unos datos basicos quedas listo para empezar.
+          </Text>
+
           <Controller
             control={control}
             name="name"
@@ -98,6 +113,7 @@ const RegisterScreen = ({ navigation }) => {
                 onChangeText={onChange}
                 error={!!errors.name}
                 style={styles.input}
+                mode="outlined"
               />
             )}
           />
@@ -106,6 +122,7 @@ const RegisterScreen = ({ navigation }) => {
               {errors.name.message}
             </Text>
           )}
+
           <Controller
             control={control}
             name="email"
@@ -116,6 +133,7 @@ const RegisterScreen = ({ navigation }) => {
                 onChangeText={onChange}
                 error={!!errors.email}
                 style={styles.input}
+                mode="outlined"
               />
             )}
           />
@@ -124,6 +142,7 @@ const RegisterScreen = ({ navigation }) => {
               {errors.email.message}
             </Text>
           )}
+
           <Controller
             control={control}
             name="password"
@@ -135,6 +154,7 @@ const RegisterScreen = ({ navigation }) => {
                 secureTextEntry
                 error={!!errors.password}
                 style={styles.input}
+                mode="outlined"
               />
             )}
           />
@@ -143,6 +163,7 @@ const RegisterScreen = ({ navigation }) => {
               {errors.password.message}
             </Text>
           )}
+
           <Controller
             control={control}
             name="confirmPassword"
@@ -154,6 +175,7 @@ const RegisterScreen = ({ navigation }) => {
                 secureTextEntry
                 error={!!errors.confirmPassword}
                 style={styles.input}
+                mode="outlined"
               />
             )}
           />
@@ -162,6 +184,7 @@ const RegisterScreen = ({ navigation }) => {
               {errors.confirmPassword.message}
             </Text>
           )}
+
           <Button
             mode="contained"
             onPress={handleSubmit(onSubmit)}
@@ -181,12 +204,15 @@ const RegisterScreen = ({ navigation }) => {
               "Registrarse"
             )}
           </Button>
-          <Button onPress={() => navigation.navigate("Login")}>
+          <Button
+            style={styles.linkButton}
+            onPress={() => navigation.navigate("Login")}
+          >
             ¿Ya tienes cuenta? Inicia Sesión
           </Button>
         </Card.Content>
       </Card>
-    </ScrollView>
+    </AppScreen>
   );
 };
 
@@ -194,15 +220,19 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     justifyContent: "center",
-    padding: 12,
   },
-  card: { borderRadius: 16, overflow: "hidden" },
-  title: { textAlign: "center", marginBottom: 16 },
+  card: { borderRadius: 28, overflow: "hidden" },
+  title: { textAlign: "center", marginBottom: 8, fontWeight: "800" },
+  subtitle: { textAlign: "center", marginBottom: 18, lineHeight: 20 },
   input: {
     marginBottom: 10,
   },
   button: {
-    marginTop: 12,
+    marginTop: 16,
+    borderRadius: 16,
+  },
+  linkButton: {
+    marginTop: 4,
   },
   loader: {
     marginRight: 8,
