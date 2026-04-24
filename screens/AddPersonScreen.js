@@ -169,33 +169,50 @@ const AddPersonScreen = ({ navigation, route }) => {
                 Avatar
               </Text>
               <View style={styles.avatarGrid}>
-                {avatars.map((avatar) => (
-                  <Pressable
-                    key={avatar}
-                    onPress={() => setSelectedAvatar(avatar)}
-                    style={[
-                      styles.avatarOption,
-                      {
-                        backgroundColor:
-                          selectedAvatar === avatar
-                            ? paperTheme.colors.primaryContainer
-                            : paperTheme.colors.surfaceVariant,
-                        borderColor:
-                          selectedAvatar === avatar
-                            ? paperTheme.colors.primary
-                            : "transparent",
-                      },
-                      selectedAvatar === avatar && styles.selectedAvatar,
-                    ]}
-                  >
-                    <IllustrationBadge
-                      preset={getAvatarIllustration(avatar)}
-                      size={54}
-                      selected={selectedAvatar === avatar}
-                      style={styles.avatarImage}
-                    />
-                  </Pressable>
-                ))}
+                {avatars.map((avatar) => {
+                  const preset = getAvatarIllustration(avatar);
+
+                  return (
+                    <Pressable
+                      key={avatar}
+                      onPress={() => setSelectedAvatar(avatar)}
+                      style={[
+                        styles.avatarOption,
+                        {
+                          backgroundColor:
+                            selectedAvatar === avatar
+                              ? paperTheme.colors.primaryContainer
+                              : paperTheme.colors.surfaceVariant,
+                          borderColor:
+                            selectedAvatar === avatar
+                              ? paperTheme.colors.primary
+                              : "transparent",
+                        },
+                        selectedAvatar === avatar && styles.selectedAvatar,
+                      ]}
+                    >
+                      <IllustrationBadge
+                        preset={preset}
+                        size={54}
+                        selected={selectedAvatar === avatar}
+                        style={styles.avatarImage}
+                      />
+                      <Text
+                        style={[
+                          styles.avatarLabel,
+                          {
+                            color:
+                              selectedAvatar === avatar
+                                ? paperTheme.colors.onPrimaryContainer
+                                : paperTheme.colors.onSurfaceVariant,
+                          },
+                        ]}
+                      >
+                        {preset.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
             </View>
 
@@ -248,20 +265,28 @@ const styles = StyleSheet.create({
   avatarGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    gap: 10,
   },
   avatarOption: {
     alignItems: "center",
-    margin: 8,
-    padding: 8,
-    borderRadius: 18,
+    width: "31%",
+    minWidth: 90,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    borderRadius: 20,
     borderWidth: 2,
+    gap: 8,
   },
   selectedAvatar: {
     transform: [{ scale: 1.03 }],
   },
   avatarImage: {
     flexShrink: 0,
+  },
+  avatarLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    textAlign: "center",
   },
   input: {
     marginBottom: 16,

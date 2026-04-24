@@ -26,6 +26,11 @@ const IllustrationBadge = ({
     preset?.halo,
     paperTheme.colors.surface,
   );
+  const orbitColor = resolveColor(
+    paperTheme,
+    preset?.orbit,
+    paperTheme.colors.primaryContainer,
+  );
 
   return (
     <View
@@ -40,10 +45,27 @@ const IllustrationBadge = ({
             ? paperTheme.colors.primary
             : paperTheme.colors.outlineVariant,
           borderWidth: selected ? 2 : 1,
+          shadowColor: paperTheme.colors.onSurface,
+          shadowOpacity: selected ? 0.18 : 0.08,
+          shadowRadius: selected ? 16 : 10,
+          shadowOffset: { width: 0, height: selected ? 8 : 4 },
+          elevation: selected ? 6 : 2,
         },
         style,
       ]}
     >
+      <View
+        style={[
+          styles.ring,
+          {
+            borderRadius: radius,
+            borderColor: selected
+              ? paperTheme.colors.onPrimaryContainer
+              : paperTheme.colors.surface,
+            opacity: selected ? 0.35 : 0.18,
+          },
+        ]}
+      />
       <View
         style={[
           styles.halo,
@@ -52,6 +74,18 @@ const IllustrationBadge = ({
             height: size * 0.68,
             borderRadius: rounded ? size * 0.34 : Math.round(size * 0.22),
             backgroundColor: haloColor,
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.sheen,
+          {
+            width: size * 0.78,
+            height: size * 0.3,
+            borderRadius: size * 0.2,
+            backgroundColor: paperTheme.colors.surface,
+            opacity: selected ? 0.28 : 0.18,
           },
         ]}
       />
@@ -75,6 +109,19 @@ const IllustrationBadge = ({
           </Text>
         </View>
       ) : null}
+      <View
+        style={[
+          styles.orbit,
+          {
+            width: size * 0.18,
+            height: size * 0.18,
+            borderRadius: size * 0.09,
+            backgroundColor: orbitColor,
+            bottom: size * 0.12,
+            left: size * 0.14,
+          },
+        ]}
+      />
     </View>
   );
 };
@@ -86,10 +133,20 @@ const styles = StyleSheet.create({
     position: "relative",
     overflow: "hidden",
   },
+  ring: {
+    ...StyleSheet.absoluteFillObject,
+    borderWidth: 1,
+  },
   halo: {
     position: "absolute",
     opacity: 0.78,
     transform: [{ translateY: 4 }],
+  },
+  sheen: {
+    position: "absolute",
+    top: 6,
+    left: 8,
+    transform: [{ rotate: "-10deg" }],
   },
   glyph: {
     textAlign: "center",
@@ -106,6 +163,10 @@ const styles = StyleSheet.create({
   spark: {
     fontWeight: "800",
     lineHeight: 12,
+  },
+  orbit: {
+    position: "absolute",
+    opacity: 0.9,
   },
 });
 
