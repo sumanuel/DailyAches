@@ -293,6 +293,12 @@ export const painIllustrations = {
     tone: "accentSun",
     halo: "heroBackdrop",
   },
+  "Pecho.png": {
+    glyph: "🫀",
+    spark: "⚡",
+    tone: "accentBerry",
+    halo: "primaryContainer",
+  },
   "Piernas.png": {
     glyph: "🦵",
     spark: "☘",
@@ -378,6 +384,7 @@ const painNameMappings = {
   Nauseas: "Nausea.png",
   "Dolor de garganta": "Gripe.png",
   "Dolor de dientes": "Muela.png",
+  "Dolor de pecho": "Pecho.png",
   Otro: PAIN_FALLBACK_KEY,
 };
 

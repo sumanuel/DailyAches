@@ -455,6 +455,7 @@ const HomeScreen = () => {
                           key={record.id || index}
                           style={[
                             styles.recordRow,
+                            !record.notes && styles.recordRowCompact,
                             {
                               backgroundColor: paperTheme.colors.surfaceVariant,
                             },
@@ -493,8 +494,8 @@ const HomeScreen = () => {
                                 ) : null}
                               </View>
 
-                              <View style={styles.recordMetaRow}>
-                                {record.notes ? (
+                              {record.notes ? (
+                                <View style={styles.recordMetaRow}>
                                   <Text
                                     numberOfLines={2}
                                     style={[
@@ -507,8 +508,8 @@ const HomeScreen = () => {
                                   >
                                     {record.notes}
                                   </Text>
-                                ) : null}
-                              </View>
+                                </View>
+                              ) : null}
                             </View>
                           </View>
 
@@ -720,6 +721,9 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 12,
   },
+  recordRowCompact: {
+    gap: 8,
+  },
   recordTopRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -748,7 +752,7 @@ const styles = StyleSheet.create({
   recordMetaRow: {
     flexDirection: "row",
     alignItems: "center",
-    minHeight: 18,
+    marginTop: 2,
   },
   recordMetaText: {
     fontSize: 12,
@@ -757,7 +761,7 @@ const styles = StyleSheet.create({
   },
   painActions: {
     flexDirection: "row",
-    gap: 8,
+    gap: 14,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
