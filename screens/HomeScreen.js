@@ -493,25 +493,24 @@ const HomeScreen = () => {
                                   </Text>
                                 ) : null}
                               </View>
-
-                              {record.notes ? (
-                                <View style={styles.recordMetaRow}>
-                                  <Text
-                                    numberOfLines={2}
-                                    style={[
-                                      styles.recordMetaText,
-                                      {
-                                        color:
-                                          paperTheme.colors.onSurfaceVariant,
-                                      },
-                                    ]}
-                                  >
-                                    {record.notes}
-                                  </Text>
-                                </View>
-                              ) : null}
                             </View>
                           </View>
+
+                          {record.notes ? (
+                            <View style={styles.recordMetaRow}>
+                              <Text
+                                numberOfLines={2}
+                                style={[
+                                  styles.recordMetaText,
+                                  {
+                                    color: paperTheme.colors.onSurfaceVariant,
+                                  },
+                                ]}
+                              >
+                                {record.notes}
+                              </Text>
+                            </View>
+                          ) : null}
 
                           <View style={styles.painActions}>
                             <IconButton
@@ -726,13 +725,13 @@ const styles = StyleSheet.create({
   },
   recordTopRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     gap: 12,
   },
   recordImage: { flexShrink: 0 },
   recordBody: {
     flex: 1,
-    gap: 8,
+    justifyContent: "center",
   },
   recordHeadingRow: {
     flexDirection: "row",
@@ -752,7 +751,7 @@ const styles = StyleSheet.create({
   recordMetaRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 2,
+    marginTop: -2,
   },
   recordMetaText: {
     fontSize: 12,

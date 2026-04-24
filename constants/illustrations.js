@@ -98,6 +98,102 @@ export const avatarIllustrations = {
     halo: "accentMint",
     orbit: "heroBackdrop",
   },
+  "Suenadora.png": {
+    label: "Suenadora",
+    glyph: "🌙",
+    spark: "☾",
+    tone: "accentBerry",
+    halo: "heroBackdrop",
+    orbit: "accentSky",
+  },
+  "Chispa.png": {
+    label: "Chispa",
+    glyph: "😄",
+    spark: "☼",
+    tone: "accentSun",
+    halo: "accentMint",
+    orbit: "primaryContainer",
+  },
+  "Coqueta.png": {
+    label: "Coqueta",
+    glyph: "😘",
+    spark: "♥",
+    tone: "accentBerry",
+    halo: "primaryContainer",
+    orbit: "accentSun",
+  },
+  "Exploradora.png": {
+    label: "Exploradora",
+    glyph: "🧭",
+    spark: "☻",
+    tone: "accentMint",
+    halo: "accentSky",
+    orbit: "heroBackdrop",
+  },
+  "Dulce.png": {
+    label: "Dulce",
+    glyph: "😊",
+    spark: "♥",
+    tone: "accentSun",
+    halo: "accentBerry",
+    orbit: "accentSky",
+  },
+  "Bailarina.png": {
+    label: "Bailarina",
+    glyph: "💃",
+    spark: "☼",
+    tone: "accentBerry",
+    halo: "accentSun",
+    orbit: "primaryContainer",
+  },
+  "Creativa.png": {
+    label: "Creativa",
+    glyph: "🎨",
+    spark: "☁",
+    tone: "accentSky",
+    halo: "accentMint",
+    orbit: "heroBackdrop",
+  },
+  "Romantica.png": {
+    label: "Romantica",
+    glyph: "💌",
+    spark: "♥",
+    tone: "accentBerry",
+    halo: "primaryContainer",
+    orbit: "accentSun",
+  },
+  "Valiente.png": {
+    label: "Valiente",
+    glyph: "😼",
+    spark: "♠",
+    tone: "accentMint",
+    halo: "secondaryContainer",
+    orbit: "accentSun",
+  },
+  "Traviesa.png": {
+    label: "Traviesa",
+    glyph: "😜",
+    spark: "☻",
+    tone: "accentSun",
+    halo: "primaryContainer",
+    orbit: "accentBerry",
+  },
+  "Elegante.png": {
+    label: "Elegante",
+    glyph: "🕶",
+    spark: "☼",
+    tone: "accentSky",
+    halo: "heroBackdrop",
+    orbit: "accentMint",
+  },
+  "Estrella.png": {
+    label: "Estrella",
+    glyph: "🌟",
+    spark: "☼",
+    tone: "accentSun",
+    halo: "accentBerry",
+    orbit: "accentSky",
+  },
 };
 
 export const painIllustrations = {
@@ -388,7 +484,28 @@ const painNameMappings = {
   Otro: PAIN_FALLBACK_KEY,
 };
 
-export const avatarIllustrationKeys = Object.keys(avatarIllustrations);
+export const avatarIllustrationKeys = [
+  "Mujer feliz.png",
+  "Saltando.png",
+  "Alegre.png",
+  "Trasnocho.png",
+  "Guino.png",
+  "Zen.png",
+  "Rebelde.png",
+  "Brillante.png",
+  "Suenadora.png",
+  "Chispa.png",
+  "Coqueta.png",
+  "Exploradora.png",
+  "Dulce.png",
+  "Bailarina.png",
+  "Creativa.png",
+  "Romantica.png",
+  "Valiente.png",
+  "Traviesa.png",
+  "Elegante.png",
+  "Estrella.png",
+];
 export const painIllustrationKeys = Object.keys(painIllustrations);
 
 export const getAvatarIllustration = (imageKey) =>
@@ -405,14 +522,25 @@ export const resolvePainIllustrationKey = (painType) => {
     return painIllustrations[painType] ? painType : PAIN_FALLBACK_KEY;
   }
 
-  if (
-    painType?.image &&
-    typeof painType.image === "string" &&
-    painIllustrations[painType.image]
-  ) {
-    return painType.image;
+  const directCandidates = [
+    painType?.image,
+    painType?.name,
+    painType?.pain,
+    painType?.pain_type_name,
+    painType?.painTypeName,
+  ];
+
+  for (const candidate of directCandidates) {
+    if (typeof candidate === "string" && painIllustrations[candidate]) {
+      return candidate;
+    }
   }
 
-  const mappedKey = painNameMappings[painType?.name];
+  const mappedKey =
+    painNameMappings[painType?.name] ||
+    painNameMappings[painType?.pain] ||
+    painNameMappings[painType?.pain_type_name] ||
+    painNameMappings[painType?.painTypeName];
+
   return mappedKey || PAIN_FALLBACK_KEY;
 };
