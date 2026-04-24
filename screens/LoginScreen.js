@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet, Alert } from "react-native";
 import {
-  TextInput,
   Button,
   Text,
   Card,
@@ -67,8 +66,8 @@ const LoginScreen = ({ navigation }) => {
       <HeroPanel
         compact
         eyebrow="BIENVENIDO DE NUEVO"
-        title="Tu cuerpo ya puede empezar a chismear"
-        description="Entra para registrar molestias, seguir el drama del día y mantener el humor incluso cuando el cuerpo no coopera."
+        title="Ya puede retomarse el radar de achaques"
+        description="Entra para registrar molestias de otras personas, revisar el seguimiento del día y mantener el tono ligero mientras se acompaña cada episodio."
       />
 
       <Card
@@ -84,7 +83,7 @@ const LoginScreen = ({ navigation }) => {
               { color: paperTheme.colors.onSurfaceVariant },
             ]}
           >
-            Usa tu cuenta para volver a tu tablero con estilo.
+            Usa la cuenta para volver al tablero de seguimiento.
           </Text>
 
           <Controller

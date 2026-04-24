@@ -20,8 +20,8 @@ const MoreScreen = ({ navigation }) => {
     const dailyRecords = getTodayRecords();
     const hasRecords = dailyRecords.length > 0;
     const shareMessage = hasRecords
-      ? `¡Registré dolores hoy en DailyAches! Nivel ${user.level}, ${user.points} puntos. #DailyAches`
-      : `¡Día perfecto! Sin dolores reportados hoy. #DailyAches`;
+      ? `Hoy se registraron achaques en DailyAches. Nivel ${user.level}, ${user.points} puntos. #DailyAches`
+      : `Hoy no se registraron achaques en DailyAches. #DailyAches`;
 
     try {
       await Share.share({
@@ -43,10 +43,7 @@ const MoreScreen = ({ navigation }) => {
         text: "Cerrar sesión",
         style: "destructive",
         onPress: async () => {
-          const response = await logout();
-          if (response?.success) {
-            navigation.getParent()?.getParent()?.replace("Auth");
-          }
+          await logout();
         },
       },
     ]);
@@ -56,8 +53,8 @@ const MoreScreen = ({ navigation }) => {
     <AppScreen contentContainerStyle={styles.content}>
       <HeroPanel
         eyebrow="CENTRO DE CONTROL"
-        title="Ajustes, progreso y salida rapida"
-        description="Desde aqui se revisa el progreso, se ajusta la cuenta y se accede a las opciones mas utiles sin tener que recorrer toda la app."
+        title="Ajustes, progreso y salida rápida"
+        description="Desde aquí se revisa el progreso general, se ordenan los ajustes y se resuelven las acciones más útiles sin dar rodeos."
       >
         <View style={styles.heroStats}>
           <Text
@@ -104,7 +101,12 @@ const MoreScreen = ({ navigation }) => {
             <Text variant="headlineSmall" style={styles.statValue}>
               {user.points}
             </Text>
-            <Text style={{ color: paperTheme.colors.onPrimaryContainer }}>
+            <Text
+              style={[
+                styles.statCopy,
+                { color: paperTheme.colors.onPrimaryContainer },
+              ]}
+            >
               Acumulados por registros y logros
             </Text>
           </Card.Content>
@@ -127,12 +129,26 @@ const MoreScreen = ({ navigation }) => {
             <Text variant="headlineSmall" style={styles.statValue}>
               {todayCount}
             </Text>
-            <Text style={{ color: paperTheme.colors.onSecondaryContainer }}>
+            <Text
+              style={[
+                styles.statCopy,
+                { color: paperTheme.colors.onSecondaryContainer },
+              ]}
+            >
               Achaques registrados en el dia
             </Text>
           </Card.Content>
         </Card>
       </View>
+
+      <Text
+        style={[
+          styles.sectionLabel,
+          { color: paperTheme.colors.onSurfaceVariant },
+        ]}
+      >
+        PANEL PRINCIPAL
+      </Text>
 
       <Card
         style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
@@ -155,6 +171,15 @@ const MoreScreen = ({ navigation }) => {
           onPress={() => navigation.navigate("Profile")}
         />
       </Card>
+
+      <Text
+        style={[
+          styles.sectionLabel,
+          { color: paperTheme.colors.onSurfaceVariant },
+        ]}
+      >
+        HERRAMIENTAS
+      </Text>
 
       <Card
         style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
@@ -198,9 +223,14 @@ const MoreScreen = ({ navigation }) => {
           <Text variant="titleMedium" style={styles.logoutTitle}>
             Sesión
           </Text>
-          <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
-            Si la persona actual ya termino, desde aqui puede cerrarse la
-            sesion.
+          <Text
+            style={[
+              styles.logoutText,
+              { color: paperTheme.colors.onSurfaceVariant },
+            ]}
+          >
+            Cuando ya no haga falta seguir registrando desde esta cuenta, aquí
+            puede cerrarse la sesión.
           </Text>
           <Button
             mode="outlined"
@@ -221,7 +251,7 @@ const MoreScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { paddingBottom: 24 },
+  content: { paddingBottom: 36 },
   heroStats: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   heroChip: {
     paddingHorizontal: 12,
@@ -231,7 +261,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     overflow: "hidden",
   },
-  statsPanel: { flexDirection: "row", gap: 12, marginBottom: 16 },
+  statsPanel: { flexDirection: "row", gap: 12, marginBottom: 18 },
   statCard: { flex: 1, borderRadius: 24, overflow: "hidden" },
   statKicker: {
     fontSize: 11,
@@ -240,10 +270,19 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   statValue: { fontWeight: "900", marginBottom: 4 },
+  statCopy: { lineHeight: 18 },
+  sectionLabel: {
+    marginBottom: 8,
+    marginLeft: 4,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.1,
+  },
   card: { marginBottom: 16, borderRadius: 24, overflow: "hidden" },
   divider: { height: StyleSheet.hairlineWidth, opacity: 0.2 },
   logoutCard: { borderRadius: 24, overflow: "hidden" },
   logoutTitle: { marginBottom: 6, fontWeight: "800" },
+  logoutText: { lineHeight: 20 },
   logoutButton: { marginTop: 16, borderRadius: 16 },
   logoutButtonContent: { minHeight: 44 },
   footer: { textAlign: "center", marginTop: 24, opacity: 0.7 },
