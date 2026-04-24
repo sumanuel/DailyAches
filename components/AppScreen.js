@@ -1,5 +1,11 @@
 import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useTheme as usePaperTheme } from "react-native-paper";
 
 const AppScreen = ({
@@ -7,6 +13,7 @@ const AppScreen = ({
   contentContainerStyle,
   style,
   scroll = true,
+  keyboardOffset = 0,
 }) => {
   const paperTheme = usePaperTheme();
   const Container = scroll ? ScrollView : View;
@@ -15,18 +22,22 @@ const AppScreen = ({
         style: styles.fill,
         contentContainerStyle: [styles.content, contentContainerStyle],
         showsVerticalScrollIndicator: false,
+        keyboardShouldPersistTaps: "handled",
+        keyboardDismissMode: Platform.OS === "ios" ? "interactive" : "on-drag",
       }
     : {
         style: [styles.fill, styles.content, contentContainerStyle],
       };
 
   return (
-    <View
+    <KeyboardAvoidingView
       style={[
         styles.root,
         { backgroundColor: paperTheme.colors.background },
         style,
       ]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={keyboardOffset}
     >
       <View
         style={[
@@ -41,7 +52,7 @@ const AppScreen = ({
         ]}
       />
       <Container {...containerProps}>{children}</Container>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

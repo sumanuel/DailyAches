@@ -331,11 +331,11 @@ const HomeScreen = () => {
           <Button
             mode="contained"
             icon="plus-circle-outline"
-            onPress={() => navigation.navigate("RecordPain")}
+            onPress={() => navigation.getParent()?.navigate("Registro")}
             contentStyle={styles.primaryActionContent}
             style={styles.primaryAction}
           >
-            Registrar dolor
+            Ir a Registro
           </Button>
 
           {dailyRecords.length === 0 && (
@@ -446,8 +446,6 @@ const HomeScreen = () => {
 
                   <View style={styles.recordList}>
                     {group.records.map((record, index) => {
-                      const relationshipLabel =
-                        peopleById[record.personId]?.relationship || "Otro";
                       const timeLabel = record.createdAt
                         ? formatTime(record.createdAt)
                         : "";
@@ -462,75 +460,56 @@ const HomeScreen = () => {
                             },
                           ]}
                         >
-                          <IllustrationBadge
-                            preset={getPainIllustration(
-                              resolvePainIllustrationKey(record),
-                            )}
-                            size={54}
-                            style={styles.recordImage}
-                          />
+                          <View style={styles.recordTopRow}>
+                            <IllustrationBadge
+                              preset={getPainIllustration(
+                                resolvePainIllustrationKey(record),
+                              )}
+                              size={54}
+                              style={styles.recordImage}
+                            />
 
-                          <View style={styles.recordBody}>
-                            <View style={styles.recordHeadingRow}>
-                              <Text
-                                variant="titleMedium"
-                                style={styles.painTitle}
-                              >
-                                {record.pain}
-                              </Text>
-                              {timeLabel ? (
+                            <View style={styles.recordBody}>
+                              <View style={styles.recordHeadingRow}>
                                 <Text
-                                  style={[
-                                    styles.timePill,
-                                    {
-                                      backgroundColor:
-                                        paperTheme.colors.accentSky,
-                                      color: paperTheme.colors.onSurface,
-                                    },
-                                  ]}
+                                  variant="titleMedium"
+                                  style={styles.painTitle}
                                 >
-                                  {timeLabel}
+                                  {record.pain}
                                 </Text>
-                              ) : null}
-                            </View>
+                                {timeLabel ? (
+                                  <Text
+                                    style={[
+                                      styles.timePill,
+                                      {
+                                        backgroundColor:
+                                          paperTheme.colors.accentSky,
+                                        color: paperTheme.colors.onSurface,
+                                      },
+                                    ]}
+                                  >
+                                    {timeLabel}
+                                  </Text>
+                                ) : null}
+                              </View>
 
-                            <View style={styles.recordMetaRow}>
-                              <Text
-                                style={[
-                                  styles.relationshipTag,
-                                  {
-                                    backgroundColor:
-                                      paperTheme.colors.primaryContainer,
-                                    color: paperTheme.colors.onPrimaryContainer,
-                                  },
-                                ]}
-                              >
-                                {relationshipLabel}
-                              </Text>
-                              <Text
-                                style={[
-                                  styles.recordMetaText,
-                                  {
-                                    color: paperTheme.colors.onSurfaceVariant,
-                                  },
-                                ]}
-                              >
-                                Seguimiento del día
-                              </Text>
+                              <View style={styles.recordMetaRow}>
+                                {record.notes ? (
+                                  <Text
+                                    numberOfLines={2}
+                                    style={[
+                                      styles.recordMetaText,
+                                      {
+                                        color:
+                                          paperTheme.colors.onSurfaceVariant,
+                                      },
+                                    ]}
+                                  >
+                                    {record.notes}
+                                  </Text>
+                                ) : null}
+                              </View>
                             </View>
-
-                            {record.notes ? (
-                              <Text
-                                style={[
-                                  styles.noteText,
-                                  {
-                                    color: paperTheme.colors.onSurfaceVariant,
-                                  },
-                                ]}
-                              >
-                                {record.notes}
-                              </Text>
-                            ) : null}
                           </View>
 
                           <View style={styles.painActions}>
@@ -726,7 +705,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   personTitle: { fontWeight: "800", fontSize: 18 },
-  personRelation: { fontSize: 13, fontWeight: "600" },
+  personRelation: { fontSize: 13, fontWeight: "800" },
   personCount: {
     paddingHorizontal: 11,
     paddingVertical: 7,
@@ -739,6 +718,9 @@ const styles = StyleSheet.create({
   recordRow: {
     borderRadius: 22,
     padding: 14,
+    gap: 12,
+  },
+  recordTopRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
@@ -766,25 +748,19 @@ const styles = StyleSheet.create({
   recordMetaRow: {
     flexDirection: "row",
     alignItems: "center",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  relationshipTag: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 999,
-    fontSize: 11,
-    fontWeight: "800",
+    minHeight: 18,
   },
   recordMetaText: {
     fontSize: 12,
     fontWeight: "600",
+    lineHeight: 18,
   },
-  noteText: { lineHeight: 19 },
   painActions: {
+    flexDirection: "row",
     gap: 8,
     alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
   },
   actionButton: {
     margin: 0,

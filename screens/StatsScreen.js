@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { StyleSheet, View, ScrollView, Modal } from "react-native";
 import {
-  Avatar,
   Button,
   Card,
   Text,
@@ -11,6 +10,11 @@ import { Calendar } from "react-native-calendars";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
+import IllustrationBadge from "../components/IllustrationBadge";
+import {
+  getPainIllustration,
+  resolvePainIllustrationKey,
+} from "../constants/illustrations";
 
 const monthShortEs = [
   "ene",
@@ -181,16 +185,18 @@ const StatsScreen = ({ route }) => {
     const relationship = person?.relationship || "Otro";
 
     return (
-      <Card key={record.id || index} style={styles.recordCard}>
+      <Card
+        key={record.id || index}
+        style={[
+          styles.recordCard,
+          { backgroundColor: paperTheme.colors.surface },
+        ]}
+      >
         <Card.Content style={styles.recordRowTop}>
-          <Avatar.Icon
-            size={40}
-            icon="clipboard-text-outline"
-            style={[
-              styles.recordIcon,
-              { backgroundColor: paperTheme.colors.surfaceVariant },
-            ]}
-            color={paperTheme.colors.onSurfaceVariant}
+          <IllustrationBadge
+            preset={getPainIllustration(resolvePainIllustrationKey(record))}
+            size={54}
+            style={styles.recordIcon}
           />
 
           <View style={styles.recordMain}>
@@ -227,7 +233,12 @@ const StatsScreen = ({ route }) => {
         </Card.Content>
 
         <Card.Content style={styles.recordBottom}>
-          <View style={styles.kv}>
+          <View
+            style={[
+              styles.kv,
+              { backgroundColor: paperTheme.colors.surfaceVariant },
+            ]}
+          >
             <Text
               style={[
                 styles.kvLabel,
@@ -238,7 +249,12 @@ const StatsScreen = ({ route }) => {
             </Text>
             <Text numberOfLines={1}>{relationship}</Text>
           </View>
-          <View style={styles.kv}>
+          <View
+            style={[
+              styles.kv,
+              { backgroundColor: paperTheme.colors.surfaceVariant },
+            ]}
+          >
             <Text
               style={[
                 styles.kvLabel,
@@ -332,6 +348,20 @@ const StatsScreen = ({ route }) => {
           ]}
         >
           <Card.Content>
+            <View style={styles.filtersHeader}>
+              <Text variant="titleMedium" style={styles.filtersTitle}>
+                Rango del historial
+              </Text>
+              <Text
+                style={[
+                  styles.filtersSubtitle,
+                  { color: paperTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                Elige fechas rápidas o define un rango manual.
+              </Text>
+            </View>
+
             <View style={styles.rangeRow}>
               <View style={styles.rangeCol}>
                 <Text
@@ -387,9 +417,9 @@ const StatsScreen = ({ route }) => {
               <Button
                 mode={preset === "this_month" ? "contained" : "outlined"}
                 onPress={() => applyPreset("this_month")}
-                style={{ flex: 1 }}
-                contentStyle={{ height: 36, paddingHorizontal: 0 }}
-                labelStyle={{ fontSize: 12 }}
+                style={styles.quickBtn}
+                contentStyle={styles.quickBtnContent}
+                labelStyle={styles.quickBtnLabel}
                 compact={true}
               >
                 Este mes
@@ -397,9 +427,9 @@ const StatsScreen = ({ route }) => {
               <Button
                 mode={preset === "prev_month" ? "contained" : "outlined"}
                 onPress={() => applyPreset("prev_month")}
-                style={{ flex: 1 }}
-                contentStyle={{ height: 36, paddingHorizontal: 0 }}
-                labelStyle={{ fontSize: 12 }}
+                style={styles.quickBtn}
+                contentStyle={styles.quickBtnContent}
+                labelStyle={styles.quickBtnLabel}
                 compact={true}
               >
                 Mes anterior
@@ -407,9 +437,9 @@ const StatsScreen = ({ route }) => {
               <Button
                 mode={preset === "this_week" ? "contained" : "outlined"}
                 onPress={() => applyPreset("this_week")}
-                style={{ flex: 1 }}
-                contentStyle={{ height: 36, paddingHorizontal: 0 }}
-                labelStyle={{ fontSize: 12 }}
+                style={styles.quickBtn}
+                contentStyle={styles.quickBtnContent}
+                labelStyle={styles.quickBtnLabel}
                 compact={true}
               >
                 Esta semana
@@ -549,26 +579,34 @@ const styles = StyleSheet.create({
   segmentBtnContent: { height: 40 },
 
   filtersCard: { marginTop: 12, borderRadius: 24, overflow: "hidden" },
+  filtersHeader: { marginBottom: 14 },
+  filtersTitle: { fontWeight: "800" },
+  filtersSubtitle: { marginTop: 4, lineHeight: 18 },
   rangeRow: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
   rangeCol: { flex: 1, gap: 6 },
-  calendarBtn: { alignSelf: "stretch" },
-  calendarBtnContent: { justifyContent: "flex-start", height: 40 },
+  calendarBtn: { alignSelf: "stretch", borderRadius: 999 },
+  calendarBtnContent: { justifyContent: "flex-start", height: 44 },
   calendarBtnLabel: { fontSize: 12 },
   quickRow: {
     flexDirection: "row",
-    gap: 0,
+    flexWrap: "wrap",
+    gap: 8,
     marginTop: 12,
-    justifyContent: "center",
   },
+  quickBtn: {
+    borderRadius: 999,
+  },
+  quickBtnContent: { height: 38, paddingHorizontal: 6 },
+  quickBtnLabel: { fontSize: 12 },
 
-  recordsList: { marginTop: 12, gap: 10 },
+  recordsList: { marginTop: 12, gap: 12 },
   recordCard: { borderRadius: 24, overflow: "hidden" },
   recordRowTop: { flexDirection: "row", alignItems: "center", gap: 12 },
-  recordIcon: { borderRadius: 12 },
+  recordIcon: { borderRadius: 16 },
   recordMain: { flex: 1 },
   recordSub: { marginTop: 2 },
   pill: {
-    maxWidth: 130,
+    maxWidth: 132,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 999,
@@ -576,9 +614,14 @@ const styles = StyleSheet.create({
   recordBottom: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 12,
+    marginTop: 14,
+    gap: 10,
   },
-  kv: { flex: 1 },
+  kv: {
+    flex: 1,
+    borderRadius: 18,
+    padding: 12,
+  },
   kvLabel: { fontSize: 10, letterSpacing: 0.6, fontWeight: "700" },
 
   emptyCard: { marginTop: 12, borderRadius: 24, overflow: "hidden" },
