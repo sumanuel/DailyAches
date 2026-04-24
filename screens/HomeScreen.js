@@ -455,6 +455,7 @@ const HomeScreen = () => {
                           key={record.id || index}
                           style={[
                             styles.recordRow,
+                            !record.notes && styles.recordRowCompact,
                             {
                               backgroundColor: paperTheme.colors.surfaceVariant,
                             },
@@ -494,85 +495,63 @@ const HomeScreen = () => {
                               </View>
 
                               {record.notes ? (
-                                <View style={styles.recordMetaRow} />
+                                <View style={styles.recordMetaRow}>
+                                  <Text
+                                    numberOfLines={2}
+                                    style={[
+                                      styles.recordMetaText,
+                                      {
+                                        color:
+                                          paperTheme.colors.onSurfaceVariant,
+                                      },
+                                    ]}
+                                  >
+                                    {record.notes}
+                                  </Text>
+                                </View>
                               ) : null}
                             </View>
                           </View>
 
-                          <View style={styles.recordBottomRow}>
-                            <View
+                          <View style={styles.painActions}>
+                            <IconButton
+                              icon="square-edit-outline"
+                              size={18}
                               style={[
-                                styles.recordPanel,
-                                { backgroundColor: paperTheme.colors.surface },
+                                styles.actionButton,
+                                {
+                                  backgroundColor: paperTheme.colors.surface,
+                                },
                               ]}
-                            >
-                              <Text
-                                style={[
-                                  styles.panelLabel,
-                                  {
-                                    color: paperTheme.colors.onSurfaceVariant,
-                                  },
-                                ]}
-                              >
-                                ACCIONES
-                              </Text>
-                              <View style={styles.painActions}>
-                                <IconButton
-                                  icon="square-edit-outline"
-                                  size={18}
-                                  style={styles.actionButton}
-                                  onPress={() =>
-                                    navigation.navigate("RecordPain", {
-                                      record,
-                                    })
-                                  }
-                                  accessibilityLabel="Editar registro"
-                                />
-                                <IconButton
-                                  icon="delete-circle-outline"
-                                  size={18}
-                                  style={styles.actionButton}
-                                  onPress={() => handleDeleteRecord(record)}
-                                  accessibilityLabel="Eliminar registro"
-                                />
-                                <IconButton
-                                  icon="share-variant-outline"
-                                  size={18}
-                                  style={styles.actionButton}
-                                  onPress={() => handleShareRecord(record)}
-                                  accessibilityLabel="Compartir registro"
-                                />
-                              </View>
-                            </View>
-
-                            <View
+                              onPress={() =>
+                                navigation.navigate("RecordPain", { record })
+                              }
+                              accessibilityLabel="Editar registro"
+                            />
+                            <IconButton
+                              icon="delete-circle-outline"
+                              size={18}
                               style={[
-                                styles.recordPanel,
-                                { backgroundColor: paperTheme.colors.surface },
+                                styles.actionButton,
+                                {
+                                  backgroundColor: paperTheme.colors.surface,
+                                },
                               ]}
-                            >
-                              <Text
-                                style={[
-                                  styles.panelLabel,
-                                  {
-                                    color: paperTheme.colors.onSurfaceVariant,
-                                  },
-                                ]}
-                              >
-                                NOTAS
-                              </Text>
-                              <Text
-                                numberOfLines={2}
-                                style={[
-                                  styles.recordMetaText,
-                                  {
-                                    color: paperTheme.colors.onSurfaceVariant,
-                                  },
-                                ]}
-                              >
-                                {record.notes ? record.notes : "-"}
-                              </Text>
-                            </View>
+                              onPress={() => handleDeleteRecord(record)}
+                              accessibilityLabel="Eliminar registro"
+                            />
+                            <IconButton
+                              icon="share-variant-outline"
+                              size={18}
+                              style={[
+                                styles.actionButton,
+                                {
+                                  backgroundColor: paperTheme.colors.surface,
+                                },
+                              ]}
+                              onPress={() => handleShareRecord(record)}
+                              accessibilityLabel="Compartir registro"
+                            />
                           </View>
                         </View>
                       );
@@ -742,6 +721,9 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 12,
   },
+  recordRowCompact: {
+    gap: 8,
+  },
   recordTopRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -770,23 +752,7 @@ const styles = StyleSheet.create({
   recordMetaRow: {
     flexDirection: "row",
     alignItems: "center",
-    minHeight: 2,
-  },
-  recordBottomRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  recordPanel: {
-    flex: 1,
-    borderRadius: 18,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  panelLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-    marginBottom: 6,
+    marginTop: 2,
   },
   recordMetaText: {
     fontSize: 12,
@@ -795,13 +761,13 @@ const styles = StyleSheet.create({
   },
   painActions: {
     flexDirection: "row",
-    gap: 10,
+    gap: 14,
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
+    alignSelf: "center",
   },
   actionButton: {
     margin: 0,
-    backgroundColor: "transparent",
   },
 });
 
