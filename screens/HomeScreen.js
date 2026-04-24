@@ -61,14 +61,6 @@ const HomeScreen = () => {
     }
   }, [todayRecords.length]);
 
-  const heroIllustrationKey = useMemo(() => {
-    if (todayRecords.length === 0) {
-      return "Saltando.png";
-    }
-
-    return resolvePainIllustrationKey(todayRecords[0]);
-  }, [todayRecords.length]);
-
   useFocusEffect(
     useCallback(() => {
       setDailyRecords(todayRecords);
@@ -84,6 +76,14 @@ const HomeScreen = () => {
     return map;
   }, [user.people]);
 
+  const painTypesById = useMemo(() => {
+    const map = {};
+    for (const painType of user.painTypes || []) {
+      if (painType?.id) map[painType.id] = painType;
+    }
+    return map;
+  }, [user.painTypes]);
+
   const formatTime = (iso) => {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return "";
@@ -95,6 +95,27 @@ const HomeScreen = () => {
     const hh = String(hours).padStart(2, "0");
     return `${hh}:${minutes} ${ampm}`;
   };
+
+  const resolveRecordIllustrationKey = (record) => {
+    const linkedPainType = record?.painTypeId
+      ? painTypesById[record.painTypeId]
+      : null;
+
+    return resolvePainIllustrationKey({
+      ...record,
+      image: linkedPainType?.image || record?.image,
+      name: linkedPainType?.name || record?.pain,
+      pain: record?.pain,
+    });
+  };
+
+  const heroIllustrationKey = useMemo(() => {
+    if (todayRecords.length === 0) {
+      return "Saltando.png";
+    }
+
+    return resolveRecordIllustrationKey(todayRecords[0]);
+  }, [todayRecords, painTypesById]);
 
   const handleShareRecord = async (record) => {
     try {
@@ -464,7 +485,7 @@ const HomeScreen = () => {
                           <View style={styles.recordTopRow}>
                             <IllustrationBadge
                               preset={getPainIllustration(
-                                resolvePainIllustrationKey(record),
+                                resolveRecordIllustrationKey(record),
                               )}
                               size={54}
                               style={styles.recordImage}
@@ -496,7 +517,7 @@ const HomeScreen = () => {
                             </View>
                           </View>
 
-                          {record.notes ? (
+                          <View style={styles.recordBottomRow}>
                             <View style={styles.recordMetaRow}>
                               <Text
                                 numberOfLines={2}
@@ -507,50 +528,50 @@ const HomeScreen = () => {
                                   },
                                 ]}
                               >
-                                {record.notes}
+                                {record.notes ? record.notes : "-"}
                               </Text>
                             </View>
-                          ) : null}
 
-                          <View style={styles.painActions}>
-                            <IconButton
-                              icon="square-edit-outline"
-                              size={18}
-                              style={[
-                                styles.actionButton,
-                                {
-                                  backgroundColor: paperTheme.colors.surface,
-                                },
-                              ]}
-                              onPress={() =>
-                                navigation.navigate("RecordPain", { record })
-                              }
-                              accessibilityLabel="Editar registro"
-                            />
-                            <IconButton
-                              icon="delete-circle-outline"
-                              size={18}
-                              style={[
-                                styles.actionButton,
-                                {
-                                  backgroundColor: paperTheme.colors.surface,
-                                },
-                              ]}
-                              onPress={() => handleDeleteRecord(record)}
-                              accessibilityLabel="Eliminar registro"
-                            />
-                            <IconButton
-                              icon="share-variant-outline"
-                              size={18}
-                              style={[
-                                styles.actionButton,
-                                {
-                                  backgroundColor: paperTheme.colors.surface,
-                                },
-                              ]}
-                              onPress={() => handleShareRecord(record)}
-                              accessibilityLabel="Compartir registro"
-                            />
+                            <View style={styles.painActions}>
+                              <IconButton
+                                icon="square-edit-outline"
+                                size={18}
+                                style={[
+                                  styles.actionButton,
+                                  {
+                                    backgroundColor: paperTheme.colors.surface,
+                                  },
+                                ]}
+                                onPress={() =>
+                                  navigation.navigate("RecordPain", { record })
+                                }
+                                accessibilityLabel="Editar registro"
+                              />
+                              <IconButton
+                                icon="delete-circle-outline"
+                                size={18}
+                                style={[
+                                  styles.actionButton,
+                                  {
+                                    backgroundColor: paperTheme.colors.surface,
+                                  },
+                                ]}
+                                onPress={() => handleDeleteRecord(record)}
+                                accessibilityLabel="Eliminar registro"
+                              />
+                              <IconButton
+                                icon="share-variant-outline"
+                                size={18}
+                                style={[
+                                  styles.actionButton,
+                                  {
+                                    backgroundColor: paperTheme.colors.surface,
+                                  },
+                                ]}
+                                onPress={() => handleShareRecord(record)}
+                                accessibilityLabel="Compartir registro"
+                              />
+                            </View>
                           </View>
                         </View>
                       );
@@ -749,9 +770,14 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   recordMetaRow: {
+    flex: 1,
+    justifyContent: "center",
+    marginTop: -1,
+  },
+  recordBottomRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: -2,
+    gap: 12,
   },
   recordMetaText: {
     fontSize: 12,
@@ -762,8 +788,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 14,
     alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
+    justifyContent: "flex-end",
   },
   actionButton: {
     margin: 0,
