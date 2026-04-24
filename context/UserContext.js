@@ -9,52 +9,148 @@ const UserContext = createContext();
 
 export const useUser = () => useContext(UserContext);
 
-const achievements = [
+const achievementDefinitions = [
   {
     id: 1,
     name: "Primer Registro",
-    description: "Registra tu primer dolor",
-    points: 10,
+    description: "Registra el primer dolor del tablero",
+    points: 15,
+    icon: "flag-checkered",
     unlocked: false,
   },
   {
     id: 2,
-    name: "Diez Dolores",
-    description: "Registra 10 dolores",
-    points: 50,
+    name: "Tres al Radar",
+    description: "Acumula 3 registros",
+    points: 20,
+    icon: "radar",
     unlocked: false,
   },
   {
     id: 3,
-    name: "Semana Sin Dolor",
-    description: "Pasa una semana sin registrar dolores",
-    points: 100,
+    name: "Cinco Episodios",
+    description: "Acumula 5 registros",
+    points: 30,
+    icon: "clipboard-pulse-outline",
     unlocked: false,
   },
   {
     id: 4,
-    name: "Nivel 5",
-    description: "Alcanza el nivel 5",
-    points: 200,
+    name: "Diez Dolores",
+    description: "Acumula 10 registros",
+    points: 45,
+    icon: "notebook-multiple",
     unlocked: false,
   },
   {
     id: 5,
+    name: "Veinte al Archivo",
+    description: "Acumula 20 registros",
+    points: 70,
+    icon: "archive-outline",
+    unlocked: false,
+  },
+  {
+    id: 6,
+    name: "Cuarenta en Bitácora",
+    description: "Acumula 40 registros",
+    points: 110,
+    icon: "book-open-page-variant-outline",
+    unlocked: false,
+  },
+  {
+    id: 7,
+    name: "Nivel 2",
+    description: "Llega al nivel Observadora",
+    points: 20,
+    icon: "star-circle-outline",
+    unlocked: false,
+  },
+  {
+    id: 8,
+    name: "Nivel 4",
+    description: "Llega al nivel Cuidadora",
+    points: 45,
+    icon: "medal-outline",
+    unlocked: false,
+  },
+  {
+    id: 9,
+    name: "Nivel 6",
+    description: "Llega al nivel Estratega",
+    points: 70,
+    icon: "compass-rose",
+    unlocked: false,
+  },
+  {
+    id: 10,
+    name: "Nivel 8",
+    description: "Llega al nivel Leyenda",
+    points: 100,
+    icon: "crown-outline",
+    unlocked: false,
+  },
+  {
+    id: 11,
+    name: "Nivel 10",
+    description: "Alcanza el rango máximo actual",
+    points: 160,
+    icon: "star-four-points-circle-outline",
+    unlocked: false,
+  },
+  {
+    id: 12,
     name: "Compartidor",
-    description: "Comparte un registro en Facebook",
+    description: "Comparte un registro",
     points: 30,
+    icon: "share-variant-outline",
     unlocked: false,
   },
 ];
 
 const levels = [
-  { level: 1, pointsRequired: 0 },
-  { level: 2, pointsRequired: 50 },
-  { level: 3, pointsRequired: 150 },
-  { level: 4, pointsRequired: 300 },
-  { level: 5, pointsRequired: 500 },
-  // Agregar más niveles
+  { level: 1, pointsRequired: 0, title: "Chispa", icon: "🌱" },
+  { level: 2, pointsRequired: 40, title: "Observadora", icon: "👀" },
+  { level: 3, pointsRequired: 95, title: "Cronista", icon: "📝" },
+  { level: 4, pointsRequired: 170, title: "Cuidadora", icon: "🩹" },
+  { level: 5, pointsRequired: 270, title: "Radar", icon: "💫" },
+  { level: 6, pointsRequired: 395, title: "Estratega", icon: "🧭" },
+  { level: 7, pointsRequired: 545, title: "Guardiana", icon: "🛡️" },
+  { level: 8, pointsRequired: 725, title: "Leyenda", icon: "🌟" },
+  { level: 9, pointsRequired: 935, title: "Maestra", icon: "👑" },
+  { level: 10, pointsRequired: 1180, title: "Oraculo", icon: "🔮" },
 ];
+
+const achievementRules = [
+  { id: 1, recordsCount: 1 },
+  { id: 2, recordsCount: 3 },
+  { id: 3, recordsCount: 5 },
+  { id: 4, recordsCount: 10 },
+  { id: 5, recordsCount: 20 },
+  { id: 6, recordsCount: 40 },
+  { id: 7, level: 2 },
+  { id: 8, level: 4 },
+  { id: 9, level: 6 },
+  { id: 10, level: 8 },
+  { id: 11, level: 10 },
+];
+
+const getDefaultAchievements = () =>
+  achievementDefinitions.map((achievement) => ({ ...achievement }));
+
+const mergeAchievements = (savedAchievements = []) => {
+  const savedById = new Map(
+    (savedAchievements || []).map((achievement) => [
+      achievement.id,
+      achievement,
+    ]),
+  );
+
+  return achievementDefinitions.map((achievement) => ({
+    ...achievement,
+    unlocked: savedById.get(achievement.id)?.unlocked || false,
+  }));
+};
 
 const defaultPainTypes = [
   { name: "Dolor de cabeza", image: "DolorDeCabeza.png" },
@@ -81,10 +177,72 @@ const computeLevel = (points) => {
   return current.level;
 };
 
+const getLevelMeta = (level) =>
+  levels.find((entry) => entry.level === level) || levels[0];
+
 const getNextLevelRequirement = (level) => {
   const idx = levels.findIndex((l) => l.level === level);
   if (idx < 0) return null;
   return levels[idx + 1] || null;
+};
+
+const applyAutomaticAchievements = ({ achievements, recordsCount, points }) => {
+  const nextAchievements = achievements.map((achievement) => ({
+    ...achievement,
+  }));
+  let nextPoints = points;
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+    const currentLevel = computeLevel(nextPoints);
+
+    for (const rule of achievementRules) {
+      const achievement = nextAchievements.find(
+        (entry) => entry.id === rule.id,
+      );
+      if (!achievement || achievement.unlocked) continue;
+
+      const qualifiesByRecords =
+        typeof rule.recordsCount === "number" &&
+        recordsCount >= rule.recordsCount;
+      const qualifiesByLevel =
+        typeof rule.level === "number" && currentLevel >= rule.level;
+
+      if (qualifiesByRecords || qualifiesByLevel) {
+        achievement.unlocked = true;
+        nextPoints += achievement.points;
+        changed = true;
+      }
+    }
+  }
+
+  return {
+    achievements: nextAchievements,
+    points: nextPoints,
+    level: computeLevel(nextPoints),
+  };
+};
+
+const buildProgressState = (
+  prevUser,
+  { recordsAdded = 0, basePoints = 0 } = {},
+) => {
+  const recordsCount = prevUser.recordsCount + recordsAdded;
+  const points = prevUser.points + basePoints;
+  const automatic = applyAutomaticAchievements({
+    achievements: prevUser.achievements,
+    recordsCount,
+    points,
+  });
+
+  return {
+    ...prevUser,
+    recordsCount,
+    achievements: automatic.achievements,
+    points: automatic.points,
+    level: automatic.level,
+  };
 };
 
 const isSameDay = (a, b) => {
@@ -100,7 +258,7 @@ export const UserProvider = ({ children }) => {
     points: 0,
     level: 1,
     recordsCount: 0,
-    achievements: achievements,
+    achievements: getDefaultAchievements(),
     profile: defaultProfile,
     people: [],
     painTypes: defaultPainTypes,
@@ -255,7 +413,7 @@ export const UserProvider = ({ children }) => {
         points: 0,
         level: 1,
         recordsCount: 0,
-        achievements: achievements,
+        achievements: getDefaultAchievements(),
         profile: defaultProfile,
         people: [],
         painTypes: defaultPainTypes,
@@ -276,20 +434,18 @@ export const UserProvider = ({ children }) => {
             typeof parsed.level === "number"
               ? parsed.level
               : computeLevel(
-                  typeof parsed.points === "number" ? parsed.points : 0
+                  typeof parsed.points === "number" ? parsed.points : 0,
                 ),
           recordsCount:
             typeof parsed.recordsCount === "number" ? parsed.recordsCount : 0,
-          achievements: Array.isArray(parsed.achievements)
-            ? parsed.achievements
-            : achievements,
+          achievements: mergeAchievements(parsed.achievements),
           profile: parsed.profile
             ? { ...defaultProfile, ...parsed.profile }
             : defaultProfile,
           people: Array.isArray(parsed.people) ? parsed.people : [],
           painTypes: Array.isArray(parsed.painTypes)
             ? parsed.painTypes.map((p) =>
-                typeof p === "string" ? { name: p, image: null } : p
+                typeof p === "string" ? { name: p, image: null } : p,
               )
             : defaultPainTypes,
           records: Array.isArray(parsed.records) ? parsed.records : [],
@@ -310,40 +466,28 @@ export const UserProvider = ({ children }) => {
 
   const addPoints = (points) => {
     setUser((prevUser) => {
-      const newPoints = prevUser.points + points;
-      const newLevel = computeLevel(newPoints);
-      const newUser = { ...prevUser, points: newPoints, level: newLevel };
+      const automatic = applyAutomaticAchievements({
+        achievements: prevUser.achievements,
+        recordsCount: prevUser.recordsCount,
+        points: prevUser.points + points,
+      });
+      const newUser = {
+        ...prevUser,
+        achievements: automatic.achievements,
+        points: automatic.points,
+        level: automatic.level,
+      };
       saveUserData(newUser);
       return newUser;
     });
   };
 
-  const incrementRecords = () => {
+  const incrementRecords = (basePoints = 0) => {
     setUser((prevUser) => {
-      const newRecordsCount = prevUser.recordsCount + 1;
-      let newPoints = prevUser.points;
-      const newAchievements = prevUser.achievements.map((ach) => ({ ...ach }));
-
-      // Desbloquear logros
-      const first = newAchievements.find((a) => a.id === 1);
-      if (newRecordsCount >= 1 && first && !first.unlocked) {
-        first.unlocked = true;
-        newPoints += first.points;
-      }
-      const ten = newAchievements.find((a) => a.id === 2);
-      if (newRecordsCount >= 10 && ten && !ten.unlocked) {
-        ten.unlocked = true;
-        newPoints += ten.points;
-      }
-
-      const newLevel = computeLevel(newPoints);
-      const newUser = {
-        ...prevUser,
-        recordsCount: newRecordsCount,
-        achievements: newAchievements,
-        points: newPoints,
-        level: newLevel,
-      };
+      const newUser = buildProgressState(prevUser, {
+        recordsAdded: 1,
+        basePoints,
+      });
       saveUserData(newUser);
       return newUser;
     });
@@ -358,13 +502,16 @@ export const UserProvider = ({ children }) => {
         pointsDelta += ach.points;
         return { ...ach, unlocked: true };
       });
-      const newPoints = prevUser.points + pointsDelta;
-      const newLevel = computeLevel(newPoints);
+      const automatic = applyAutomaticAchievements({
+        achievements: newAchievements,
+        recordsCount: prevUser.recordsCount,
+        points: prevUser.points + pointsDelta,
+      });
       const newUser = {
         ...prevUser,
-        achievements: newAchievements,
-        points: newPoints,
-        level: newLevel,
+        achievements: automatic.achievements,
+        points: automatic.points,
+        level: automatic.level,
       };
       saveUserData(newUser);
       return newUser;
@@ -420,7 +567,7 @@ export const UserProvider = ({ children }) => {
     relationship,
     avatar,
     phone,
-    whatsappEnabled
+    whatsappEnabled,
   ) => {
     const trimmed = (name || "").trim();
     if (!trimmed) return;
@@ -430,7 +577,7 @@ export const UserProvider = ({ children }) => {
         relationship,
         avatar,
         phone,
-        whatsappEnabled
+        whatsappEnabled,
       );
       if (response.success) {
         const newPerson = {
@@ -480,17 +627,17 @@ export const UserProvider = ({ children }) => {
         updates.relationship,
         updates.avatar,
         updates.phone,
-        updates.whatsappEnabled
+        updates.whatsappEnabled,
       );
       if (response.success) {
         setUser((prevUser) => {
           const newPeople = prevUser.people.map((p) =>
-            p.id === personId ? { ...p, ...updates } : p
+            p.id === personId ? { ...p, ...updates } : p,
           );
           const newRecords = prevUser.records.map((r) =>
             r.personId === personId
               ? { ...r, personName: updates.name || r.personName }
-              : r
+              : r,
           );
           const newUser = {
             ...prevUser,
@@ -509,7 +656,7 @@ export const UserProvider = ({ children }) => {
   const updateRecord = (recordId, updates) => {
     setUser((prevUser) => {
       const newRecords = prevUser.records.map((r) =>
-        r.id === recordId ? { ...r, ...updates } : r
+        r.id === recordId ? { ...r, ...updates } : r,
       );
       const newUser = { ...prevUser, records: newRecords };
       saveUserData(newUser);
@@ -526,7 +673,7 @@ export const UserProvider = ({ children }) => {
     try {
       const response = await PainTypesService.createPainType(
         trimmed,
-        image || undefined
+        image || undefined,
       );
       console.log("PainTypesService.createPainType response:", response);
 
@@ -539,7 +686,7 @@ export const UserProvider = ({ children }) => {
         console.log("New pain type created:", newPainType);
         setUser((prevUser) => {
           const exists = prevUser.painTypes.some(
-            (p) => p.name.toLowerCase() === trimmed.toLowerCase()
+            (p) => p.name.toLowerCase() === trimmed.toLowerCase(),
           );
           if (exists) return prevUser;
           const newUser = {
@@ -561,7 +708,7 @@ export const UserProvider = ({ children }) => {
       // Fallback to local addition for other errors
       setUser((prevUser) => {
         const exists = prevUser.painTypes.some(
-          (p) => p.name.toLowerCase() === trimmed.toLowerCase()
+          (p) => p.name.toLowerCase() === trimmed.toLowerCase(),
         );
         if (exists) return prevUser;
         const newPainType = { id: String(Date.now()), name: trimmed, image };
@@ -587,10 +734,10 @@ export const UserProvider = ({ children }) => {
     if (!painTypeId || isNaN(parseInt(painTypeId))) {
       console.error(
         "ERROR: painTypeId must be a valid number, got:",
-        painTypeId
+        painTypeId,
       );
       alert(
-        "Error: ID de tipo de dolor inválido. Asegúrate de que sea un número."
+        "Error: ID de tipo de dolor inválido. Asegúrate de que sea un número.",
       );
       return;
     }
@@ -610,7 +757,7 @@ export const UserProvider = ({ children }) => {
     if (!currentPainType) {
       console.error("ERROR: Pain type not found with ID:", painTypeId);
       alert(
-        "Error: Tipo de dolor no encontrado. Verifica que el ID sea correcto."
+        "Error: Tipo de dolor no encontrado. Verifica que el ID sea correcto.",
       );
       return;
     }
@@ -619,7 +766,7 @@ export const UserProvider = ({ children }) => {
       const response = await PainTypesService.updatePainType(
         painTypeId,
         trimmed,
-        imageToUse
+        imageToUse,
       );
       console.log("PainTypesService.updatePainType response:", response);
       if (response.success) {
@@ -633,7 +780,7 @@ export const UserProvider = ({ children }) => {
                     name: response.painType.name,
                     image: response.painType.image_url || null,
                   }
-                : p
+                : p,
             ),
           };
           saveUserData(newUser);
@@ -653,7 +800,9 @@ export const UserProvider = ({ children }) => {
         const newUser = {
           ...prevUser,
           painTypes: prevUser.painTypes.map((p) =>
-            p.id === painTypeId ? { ...p, name: trimmed, image: imageToUse } : p
+            p.id === painTypeId
+              ? { ...p, name: trimmed, image: imageToUse }
+              : p,
           ),
         };
         saveUserData(newUser);
@@ -728,37 +877,13 @@ export const UserProvider = ({ children }) => {
 
     setUser((prevUser) => {
       const newRecords = [record, ...prevUser.records];
-
-      const newRecordsCount = prevUser.recordsCount + 1;
-      let newPoints = prevUser.points + 10; // +10 por registro
-      const newAchievements = prevUser.achievements.map((ach) => ({ ...ach }));
-
-      const first = newAchievements.find((a) => a.id === 1);
-      if (newRecordsCount >= 1 && first && !first.unlocked) {
-        first.unlocked = true;
-        newPoints += first.points;
-      }
-      const ten = newAchievements.find((a) => a.id === 2);
-      if (newRecordsCount >= 10 && ten && !ten.unlocked) {
-        ten.unlocked = true;
-        newPoints += ten.points;
-      }
-
-      const newLevel = computeLevel(newPoints);
-      const lvl5 = newAchievements.find((a) => a.id === 4);
-      if (newLevel >= 5 && lvl5 && !lvl5.unlocked) {
-        lvl5.unlocked = true;
-        newPoints += lvl5.points;
-      }
-
-      const finalLevel = computeLevel(newPoints);
+      const progressState = buildProgressState(prevUser, {
+        recordsAdded: 1,
+        basePoints: 10,
+      });
       const newUser = {
-        ...prevUser,
+        ...progressState,
         records: newRecords,
-        recordsCount: newRecordsCount,
-        points: newPoints,
-        level: finalLevel,
-        achievements: newAchievements,
       };
       saveUserData(newUser);
       return newUser;
@@ -772,8 +897,7 @@ export const UserProvider = ({ children }) => {
         // Reload records from API to get updated data
         await loadRecordsFromAPI();
         // Update local stats
-        addPoints(10);
-        incrementRecords();
+        incrementRecords(10);
         return { success: true, record: response.record };
       }
       return response;
@@ -862,6 +986,8 @@ export const UserProvider = ({ children }) => {
         loadPainTypesFromAPI,
         loadRecordsFromAPI,
         getLevelProgress,
+        getLevelMeta,
+        levels,
         getTodayRecords,
       }}
     >

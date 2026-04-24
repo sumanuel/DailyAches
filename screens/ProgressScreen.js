@@ -13,11 +13,15 @@ import HeroPanel from "../components/HeroPanel";
 
 const ProgressScreen = () => {
   const paperTheme = usePaperTheme();
-  const { user, getLevelProgress } = useUser();
+  const { user, getLevelProgress, getLevelMeta } = useUser();
 
   const progress = getLevelProgress();
   const progress01 =
     typeof progress.progress === "number" ? progress.progress : 0;
+  const currentLevel = getLevelMeta(user.level);
+  const nextLevel = progress.nextLevel
+    ? getLevelMeta(progress.nextLevel)
+    : null;
 
   const renderAchievement = ({ item }) => (
     <List.Item
@@ -26,7 +30,7 @@ const ProgressScreen = () => {
       left={(props) => (
         <List.Icon
           {...props}
-          icon={item.unlocked ? "trophy" : "trophy-outline"}
+          icon={item.icon || (item.unlocked ? "trophy" : "trophy-outline")}
           color={
             item.unlocked
               ? paperTheme.colors.tertiary
@@ -58,9 +62,31 @@ const ProgressScreen = () => {
       >
         <Card.Title title="Nivel y puntos" />
         <Card.Content>
+          <View
+            style={[
+              styles.levelBadge,
+              { backgroundColor: paperTheme.colors.primaryContainer },
+            ]}
+          >
+            <Text style={styles.levelIcon}>{currentLevel.icon}</Text>
+            <View style={styles.levelCopy}>
+              <Text style={styles.levelName}>{currentLevel.title}</Text>
+              <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
+                Nivel {user.level}
+              </Text>
+            </View>
+            <Text style={styles.levelPoints}>{user.points} pts</Text>
+          </View>
+
           <View style={styles.row}>
-            <Text variant="titleMedium">Nivel {user.level}</Text>
-            <Text variant="titleMedium">{user.points} pts</Text>
+            <Text variant="titleMedium">Progreso actual</Text>
+            {nextLevel ? (
+              <Text style={styles.nextLevelHint}>
+                Siguiente: {nextLevel.icon} {nextLevel.title}
+              </Text>
+            ) : (
+              <Text style={styles.nextLevelHint}>Rango máximo actual</Text>
+            )}
           </View>
           <ProgressBar progress={progress01} style={styles.progress} />
           {progress.nextLevel ? (
@@ -79,7 +105,8 @@ const ProgressScreen = () => {
         <Card.Title title="Logros" />
         <Card.Content>
           <Text style={styles.subtitle}>
-            Desbloquea logros registrando dolores y alcanzando hitos.
+            Desbloquea hitos registrando dolores, sumando constancia y subiendo
+            de rango.
           </Text>
           <FlatList
             data={user.achievements}
@@ -98,11 +125,24 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingBottom: 24 },
   card: { marginBottom: 16, borderRadius: 24, overflow: "hidden" },
+  levelBadge: {
+    borderRadius: 22,
+    padding: 14,
+    marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  levelIcon: { fontSize: 28 },
+  levelCopy: { flex: 1 },
+  levelName: { fontSize: 18, fontWeight: "800" },
+  levelPoints: { fontSize: 18, fontWeight: "900" },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
+  nextLevelHint: { fontSize: 12, opacity: 0.8 },
   progress: { marginTop: 12, height: 10, borderRadius: 6 },
   sub: { marginTop: 8, opacity: 0.7 },
   subtitle: {
