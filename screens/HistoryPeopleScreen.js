@@ -7,21 +7,14 @@ import {
   IconButton,
   useTheme as usePaperTheme,
 } from "react-native-paper";
-import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
-
-const avatarImages = {
-  "DolorDeCabeza.png": require("../assets/avatars/DolorDeCabeza.png"),
-  "DolorDeEspalda.png": require("../assets/avatars/DolorDeEspalda.png"),
-  "DolorDePiernas.png": require("../assets/avatars/DolorDePiernas.png"),
-  "Mujer feliz.png": require("../assets/avatars/Mujer feliz.png"),
-  "Saltando.png": require("../assets/avatars/Saltando.png"),
-  "Alegre.png": require("../assets/avatars/Alegre.png"),
-  "Mareo.png": require("../assets/avatars/Mareo.png"),
-  "Trasnocho.png": require("../assets/avatars/Trasnocho.png"),
-};
+import IllustrationBadge from "../components/IllustrationBadge";
+import {
+  getAvatarIllustration,
+  resolveAvatarIllustrationKey,
+} from "../constants/illustrations";
 
 const HistoryPeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
@@ -123,8 +116,11 @@ const HistoryPeopleScreen = ({ navigation }) => {
               <Card.Content style={styles.row}>
                 <View style={styles.rowLeft}>
                   {p.avatar ? (
-                    <Image
-                      source={avatarImages[p.avatar]}
+                    <IllustrationBadge
+                      preset={getAvatarIllustration(
+                        resolveAvatarIllustrationKey(p.avatar),
+                      )}
+                      size={52}
                       style={styles.avatar}
                     />
                   ) : (
@@ -199,11 +195,7 @@ const styles = StyleSheet.create({
   },
   rowLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
   avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
+    flexShrink: 0,
   },
   avatarText: { fontSize: 18, fontWeight: "700" },
   meta: { flex: 1 },

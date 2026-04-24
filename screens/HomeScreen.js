@@ -8,28 +8,16 @@ import {
   useTheme as usePaperTheme,
   Avatar,
 } from "react-native-paper";
-import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
-
-const avatarImages = {
-  "DolorDeCabeza.png": require("../assets/avatars/DolorDeCabeza.png"),
-  "DolorDeEspalda.png": require("../assets/avatars/DolorDeEspalda.png"),
-  "DolorDePiernas.png": require("../assets/avatars/DolorDePiernas.png"),
-  "Mujer feliz.png": require("../assets/avatars/Mujer feliz.png"),
-  "Saltando.png": require("../assets/avatars/Saltando.png"),
-  "Alegre.png": require("../assets/avatars/Alegre.png"),
-  "Mareo.png": require("../assets/avatars/Mareo.png"),
-  "Trasnocho.png": require("../assets/avatars/Trasnocho.png"),
-};
-
-const painImages = {
-  "DolorDeCabeza.png": require("../assets/resourse_one/DolorDeCabeza.png"),
-  "DolorDeEspalda.png": require("../assets/resourse_one/DolorDeEspalda.png"),
-  "DolorDePiernas.png": require("../assets/resourse_one/DolorDePiernas.png"),
-  "Mujer feliz.png": require("../assets/resourse_one/Mujer feliz.png"),
-};
+import IllustrationBadge from "../components/IllustrationBadge";
+import {
+  getAvatarIllustration,
+  getPainIllustration,
+  resolveAvatarIllustrationKey,
+  resolvePainIllustrationKey,
+} from "../constants/illustrations";
 
 const HomeScreen = () => {
   const {
@@ -44,7 +32,6 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const [dailyRecords, setDailyRecords] = useState([]);
   const [message, setMessage] = useState("");
-  const [imageUri, setImageUri] = useState("https://via.placeholder.com/300"); // Imagen dinámica placeholder
 
   const defaultMessages = [
     "¡Hola! ¿Cómo van esos dolores hoy? 😏",
@@ -75,20 +62,19 @@ const HomeScreen = () => {
     }
   }, [todayRecords.length]);
 
-  const currentImageUri = useMemo(() => {
+  const heroIllustrationKey = useMemo(() => {
     if (todayRecords.length === 0) {
-      return require("../assets/avatars/Saltando.png");
-    } else {
-      return require("../assets/resourse_one/DolorDeCabeza.png");
+      return "Saltando.png";
     }
+
+    return resolvePainIllustrationKey(todayRecords[0]);
   }, [todayRecords.length]);
 
   useFocusEffect(
     useCallback(() => {
       setDailyRecords(todayRecords);
       setMessage(currentMessage);
-      setImageUri(currentImageUri);
-    }, [todayRecords, currentMessage, currentImageUri]),
+    }, [todayRecords, currentMessage]),
   );
 
   const peopleById = useMemo(() => {
@@ -257,11 +243,14 @@ const HomeScreen = () => {
                 {heroDescription}
               </Text>
             </View>
-            <Image
-              source={imageUri}
+            <IllustrationBadge
+              preset={
+                todayCount === 0
+                  ? getAvatarIllustration(heroIllustrationKey)
+                  : getPainIllustration(heroIllustrationKey)
+              }
+              size={132}
               style={styles.heroImage}
-              placeholder={require("../assets/splash-icon.png")}
-              contentFit="contain"
             />
           </View>
 
@@ -406,14 +395,16 @@ const HomeScreen = () => {
                   subtitle={relationship || undefined}
                   titleStyle={styles.personTitle}
                   left={(props) => (
-                    <Avatar.Image
-                      size={40}
-                      source={
-                        avatarImages[
-                          peopleById[personKey]?.avatar || "Mujer feliz.png"
-                        ]
-                      }
-                    />
+                    <View style={styles.avatarWrap}>
+                      <IllustrationBadge
+                        preset={getAvatarIllustration(
+                          resolveAvatarIllustrationKey(
+                            peopleById[personKey]?.avatar,
+                          ),
+                        )}
+                        size={40}
+                      />
+                    </View>
                   )}
                 />
                 <Card.Content>
@@ -435,8 +426,11 @@ const HomeScreen = () => {
                         <Card.Content>
                           <View style={styles.painHeader}>
                             {record.image ? (
-                              <Image
-                                source={painImages[record.image]}
+                              <IllustrationBadge
+                                preset={getPainIllustration(
+                                  resolvePainIllustrationKey(record),
+                                )}
+                                size={40}
                                 style={styles.recordImage}
                               />
                             ) : null}
@@ -582,6 +576,7 @@ const styles = StyleSheet.create({
   heroTitle: { fontWeight: "900", lineHeight: 30 },
   heroText: { lineHeight: 21, maxWidth: 250 },
   heroImage: { width: 132, height: 132 },
+  avatarWrap: { justifyContent: "center", marginRight: 2 },
   statsRow: {
     flexDirection: "row",
     gap: 10,
@@ -630,7 +625,7 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 6,
   },
-  recordImage: { width: 40, height: 40, borderRadius: 20 },
+  recordImage: { flexShrink: 0 },
   personTitle: { fontWeight: "800", fontSize: 18 },
   painTitle: { fontWeight: "700" },
   relationshipTag: {

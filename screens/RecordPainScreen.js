@@ -7,69 +7,17 @@ import {
   Card,
   useTheme as usePaperTheme,
 } from "react-native-paper";
-import { Image } from "expo-image";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
-
-const painImages = {
-  "Alegre.png": require("../assets/resourse_one/Alegre.png"),
-  "Cabeza.png": require("../assets/resourse_one/Cabeza.png"),
-  "Cervical.png": require("../assets/resourse_one/Cervical.png"),
-  "Diarrea.png": require("../assets/resourse_one/Diarrea.png"),
-  "DolorDeCabeza.png": require("../assets/resourse_one/DolorDeCabeza.png"),
-  "DolorDeEspalda.png": require("../assets/resourse_one/DolorDeEspalda.png"),
-  "DolorDePiernas.png": require("../assets/resourse_one/DolorDePiernas.png"),
-  "Espalda.png": require("../assets/resourse_one/Espalda.png"),
-  "Fiebre.png": require("../assets/resourse_one/Fiebre.png"),
-  "Gripe.png": require("../assets/resourse_one/Gripe.png"),
-  "Mamitis.png": require("../assets/resourse_one/Mamitis.png"),
-  "Manos.png": require("../assets/resourse_one/Manos.png"),
-  "Mareo.png": require("../assets/resourse_one/Mareo.png"),
-  "Muela.png": require("../assets/resourse_one/Muela.png"),
-  "Mujer feliz.png": require("../assets/resourse_one/Mujer feliz.png"),
-  "Papitis.png": require("../assets/resourse_one/Papitis.png"),
-  "Piernas.png": require("../assets/resourse_one/Piernas.png"),
-  "Resaca.png": require("../assets/resourse_one/Resaca.png"),
-  "Saltando.png": require("../assets/resourse_one/Saltando.png"),
-  "Senos.png": require("../assets/resourse_one/Senos.png"),
-  "Trasnocho.png": require("../assets/resourse_one/Trasnocho.png"),
-  "Vientre.png": require("../assets/resourse_one/Vientre.png"),
-  "Vomito.png": require("../assets/resourse_one/Vomito.png"),
-};
-
-// Función para obtener la imagen correcta para un tipo de dolor
-const getPainImage = (painType) => {
-  // Mapear por nombre del tipo de dolor (esta es la forma más confiable)
-  const nameMappings = {
-    "Dolor de cabeza": "DolorDeCabeza.png",
-    "Dolor de espalda": "DolorDeEspalda.png",
-    "Dolor menstrual": "DolorDePiernas.png",
-    "Dolor de estómago": "DolorDePiernas.png",
-    "Dolor de garganta": "DolorDePiernas.png",
-    "Dolor de dientes": "DolorDePiernas.png",
-    Otro: "Mujer feliz.png",
-  };
-
-  // Si el pain type tiene un image específico configurado, úsalo
-  if (
-    painType.image &&
-    typeof painType.image === "string" &&
-    painType.image.trim()
-  ) {
-    const directImage = painImages[painType.image];
-    if (directImage) {
-      return directImage;
-    }
-  }
-
-  // De lo contrario, usa el mapeo por nombre
-  const mappedImage = nameMappings[painType.name] || "Mujer feliz.png";
-  return painImages[mappedImage] || painImages["Mujer feliz.png"];
-};
+import IllustrationBadge from "../components/IllustrationBadge";
+import {
+  getPainIllustration,
+  resolvePainIllustrationKey,
+} from "../constants/illustrations";
 
 const schema = yup.object({
   pain: yup.string().required("Selecciona un dolor"),
@@ -233,7 +181,9 @@ const RecordPainScreen = ({ navigation, route }) => {
             numColumns={3}
             scrollEnabled={false}
             renderItem={({ item }) => {
-              const imageSource = getPainImage(item);
+              const preset = getPainIllustration(
+                resolvePainIllustrationKey(item),
+              );
               const isSelected = selectedPainType?.name === item.name;
 
               return (
@@ -254,12 +204,11 @@ const RecordPainScreen = ({ navigation, route }) => {
                     setValue("pain", item.name);
                   }}
                 >
-                  <Image
-                    source={imageSource}
+                  <IllustrationBadge
+                    preset={preset}
+                    size={60}
+                    selected={isSelected}
                     style={styles.painImage}
-                    onError={() =>
-                      console.log(`Error loading image for: ${item.name}`)
-                    }
                   />
                   <Text
                     style={[

@@ -15,21 +15,14 @@ import {
   Checkbox,
   List,
 } from "react-native-paper";
-import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
-
-const avatarImages = {
-  "DolorDeCabeza.png": require("../assets/avatars/DolorDeCabeza.png"),
-  "DolorDeEspalda.png": require("../assets/avatars/DolorDeEspalda.png"),
-  "DolorDePiernas.png": require("../assets/avatars/DolorDePiernas.png"),
-  "Mujer feliz.png": require("../assets/avatars/Mujer feliz.png"),
-  "Saltando.png": require("../assets/avatars/Saltando.png"),
-  "Alegre.png": require("../assets/avatars/Alegre.png"),
-  "Mareo.png": require("../assets/avatars/Mareo.png"),
-  "Trasnocho.png": require("../assets/avatars/Trasnocho.png"),
-};
+import IllustrationBadge from "../components/IllustrationBadge";
+import {
+  avatarIllustrationKeys,
+  getAvatarIllustration,
+} from "../constants/illustrations";
 
 const AddPersonScreen = ({ navigation, route }) => {
   const paperTheme = usePaperTheme();
@@ -52,16 +45,7 @@ const AddPersonScreen = ({ navigation, route }) => {
   );
   const [expanded, setExpanded] = useState(false);
 
-  const avatars = [
-    "DolorDeCabeza.png",
-    "DolorDeEspalda.png",
-    "DolorDePiernas.png",
-    "Mujer feliz.png",
-    "Saltando.png",
-    "Alegre.png",
-    "Mareo.png",
-    "Trasnocho.png",
-  ];
+  const avatars = avatarIllustrationKeys;
 
   const relationshipOptions = [
     "Esposa",
@@ -204,8 +188,10 @@ const AddPersonScreen = ({ navigation, route }) => {
                       selectedAvatar === avatar && styles.selectedAvatar,
                     ]}
                   >
-                    <Image
-                      source={avatarImages[avatar]}
+                    <IllustrationBadge
+                      preset={getAvatarIllustration(avatar)}
+                      size={54}
+                      selected={selectedAvatar === avatar}
                       style={styles.avatarImage}
                     />
                   </Pressable>
@@ -275,9 +261,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.03 }],
   },
   avatarImage: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    flexShrink: 0,
   },
   input: {
     marginBottom: 16,

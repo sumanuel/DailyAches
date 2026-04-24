@@ -6,36 +6,14 @@ import {
   Card,
   useTheme as usePaperTheme,
 } from "react-native-paper";
-import { Image } from "expo-image";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
-
-const painImages = {
-  "Alegre.png": require("../assets/resourse_one/Alegre.png"),
-  "Cabeza.png": require("../assets/resourse_one/Cabeza.png"),
-  "Cervical.png": require("../assets/resourse_one/Cervical.png"),
-  "Diarrea.png": require("../assets/resourse_one/Diarrea.png"),
-  "DolorDeCabeza.png": require("../assets/resourse_one/DolorDeCabeza.png"),
-  "DolorDeEspalda.png": require("../assets/resourse_one/DolorDeEspalda.png"),
-  "DolorDePiernas.png": require("../assets/resourse_one/DolorDePiernas.png"),
-  "Espalda.png": require("../assets/resourse_one/Espalda.png"),
-  "Fiebre.png": require("../assets/resourse_one/Fiebre.png"),
-  "Gripe.png": require("../assets/resourse_one/Gripe.png"),
-  "Mamitis.png": require("../assets/resourse_one/Mamitis.png"),
-  "Manos.png": require("../assets/resourse_one/Manos.png"),
-  "Mareo.png": require("../assets/resourse_one/Mareo.png"),
-  "Muela.png": require("../assets/resourse_one/Muela.png"),
-  "Mujer feliz.png": require("../assets/resourse_one/Mujer feliz.png"),
-  "Papitis.png": require("../assets/resourse_one/Papitis.png"),
-  "Piernas.png": require("../assets/resourse_one/Piernas.png"),
-  "Resaca.png": require("../assets/resourse_one/Resaca.png"),
-  "Saltando.png": require("../assets/resourse_one/Saltando.png"),
-  "Senos.png": require("../assets/resourse_one/Senos.png"),
-  "Trasnocho.png": require("../assets/resourse_one/Trasnocho.png"),
-  "Vientre.png": require("../assets/resourse_one/Vientre.png"),
-  "Vomito.png": require("../assets/resourse_one/Vomito.png"),
-};
+import IllustrationBadge from "../components/IllustrationBadge";
+import {
+  getPainIllustration,
+  painIllustrationKeys,
+} from "../constants/illustrations";
 
 const AddPainTypeScreen = ({ navigation, route }) => {
   const paperTheme = usePaperTheme();
@@ -95,7 +73,7 @@ const AddPainTypeScreen = ({ navigation, route }) => {
   };
 
   const renderImageGrid = () => {
-    const images = Object.keys(painImages);
+    const images = painIllustrationKeys;
 
     return (
       <View style={styles.imagesGrid}>
@@ -118,7 +96,12 @@ const AddPainTypeScreen = ({ navigation, route }) => {
               selectedImage === img && styles.imageOptionSelected,
             ]}
           >
-            <Image source={painImages[img]} style={styles.imagePreview} />
+            <IllustrationBadge
+              preset={getPainIllustration(img)}
+              size={60}
+              selected={selectedImage === img}
+              style={styles.imagePreview}
+            />
             {selectedImage === img && (
               <View style={styles.selectedOverlay}>
                 <Text style={styles.checkMark}>✓</Text>
@@ -237,9 +220,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.03 }],
   },
   imagePreview: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    flexShrink: 0,
   },
   selectedOverlay: {
     position: "absolute",

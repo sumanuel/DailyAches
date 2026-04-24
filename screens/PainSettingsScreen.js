@@ -7,37 +7,15 @@ import {
   Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
-import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
-
-const painImages = {
-  "Alegre.png": require("../assets/resourse_one/Alegre.png"),
-  "Cabeza.png": require("../assets/resourse_one/Cabeza.png"),
-  "Cervical.png": require("../assets/resourse_one/Cervical.png"),
-  "Diarrea.png": require("../assets/resourse_one/Diarrea.png"),
-  "DolorDeCabeza.png": require("../assets/resourse_one/DolorDeCabeza.png"),
-  "DolorDeEspalda.png": require("../assets/resourse_one/DolorDeEspalda.png"),
-  "DolorDePiernas.png": require("../assets/resourse_one/DolorDePiernas.png"),
-  "Espalda.png": require("../assets/resourse_one/Espalda.png"),
-  "Fiebre.png": require("../assets/resourse_one/Fiebre.png"),
-  "Gripe.png": require("../assets/resourse_one/Gripe.png"),
-  "Mamitis.png": require("../assets/resourse_one/Mamitis.png"),
-  "Manos.png": require("../assets/resourse_one/Manos.png"),
-  "Mareo.png": require("../assets/resourse_one/Mareo.png"),
-  "Muela.png": require("../assets/resourse_one/Muela.png"),
-  "Mujer feliz.png": require("../assets/resourse_one/Mujer feliz.png"),
-  "Papitis.png": require("../assets/resourse_one/Papitis.png"),
-  "Piernas.png": require("../assets/resourse_one/Piernas.png"),
-  "Resaca.png": require("../assets/resourse_one/Resaca.png"),
-  "Saltando.png": require("../assets/resourse_one/Saltando.png"),
-  "Senos.png": require("../assets/resourse_one/Senos.png"),
-  "Trasnocho.png": require("../assets/resourse_one/Trasnocho.png"),
-  "Vientre.png": require("../assets/resourse_one/Vientre.png"),
-  "Vomito.png": require("../assets/resourse_one/Vomito.png"),
-};
+import IllustrationBadge from "../components/IllustrationBadge";
+import {
+  getPainIllustration,
+  resolvePainIllustrationKey,
+} from "../constants/illustrations";
 
 const PainSettingsScreen = () => {
   const paperTheme = usePaperTheme();
@@ -148,7 +126,11 @@ const PainSettingsScreen = () => {
           }
           renderItem={({ item }) => (
             <View style={styles.itemRow}>
-              <Image source={painImages[item.image]} style={styles.itemImage} />
+              <IllustrationBadge
+                preset={getPainIllustration(resolvePainIllustrationKey(item))}
+                size={48}
+                style={styles.itemImage}
+              />
               <View style={styles.itemMeta}>
                 <Text style={styles.itemText}>{item.name}</Text>
                 <Text
@@ -220,7 +202,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  itemImage: { width: 48, height: 48, borderRadius: 18, marginRight: 12 },
+  itemImage: { marginRight: 12, flexShrink: 0 },
   itemMeta: { flex: 1 },
   itemText: { fontSize: 16, fontWeight: "700" },
   itemActions: { flexDirection: "row" },
