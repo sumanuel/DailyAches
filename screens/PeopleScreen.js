@@ -3,7 +3,6 @@ import { StyleSheet, View, ScrollView, Alert } from "react-native";
 import {
   Card,
   Text,
-  TextInput,
   IconButton,
   FAB,
   useTheme as usePaperTheme,
@@ -22,8 +21,6 @@ const PeopleScreen = ({ navigation }) => {
   const { user, addPerson, removePerson, updatePerson, loadPeopleFromAPI } =
     useUser();
 
-  const [query, setQuery] = useState("");
-
   const openAdd = () => {
     navigation.navigate("AddPerson");
   };
@@ -32,11 +29,7 @@ const PeopleScreen = ({ navigation }) => {
     navigation.navigate("AddPerson", { person });
   };
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return user.people;
-    return user.people.filter((p) => (p.name || "").toLowerCase().includes(q));
-  }, [query, user.people]);
+  const filtered = useMemo(() => user.people || [], [user.people]);
 
   const onSelectPerson = (person) => {
     navigation.navigate("RecordPain", {
@@ -68,8 +61,8 @@ const PeopleScreen = ({ navigation }) => {
     <AppScreen scroll={false} contentContainerStyle={styles.container}>
       <HeroPanel
         eyebrow="PERSONAS"
-        title="Tu elenco oficial del drama corporal"
-        description="Busca rapido, agrega nuevas personas y entra directo a registrar lo que el cuerpo decidio improvisar hoy."
+        title="Personas registradas para sus achaques"
+        description="Desde aqui se agregan personas, se editan sus datos y se abre el registro del malestar que toque ese dia."
       >
         <View style={styles.heroStats}>
           <Text
@@ -97,24 +90,6 @@ const PeopleScreen = ({ navigation }) => {
         </View>
       </HeroPanel>
 
-      <Card
-        style={[
-          styles.searchCard,
-          { backgroundColor: paperTheme.colors.surface },
-        ]}
-      >
-        <Card.Content style={styles.searchContent}>
-          <TextInput
-            mode="outlined"
-            placeholder="Buscar persona o complicidad..."
-            value={query}
-            onChangeText={setQuery}
-            style={styles.searchInput}
-            left={<TextInput.Icon icon="account-search" />}
-          />
-        </Card.Content>
-      </Card>
-
       <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
         {filtered.length === 0 ? (
           <Card
@@ -134,14 +109,14 @@ const PeopleScreen = ({ navigation }) => {
                   { color: paperTheme.colors.onSurfaceVariant },
                 ]}
               >
-                Agrega a alguien para empezar a registrar dolores con elegancia
-                y un poco de humor.
+                Agrega una persona para empezar a registrar sus molestias con
+                claridad y un tono ligero.
               </Text>
               <Text
                 style={[styles.emptyHint, { color: paperTheme.colors.primary }]}
               >
-                El boton + ya esta listo para fichar a la primera victima del
-                dia.
+                El boton + ya esta listo para sumar a la primera persona del
+                listado.
               </Text>
             </Card.Content>
           </Card>
@@ -195,18 +170,18 @@ const PeopleScreen = ({ navigation }) => {
                         { color: paperTheme.colors.primary },
                       ]}
                     >
-                      Toca para registrar el achaque del momento
+                      Toca para registrar el achaque que presente
                     </Text>
                   </View>
                 </View>
                 <View style={styles.actions}>
                   <IconButton
-                    icon="pencil"
+                    icon="square-edit-outline"
                     onPress={() => openEdit(p)}
                     accessibilityLabel="Editar persona"
                   />
                   <IconButton
-                    icon="trash-can-outline"
+                    icon="delete-circle-outline"
                     onPress={() => handleRemovePerson(p)}
                     accessibilityLabel="Eliminar persona"
                   />
@@ -238,9 +213,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     overflow: "hidden",
   },
-  searchCard: { borderRadius: 24, overflow: "hidden" },
-  searchContent: { paddingVertical: 6 },
-  searchInput: { backgroundColor: "transparent" },
   list: { flex: 1, marginTop: 12 },
   emptyCard: { borderRadius: 24, overflow: "hidden" },
   emptyTitle: { marginBottom: 6, fontWeight: "800" },

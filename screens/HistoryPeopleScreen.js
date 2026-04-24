@@ -1,9 +1,8 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useEffect } from "react";
 import { StyleSheet, View, ScrollView } from "react-native";
 import {
   Card,
   Text,
-  TextInput,
   IconButton,
   useTheme as usePaperTheme,
 } from "react-native-paper";
@@ -20,19 +19,11 @@ const HistoryPeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
   const { user, loadPeopleFromAPI } = useUser();
 
-  const [query, setQuery] = useState("");
-
   useEffect(() => {
     loadPeopleFromAPI();
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return user.people || [];
-    return (user.people || []).filter((p) =>
-      (p.name || "").toLowerCase().includes(q),
-    );
-  }, [query, user.people]);
+  const filtered = useMemo(() => user.people || [], [user.people]);
 
   const onSelectPerson = (person) => {
     navigation.navigate("HistoryDetail", {
@@ -45,8 +36,8 @@ const HistoryPeopleScreen = ({ navigation }) => {
     <AppScreen contentContainerStyle={styles.container}>
       <HeroPanel
         eyebrow="HISTORIAL"
-        title="Busca a quien quieras investigar"
-        description="Entra en cualquier persona para revisar el archivo completo de molestias, fechas y capitulos del cuerpo."
+        title="Historial disponible por persona"
+        description="Cada ficha abre el archivo completo de molestias, fechas y episodios registrados para esa persona."
       >
         <Text
           style={[
@@ -60,24 +51,6 @@ const HistoryPeopleScreen = ({ navigation }) => {
           Coincidencias: {filtered.length}
         </Text>
       </HeroPanel>
-
-      <Card
-        style={[
-          styles.searchCard,
-          { backgroundColor: paperTheme.colors.surface },
-        ]}
-      >
-        <Card.Content style={styles.searchContent}>
-          <TextInput
-            mode="outlined"
-            placeholder="Buscar persona para ver historial..."
-            value={query}
-            onChangeText={setQuery}
-            style={styles.searchInput}
-            left={<TextInput.Icon icon="account-search" />}
-          />
-        </Card.Content>
-      </Card>
 
       <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
         {filtered.length === 0 ? (
@@ -98,8 +71,8 @@ const HistoryPeopleScreen = ({ navigation }) => {
                   lineHeight: 20,
                 }}
               >
-                Agrega una persona en Registro para empezar a llenar el archivo
-                historico.
+                Agrega una persona en Registro para empezar a construir su
+                historial.
               </Text>
             </Card.Content>
           </Card>
@@ -153,11 +126,11 @@ const HistoryPeopleScreen = ({ navigation }) => {
                         { color: paperTheme.colors.primary },
                       ]}
                     >
-                      Toca para ver el historial completo
+                      Toca para ver todo su historial
                     </Text>
                   </View>
                 </View>
-                <IconButton icon="chevron-right" />
+                <IconButton icon="arrow-right-circle-outline" />
               </Card.Content>
             </Card>
           ))
@@ -178,9 +151,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     overflow: "hidden",
   },
-  searchCard: { borderRadius: 24, overflow: "hidden" },
-  searchContent: { paddingVertical: 6 },
-  searchInput: { backgroundColor: "transparent" },
   list: { flex: 1, marginTop: 12 },
   card: {
     width: "100%",

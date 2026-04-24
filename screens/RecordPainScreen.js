@@ -145,8 +145,8 @@ const RecordPainScreen = ({ navigation, route }) => {
     <AppScreen contentContainerStyle={styles.container}>
       <HeroPanel
         eyebrow={isEdit ? "EDITAR REGISTRO" : "NUEVO REGISTRO"}
-        title={`${personName} entra al radar de hoy`}
-        description="Elige el tipo de molestia, deja una nota si hace falta y guarda el capitulo de hoy sin perder claridad."
+        title={`${personName} queda en el radar del dia`}
+        description="Aqui se elige el tipo de molestia, se agrega una nota si hace falta y se guarda el episodio con claridad."
       >
         {selectedPainType ? (
           <Text

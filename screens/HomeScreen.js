@@ -34,15 +34,15 @@ const HomeScreen = () => {
   const [message, setMessage] = useState("");
 
   const defaultMessages = [
-    "¡Hola! ¿Cómo van esos dolores hoy? 😏",
-    "Recuerda registrar tus dolores para ganar puntos y logros!",
-    "¡Un día sin dolor es un día ganado! Comparte tu victoria.",
-    "No olvides agregar a quién le duele... ¡con humor!",
+    "Hoy ya puede revisarse como va el panorama de achaques.",
+    "Los dolores registrados aqui siguen sumando puntos y logros.",
+    "Un dia sin dolor tambien merece quedar anotado.",
+    "Si aparece un achaque nuevo, desde aqui se registra rapido.",
   ];
 
   const surpriseMessages = [
-    "¡Sorpresa! No registraste ningún dolor hoy. ¿Estás bien? 😂",
-    "¡Día perfecto! Sin dolores reportados. ¡Felicidades!",
+    "Todavia no aparece ningun dolor registrado hoy.",
+    "Por ahora el dia va en calma y sin achaques reportados.",
   ];
 
   useEffect(() => {
@@ -158,14 +158,13 @@ const HomeScreen = () => {
     todayCount === 0 ? "Hoy manda la paz" : "Radar del drama corporal";
   const heroDescription =
     todayCount === 0
-      ? "Todavía no hay achaques fichados. Si el cuerpo sigue cooperando, puedes presumir de día zen con una sonrisa culpable."
-      : "Tu resumen diario ya está servido: quién se quejó, qué dolió y a qué hora empezó la novela del cuerpo.";
-  const moodChip =
-    todayCount === 0 ? "Humor terapéutico activado" : "Hoy hubo contenido";
+      ? "Todavia no hay achaques fichados. Si todo sigue en calma, este tablero queda listo para cuando toque registrar alguno."
+      : "Aqui se resume quien presento molestias, que dolio y a que hora comenzo el episodio del dia.";
+  const moodChip = todayCount === 0 ? "Dia en calma" : "Hoy hubo registro";
   const forecastChip =
     todayCount === 0
-      ? "Pronóstico: cero drama"
-      : "Pronóstico: mimo y seguimiento";
+      ? "Pronostico: sin novedad"
+      : "Pronostico: seguimiento y cuidado";
 
   return (
     <ScrollView

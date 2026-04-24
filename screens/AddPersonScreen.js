@@ -101,10 +101,10 @@ const AddPersonScreen = ({ navigation, route }) => {
           eyebrow={isEdit ? "EDITAR PERSONA" : "NUEVA PERSONA"}
           title={
             isEdit
-              ? "Ajusta la ficha del personaje"
-              : "Agrega a alguien a tu radar"
+              ? "Actualiza la ficha de la persona"
+              : "Agrega una persona al registro"
           }
-          description="Ponle nombre, relacion y avatar para que registrar dolores sea rapido y visualmente claro."
+          description="Se puede guardar su nombre, relacion y avatar para que luego sus achaques queden identificados con claridad."
         />
 
         <Card
@@ -160,7 +160,7 @@ const AddPersonScreen = ({ navigation, route }) => {
                 style={styles.checkboxLabel}
                 onPress={() => setWhatsappEnabled(!whatsappEnabled)}
               >
-                Enviar recordatorios por WhatsApp
+                Enviar sus recordatorios por WhatsApp
               </Text>
             </View>
 

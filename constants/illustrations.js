@@ -21,7 +21,7 @@ export const avatarIllustrations = {
   "DolorDePiernas.png": {
     label: "Piernas",
     glyph: "🦵",
-    spark: "✨",
+    spark: "☘",
     tone: "accentMint",
     halo: "tertiaryContainer",
     orbit: "accentSun",
@@ -37,7 +37,7 @@ export const avatarIllustrations = {
   "Saltando.png": {
     label: "Activa",
     glyph: "🤸",
-    spark: "✦",
+    spark: "☻",
     tone: "accentMint",
     halo: "accentSky",
     orbit: "primaryContainer",
@@ -45,7 +45,7 @@ export const avatarIllustrations = {
   "Alegre.png": {
     label: "Alegre",
     glyph: "😄",
-    spark: "✦",
+    spark: "☼",
     tone: "accentSun",
     halo: "accentBerry",
     orbit: "accentSky",
@@ -69,7 +69,7 @@ export const avatarIllustrations = {
   "Guino.png": {
     label: "Guino",
     glyph: "😉",
-    spark: "✦",
+    spark: "☻",
     tone: "accentSun",
     halo: "primaryContainer",
     orbit: "accentBerry",
@@ -85,7 +85,7 @@ export const avatarIllustrations = {
   "Rebelde.png": {
     label: "Rebelde",
     glyph: "😎",
-    spark: "★",
+    spark: "♠",
     tone: "accentBerry",
     halo: "secondaryContainer",
     orbit: "accentSun",
@@ -93,7 +93,7 @@ export const avatarIllustrations = {
   "Brillante.png": {
     label: "Brillante",
     glyph: "🤩",
-    spark: "✦",
+    spark: "☼",
     tone: "accentSky",
     halo: "accentMint",
     orbit: "heroBackdrop",
@@ -103,7 +103,7 @@ export const avatarIllustrations = {
 export const painIllustrations = {
   "Alegre.png": {
     glyph: "😄",
-    spark: "✦",
+    spark: "☼",
     tone: "accentMint",
     halo: "accentSun",
   },
@@ -139,7 +139,7 @@ export const painIllustrations = {
   },
   "DolorDePiernas.png": {
     glyph: "🦵",
-    spark: "✦",
+    spark: "☘",
     tone: "accentMint",
     halo: "tertiaryContainer",
   },
@@ -169,7 +169,7 @@ export const painIllustrations = {
   },
   "Manos.png": {
     glyph: "✋",
-    spark: "✦",
+    spark: "☻",
     tone: "accentMint",
     halo: "accentSky",
   },
@@ -187,7 +187,7 @@ export const painIllustrations = {
   },
   "Mujer feliz.png": {
     glyph: "🙂",
-    spark: "✦",
+    spark: "♥",
     tone: "accentMint",
     halo: "accentSun",
   },
@@ -199,7 +199,7 @@ export const painIllustrations = {
   },
   "Piernas.png": {
     glyph: "🦵",
-    spark: "✦",
+    spark: "☘",
     tone: "accentMint",
     halo: "tertiaryContainer",
   },
@@ -211,7 +211,7 @@ export const painIllustrations = {
   },
   "Saltando.png": {
     glyph: "🤸",
-    spark: "✦",
+    spark: "☻",
     tone: "accentMint",
     halo: "accentSky",
   },
