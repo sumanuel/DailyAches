@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
-const FALLBACK_DEV_API_URL = "http://192.168.1.8:3000/api";
+const FALLBACK_DEV_API_URL = "http://192.168.1.10:3000/api";
 
 function getDevHost() {
   const hostUri =
@@ -10,7 +10,7 @@ function getDevHost() {
     Constants.manifest2?.extra?.expoClient?.hostUri;
 
   if (typeof hostUri === "string" && hostUri.length) {
-    // hostUri is usually like "192.168.1.6:8081"
+    // hostUri is usually like "192.168.1.10:8081"
     return hostUri.split(":")[0];
   }
 
@@ -32,7 +32,7 @@ function getDevBaseUrl() {
 
   // Android emulator should use the special alias to reach the host machine. Jesús IP consola API
   if (Platform.OS === "android" && !Constants.isDevice) {
-    return "http://192.168.1.8:3000/api";
+    return "http://192.168.1.10:3000/api";
   }
 
   // Physical devices need a stable LAN address. Avoid auto-detected virtual
