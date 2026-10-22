@@ -19,7 +19,9 @@ class HttpService {
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
-    console.log("HTTP Request:", options.method || "GET", url); // Agregar log
+    if (__DEV__) {
+      console.log("HTTP Request:", options.method || "GET", url);
+    }
     const config = {
       method: options.method || "GET",
       headers: {

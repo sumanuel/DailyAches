@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
-const FALLBACK_DEV_API_URL = "http://192.168.1.10:3000/api";
+const API_PORT = 3000;
 
 function getDevHost() {
   const hostUri =
@@ -25,41 +25,36 @@ function normalizeBaseUrl(url) {
 }
 
 function getDevBaseUrl() {
+  // Preferred: set EXPO_PUBLIC_API_URL in .env (see .env.example).
   const envBaseUrl = normalizeBaseUrl(process.env.EXPO_PUBLIC_API_URL);
   if (envBaseUrl) {
     return envBaseUrl;
   }
 
-  // Android emulator should use the special alias to reach the host machine. Jesús IP consola API
+  // Android emulator reaches the host machine through this special alias.
   if (Platform.OS === "android" && !Constants.isDevice) {
-    return "http://192.168.1.10:3000/api";
+    return `http://10.0.2.2:${API_PORT}/api`;
   }
 
-  // Physical devices need a stable LAN address. Avoid auto-detected virtual
-  // adapters like 172.30.x.x from Hyper-V/WSL because phones cannot route to
-  // them reliably.
-  if (Constants.isDevice) {
-    return FALLBACK_DEV_API_URL;
-  }
-
-  // iOS simulator / web dev can usually reach the host resolved by Expo.
-  if (!Constants.isDevice) {
-    const host = getDevHost();
-    return `http://${host}:3000/api`;
-  }
-
-  return FALLBACK_DEV_API_URL;
+  // Physical devices, iOS simulator and web use the host Expo resolved. On
+  // machines with virtual adapters (Hyper-V/WSL) that host may be unreachable
+  // from a phone: set EXPO_PUBLIC_API_URL to the real LAN address instead.
+  return `http://${getDevHost()}:${API_PORT}/api`;
 }
+
+const PRODUCTION_API_URL = normalizeBaseUrl(process.env.EXPO_PUBLIC_API_URL);
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: __DEV__ ? getDevBaseUrl() : "https://your-production-api.com/api",
+  BASE_URL: __DEV__
+    ? getDevBaseUrl()
+    : PRODUCTION_API_URL || "https://your-production-api.com/api",
   TIMEOUT: 30000,
 };
 
 // Notes:
-// - Physical device on LAN: uses Metro host IP (e.g. http://192.168.1.8:3000/api)
-// - Android emulator: http://10.0.2.2:3000/api
+// - Set EXPO_PUBLIC_API_URL in .env to override the URL in any environment.
+// - Android emulator default: http://10.0.2.2:3000/api
 // - If Metro runs in tunnel mode, set a fixed API URL manually.
 
 // API Endpoints
