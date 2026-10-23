@@ -51,16 +51,14 @@ class HttpService {
       config.body = JSON.stringify(options.body);
     }
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
+    try {
       const response = await fetch(url, {
         ...config,
         signal: controller.signal,
       });
-
-      clearTimeout(timeoutId);
 
       const result = await this.handleResponse(response);
       if (
@@ -74,6 +72,8 @@ class HttpService {
       return result;
     } catch (error) {
       return this.handleError(error);
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 

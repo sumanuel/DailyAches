@@ -14,9 +14,13 @@ npm run start     # expo start
 npm run android
 npm run ios
 npm run web
+npm test                              # Jest (jest-expo preset), tests live in utils/__tests__
+npx jest utils/__tests__/gamification.test.js   # a single test file
+npm run lint                          # ESLint (eslint-config-expo), 0 errors, some warnings
+npx expo-doctor                       # should pass 18/18
 ```
 
-There is no test runner, linter or build script configured. Verification is manual (smoke test in `ARRANQUE_RAPIDO.md`: register, login, load people/pain-types/records, create each).
+Tests cover only the pure logic and `httpService` (`gamification`, `apiMappers`, `httpService`); contexts, services and screens are verified manually (smoke test in `ARRANQUE_RAPIDO.md`: register, login, load people/pain-types/records, create each). `npx expo start --web` with `EXPO_PUBLIC_API_URL` pointing at a local `Dailyaches-api` is a quick way to exercise login and the data flow in a browser; `Alert.alert` does nothing on web.
 
 Backend URL: set `EXPO_PUBLIC_API_URL` (the `/api` suffix is appended if missing). Copy `.env.example` to `.env` (git-ignored). Without the variable, `constants/api.js` uses `10.0.2.2:3000` on Android emulators and the Expo host elsewhere (set the variable explicitly on physical devices if the host is a virtual adapter). The production URL is still a placeholder.
 

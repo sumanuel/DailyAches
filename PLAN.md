@@ -30,8 +30,8 @@ Objetivo: poder cambiar cosas sin romperlas.
 - [x] Partir `context/UserContext.js` (hecho 2026-10-23, 997 a 286 líneas): `utils/gamification.js` y `utils/apiMappers.js` (funciones puras), `context/AuthContext.js` (sesión y handler de 401) y `context/useRemoteData.js` (API de personas, tipos de dolor y registros). `useUser()` sigue siendo la fachada, así que las pantallas no cambiaron. Probado en la versión web contra la API local: login, persistencia tras recargar y cierre de sesión por token inválido. No probado en dispositivo ni crear/editar/borrar datos desde la UI.
 - [ ] Definir una sola fuente de verdad: con sesión manda la API y AsyncStorage queda como caché; sin sesión, decidir si hay modo local o se exige cuenta.
 - [x] Manejo de sesión expirada: `httpService.setUnauthorizedHandler` y `UserProvider` cierran la sesión ante un 401 con token (sin probar en dispositivo).
-- [ ] Tests con Jest (jest-expo) para lo más frágil: cálculo de nivel y logros, y servicios (`utils/*Service.js`) con `fetch` simulado.
-- [ ] Añadir ESLint y un script `npm run lint`.
+- [x] Jest (jest-expo) instalado (2026-10-23): 24 pruebas para `gamification`, `apiMappers` y `httpService` (`npm test`). Pendiente: pruebas de `utils/*Service.js` y de los contextos (hace falta `@testing-library/react-native`).
+- [x] ESLint con `eslint-config-expo` y `npm run lint` (0 errores, 25 avisos). Pendiente: limpiar los 12 `no-unused-vars`, los 11 `react-hooks/exhaustive-deps` y 2 `import/no-duplicates`.
 - [ ] Estados de carga y error consistentes en todas las pantallas que llaman a la API (hoy los servicios devuelven `{ success, error }`, falta que la UI los muestre de forma uniforme).
 - [ ] Revisar listas largas (historial, registros) contra las reglas de `.agents/skills/vercel-react-native-skills` (FlatList, `memo`, `expo-image`).
 - [ ] Actualizar `CONTEXTO_PROYECTO.md` y `MATRIZ_APP_BACKEND.md` al terminar la refactorización.
@@ -137,3 +137,5 @@ _Hallazgos de la fase 0 (2026-10-22):_
 - [ ] `RegisterScreen` usa `AuthService.register` directo: guarda el token pero no activa `isAuthenticated`; después pide iniciar sesión. Decidir si debe entrar directo con `register` del contexto.
 - [ ] Aviso de React en web: un input pasa de no controlado a controlado (algún formulario inicia con `undefined`).
 - [ ] `MoreScreen` confirma el cierre de sesión con `Alert.alert`, que no hace nada en react-native-web; solo funciona en móvil.
+- [x] `httpService` no cancelaba el temporizador de timeout cuando `fetch` fallaba; ahora lo limpia en un `finally` (lo detectó Jest como proceso sin cerrar).
+- [x] `@expo/vector-icons` y `expo-font` se usaban sin estar declarados; ahora son dependencias directas y `expo-doctor` pasa 18/18.
