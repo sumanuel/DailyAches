@@ -31,7 +31,7 @@ Objetivo: poder cambiar cosas sin romperlas.
 - [ ] Definir una sola fuente de verdad: con sesión manda la API y AsyncStorage queda como caché; sin sesión, decidir si hay modo local o se exige cuenta.
 - [x] Manejo de sesión expirada: `httpService.setUnauthorizedHandler` y `UserProvider` cierran la sesión ante un 401 con token (sin probar en dispositivo).
 - [x] Jest (jest-expo) instalado (2026-10-23): 24 pruebas para `gamification`, `apiMappers` y `httpService` (`npm test`). Pendiente: pruebas de `utils/*Service.js` y de los contextos (hace falta `@testing-library/react-native`).
-- [x] ESLint con `eslint-config-expo` y `npm run lint` (0 errores, 25 avisos). Pendiente: limpiar los 12 `no-unused-vars`, los 11 `react-hooks/exhaustive-deps` y 2 `import/no-duplicates`.
+- [x] ESLint con `eslint-config-expo` y `npm run lint` (0 errores, 0 avisos desde 2026-10-23). Para ello los cargadores de `useRemoteData` y `getTodayRecords` ahora son estables con `useCallback`.
 - [ ] Estados de carga y error consistentes en todas las pantallas que llaman a la API (hoy los servicios devuelven `{ success, error }`, falta que la UI los muestre de forma uniforme).
 - [ ] Revisar listas largas (historial, registros) contra las reglas de `.agents/skills/vercel-react-native-skills` (FlatList, `memo`, `expo-image`).
 - [ ] Actualizar `CONTEXTO_PROYECTO.md` y `MATRIZ_APP_BACKEND.md` al terminar la refactorización.

@@ -50,7 +50,7 @@ const LoginScreen = ({ navigation }) => {
           [{ text: "OK" }],
         );
       }
-    } catch (error) {
+    } catch {
       Alert.alert(
         "Error",
         "Ha ocurrido un error inesperado. Inténtalo de nuevo.",

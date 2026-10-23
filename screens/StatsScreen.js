@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { StyleSheet, View, ScrollView, Modal } from "react-native";
+import { StyleSheet, View, Modal } from "react-native";
 import {
   Button,
   Card,
@@ -114,7 +114,7 @@ const StatsScreen = ({ route }) => {
 
   useEffect(() => {
     loadRecordsFromAPI();
-  }, []);
+  }, [loadRecordsFromAPI]);
 
   const applyPreset = (p) => {
     setPreset(p);
@@ -131,7 +131,7 @@ const StatsScreen = ({ route }) => {
     const allToday = getTodayRecords();
     if (!personId) return [];
     return allToday.filter((r) => r.personId === personId);
-  }, [getTodayRecords, personId, user.records]);
+  }, [getTodayRecords, personId]);
 
   const historyRecords = useMemo(() => {
     const start = historyRange.start.getTime();

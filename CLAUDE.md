@@ -16,7 +16,7 @@ npm run ios
 npm run web
 npm test                              # Jest (jest-expo preset), tests live in utils/__tests__
 npx jest utils/__tests__/gamification.test.js   # a single test file
-npm run lint                          # ESLint (eslint-config-expo), 0 errors, some warnings
+npm run lint                          # ESLint (eslint-config-expo), currently clean
 npx expo-doctor                       # should pass 18/18
 ```
 

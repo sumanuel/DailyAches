@@ -21,7 +21,7 @@ const HistoryPeopleScreen = ({ navigation }) => {
 
   useEffect(() => {
     loadPeopleFromAPI();
-  }, []);
+  }, [loadPeopleFromAPI]);
 
   const filtered = useMemo(() => user.people || [], [user.people]);
 

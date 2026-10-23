@@ -26,7 +26,7 @@ const PainSettingsScreen = () => {
 
   useEffect(() => {
     loadPainTypesFromAPI();
-  }, []);
+  }, [loadPainTypesFromAPI]);
 
   const openAddScreen = () => {
     navigation.navigate("AddPainType", { isEdit: false });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ScrollView, Alert, Platform } from "react-native";
+import { StyleSheet, Alert, Platform } from "react-native";
 import {
   Button,
   Card,

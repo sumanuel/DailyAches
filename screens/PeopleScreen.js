@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useEffect } from "react";
 import { StyleSheet, View, ScrollView, Alert } from "react-native";
 import {
   Card,
@@ -18,8 +18,7 @@ import {
 
 const PeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
-  const { user, addPerson, removePerson, updatePerson, loadPeopleFromAPI } =
-    useUser();
+  const { user, removePerson, loadPeopleFromAPI } = useUser();
 
   const openAdd = () => {
     navigation.navigate("AddPerson");
@@ -40,7 +39,7 @@ const PeopleScreen = ({ navigation }) => {
 
   useEffect(() => {
     loadPeopleFromAPI();
-  }, []);
+  }, [loadPeopleFromAPI]);
 
   const handleRemovePerson = (person) => {
     Alert.alert(

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { buildProgressState } from "../utils/gamification";
 import PeopleService from "../utils/peopleService";
 import PainTypesService from "../utils/painTypesService";
@@ -12,7 +13,7 @@ export default function useRemoteData({
   saveUserData,
   incrementRecords,
 }) {
-  const loadPeopleFromAPI = async () => {
+  const loadPeopleFromAPI = useCallback(async () => {
     try {
       const response = await PeopleService.getPeople();
       if (response.success) {
@@ -24,9 +25,9 @@ export default function useRemoteData({
     } catch (error) {
       console.error("Error loading people from API:", error);
     }
-  };
+  }, [setUser]);
 
-  const loadPainTypesFromAPI = async () => {
+  const loadPainTypesFromAPI = useCallback(async () => {
     try {
       const response = await PainTypesService.getPainTypes();
       if (response.success) {
@@ -38,9 +39,9 @@ export default function useRemoteData({
     } catch (error) {
       console.error("Error loading pain types from API:", error);
     }
-  };
+  }, [setUser]);
 
-  const loadRecordsFromAPI = async () => {
+  const loadRecordsFromAPI = useCallback(async () => {
     try {
       const response = await RecordsService.getRecords();
       if (response.success && response.records) {
@@ -52,7 +53,7 @@ export default function useRemoteData({
     } catch (error) {
       console.error("Error loading records from API:", error);
     }
-  };
+  }, [setUser]);
 
   const addPerson = async (
     name,

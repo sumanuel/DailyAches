@@ -7,8 +7,7 @@ import {
   Button,
   useTheme as usePaperTheme,
 } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
-import { useFocusEffect } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
 import IllustrationBadge from "../components/IllustrationBadge";
 import {
@@ -17,6 +16,18 @@ import {
   resolveAvatarIllustrationKey,
   resolvePainIllustrationKey,
 } from "../constants/illustrations";
+
+const defaultMessages = [
+  "Hoy ya puede revisarse como va el panorama de achaques.",
+  "Los dolores registrados aqui siguen sumando puntos y logros.",
+  "Un dia sin dolor tambien merece quedar anotado.",
+  "Si aparece un achaque nuevo, desde aqui se registra rapido.",
+];
+
+const surpriseMessages = [
+  "Todavia no aparece ningun dolor registrado hoy.",
+  "Por ahora el dia va en calma y sin achaques reportados.",
+];
 
 const HomeScreen = () => {
   const {
@@ -32,25 +43,13 @@ const HomeScreen = () => {
   const [dailyRecords, setDailyRecords] = useState([]);
   const [message, setMessage] = useState("");
 
-  const defaultMessages = [
-    "Hoy ya puede revisarse como va el panorama de achaques.",
-    "Los dolores registrados aqui siguen sumando puntos y logros.",
-    "Un dia sin dolor tambien merece quedar anotado.",
-    "Si aparece un achaque nuevo, desde aqui se registra rapido.",
-  ];
-
-  const surpriseMessages = [
-    "Todavia no aparece ningun dolor registrado hoy.",
-    "Por ahora el dia va en calma y sin achaques reportados.",
-  ];
-
   useEffect(() => {
     // Load data from API when screen opens
     loadPeopleFromAPI();
     loadRecordsFromAPI();
-  }, []); // Remove loadPeopleFromAPI and loadRecordsFromAPI from dependencies
+  }, [loadPeopleFromAPI, loadRecordsFromAPI]);
 
-  const todayRecords = useMemo(() => getTodayRecords(), [user.records]);
+  const todayRecords = useMemo(() => getTodayRecords(), [getTodayRecords]);
 
   // Memoizar el mensaje para evitar cambios constantes
   const currentMessage = useMemo(() => {
@@ -96,18 +95,21 @@ const HomeScreen = () => {
     return `${hh}:${minutes} ${ampm}`;
   };
 
-  const resolveRecordIllustrationKey = (record) => {
-    const linkedPainType = record?.painTypeId
-      ? painTypesById[record.painTypeId]
-      : null;
-
-    return resolvePainIllustrationKey({
-      ...record,
-      image: linkedPainType?.image || record?.image,
-      name: linkedPainType?.name || record?.pain,
-      pain: record?.pain,
-    });
-  };
+  const resolveRecordIllustrationKey = useCallback(
+    (record) => {
+      const linkedPainType = record?.painTypeId
+        ? painTypesById[record.painTypeId]
+        : null;
+  
+      return resolvePainIllustrationKey({
+        ...record,
+        image: linkedPainType?.image || record?.image,
+        name: linkedPainType?.name || record?.pain,
+        pain: record?.pain,
+      });
+    },
+    [painTypesById],
+  );
 
   const heroIllustrationKey = useMemo(() => {
     if (todayRecords.length === 0) {
@@ -115,7 +117,7 @@ const HomeScreen = () => {
     }
 
     return resolveRecordIllustrationKey(todayRecords[0]);
-  }, [todayRecords, painTypesById]);
+  }, [todayRecords, resolveRecordIllustrationKey]);
 
   const handleShareRecord = async (record) => {
     try {
@@ -137,7 +139,7 @@ const HomeScreen = () => {
       });
 
       unlockAchievement(5);
-    } catch (error) {
+    } catch {
       Alert.alert("No se pudo compartir", "Intenta de nuevo en un momento.");
     }
   };

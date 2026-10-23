@@ -1,7 +1,6 @@
 import React from "react";
 import { StyleSheet, Alert } from "react-native";
 import {
-  TextInput,
   Button,
   Text,
   Card,

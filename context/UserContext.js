@@ -3,6 +3,7 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useCallback,
   useRef,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -44,7 +45,7 @@ export const UserProvider = ({ children }) => {
   const wasAuthenticated = useRef(false);
   const auth = useAuth();
 
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     try {
       const data = await AsyncStorage.getItem("userData");
       if (data) {
@@ -75,7 +76,7 @@ export const UserProvider = ({ children }) => {
     } catch (error) {
       console.error("Error loading user data:", error);
     }
-  };
+  }, []);
 
   const saveUserData = async (userData) => {
     try {
@@ -190,7 +191,7 @@ export const UserProvider = ({ children }) => {
     ...remoteActions
   } = useRemoteData({ user, setUser, saveUserData, incrementRecords });
 
-  const loadUserProfile = async () => {
+  const loadUserProfile = useCallback(async () => {
     try {
       const response = await AuthService.getCurrentUser();
       if (response.success && response.user) {
@@ -213,7 +214,7 @@ export const UserProvider = ({ children }) => {
     } catch (error) {
       console.error("Error loading user profile:", error);
     }
-  };
+  }, [loadUserData, loadPeopleFromAPI, loadPainTypesFromAPI, loadRecordsFromAPI]);
 
   // Hydrate state whenever the session changes: remote data when logged in,
   // local data when not, and a reset right after logging out.
@@ -235,7 +236,7 @@ export const UserProvider = ({ children }) => {
     return () => {
       active = false;
     };
-  }, [auth.isAuthenticated, auth.authLoading]);
+  }, [auth.isAuthenticated, auth.authLoading, loadUserData, loadUserProfile]);
 
   const getLevelProgress = () => {
     const next = getNextLevelRequirement(user.level);
@@ -249,13 +250,13 @@ export const UserProvider = ({ children }) => {
     return { progress, nextLevel: next.level, remaining };
   };
 
-  const getTodayRecords = () => {
+  const getTodayRecords = useCallback(() => {
     const today = new Date();
     return user.records.filter((r) => {
       const d = new Date(r.createdAt);
       return isSameDay(d, today);
     });
-  };
+  }, [user.records]);
 
   return (
     <UserContext.Provider

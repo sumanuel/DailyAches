@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { View, StyleSheet, Alert, Pressable, FlatList } from "react-native";
+import { StyleSheet, Alert, Pressable, FlatList } from "react-native";
 import {
   Button,
   Text,
@@ -42,7 +42,7 @@ const RecordPainScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     loadPainTypesFromAPI();
-  }, []);
+  }, [loadPainTypesFromAPI]);
 
   useEffect(() => {
     if (record) {
