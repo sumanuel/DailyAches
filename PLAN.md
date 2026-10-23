@@ -27,7 +27,7 @@ Objetivo: saber qué funciona hoy.
 
 Objetivo: poder cambiar cosas sin romperlas.
 
-- [ ] Partir `context/UserContext.js` (~1.000 líneas) en piezas: `AuthContext`, datos remotos (personas, tipos de dolor, registros) y gamificación (puntos, niveles, logros como funciones puras).
+- [ ] Partir `context/UserContext.js` en piezas. Hecho (2026-10-22): la gamificación y los valores por defecto pasaron a `utils/gamification.js` como funciones puras, los mapeos API a estado a `utils/apiMappers.js` y se quitaron los `console.log` de depuración (997 a 746 líneas). Pendiente: separar `AuthContext` y el contexto de datos remotos (personas, tipos de dolor, registros), manteniendo `useUser()` como fachada.
 - [ ] Definir una sola fuente de verdad: con sesión manda la API y AsyncStorage queda como caché; sin sesión, decidir si hay modo local o se exige cuenta.
 - [x] Manejo de sesión expirada: `httpService.setUnauthorizedHandler` y `UserProvider` cierran la sesión ante un 401 con token (sin probar en dispositivo).
 - [ ] Tests con Jest (jest-expo) para lo más frágil: cálculo de nivel y logros, y servicios (`utils/*Service.js`) con `fetch` simulado.
@@ -131,5 +131,5 @@ _Hallazgos de la fase 0 (2026-10-22):_
 - [x] Resuelto el 2026-10-22: `expo-doctor` pasa 18/18. Se instalaron `react-native-worklets` y `react-native-svg`, se actualizaron `expo` (~54.0.37) y `babel-preset-expo`, se añadió `expo-constants` como dependencia directa y un `overrides` en `package.json` fija `react-native-safe-area-context` en ~5.6.0 (antes `react-native-calendars` anidaba la 4.5.0).
 - [x] Quitado el plugin explícito de Reanimated de `babel.config.js` (`babel-preset-expo` lo añade solo si hace falta); las dependencias siguen instaladas.
 - [x] `app.json`: `name` pasó a `DailyAches` y `slug` a `dailyaches`. `userInterfaceStyle` se queda en `light` porque el modo oscuro es un interruptor dentro de la app (`ThemeContext`), no sigue al sistema.
-- [ ] Los ids que devuelve la API son strings (`"id": "13"`), no números; revisar comparaciones con `===` en `UserContext` y las pantallas.
+- [x] Los ids de la API son strings, pero la app ya los convierte con `String()` en `utils/apiMappers.js`, así que no hay riesgo de comparaciones por tipo.
 - [ ] `AuthService.isAuthenticated()` trata cualquier fallo de `/auth/me`, incluido un corte de red, como sesión cerrada; distinguir 401 de errores de red.
