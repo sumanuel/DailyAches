@@ -27,7 +27,7 @@ Objetivo: saber qué funciona hoy.
 
 Objetivo: poder cambiar cosas sin romperlas.
 
-- [ ] Partir `context/UserContext.js` en piezas. Hecho (2026-10-22): la gamificación y los valores por defecto pasaron a `utils/gamification.js` como funciones puras, los mapeos API a estado a `utils/apiMappers.js` y se quitaron los `console.log` de depuración (997 a 746 líneas). Pendiente: separar `AuthContext` y el contexto de datos remotos (personas, tipos de dolor, registros), manteniendo `useUser()` como fachada.
+- [x] Partir `context/UserContext.js` (hecho 2026-10-23, 997 a 286 líneas): `utils/gamification.js` y `utils/apiMappers.js` (funciones puras), `context/AuthContext.js` (sesión y handler de 401) y `context/useRemoteData.js` (API de personas, tipos de dolor y registros). `useUser()` sigue siendo la fachada, así que las pantallas no cambiaron. Probado en la versión web contra la API local: login, persistencia tras recargar y cierre de sesión por token inválido. No probado en dispositivo ni crear/editar/borrar datos desde la UI.
 - [ ] Definir una sola fuente de verdad: con sesión manda la API y AsyncStorage queda como caché; sin sesión, decidir si hay modo local o se exige cuenta.
 - [x] Manejo de sesión expirada: `httpService.setUnauthorizedHandler` y `UserProvider` cierran la sesión ante un 401 con token (sin probar en dispositivo).
 - [ ] Tests con Jest (jest-expo) para lo más frágil: cálculo de nivel y logros, y servicios (`utils/*Service.js`) con `fetch` simulado.
@@ -133,3 +133,7 @@ _Hallazgos de la fase 0 (2026-10-22):_
 - [x] `app.json`: `name` pasó a `DailyAches` y `slug` a `dailyaches`. `userInterfaceStyle` se queda en `light` porque el modo oscuro es un interruptor dentro de la app (`ThemeContext`), no sigue al sistema.
 - [x] Los ids de la API son strings, pero la app ya los convierte con `String()` en `utils/apiMappers.js`, así que no hay riesgo de comparaciones por tipo.
 - [ ] `AuthService.isAuthenticated()` trata cualquier fallo de `/auth/me`, incluido un corte de red, como sesión cerrada; distinguir 401 de errores de red.
+- [ ] `LoginScreen` llama a `navigation.getParent()?.replace("Main")` tras el login y React Navigation avisa de que ninguna pantalla `Main` lo maneja; el cambio de pantalla ya lo hace `isAuthenticated`, así que esa línea sobra.
+- [ ] `RegisterScreen` usa `AuthService.register` directo: guarda el token pero no activa `isAuthenticated`; después pide iniciar sesión. Decidir si debe entrar directo con `register` del contexto.
+- [ ] Aviso de React en web: un input pasa de no controlado a controlado (algún formulario inicia con `undefined`).
+- [ ] `MoreScreen` confirma el cierre de sesión con `Alert.alert`, que no hace nada en react-native-web; solo funciona en móvil.

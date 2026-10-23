@@ -1,5 +1,6 @@
 import React from "react";
 import { PaperProvider } from "react-native-paper";
+import { AuthProvider } from "./context/AuthContext";
 import { UserProvider } from "./context/UserContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import AppNavigator from "./navigation/AppNavigator";
@@ -16,9 +17,11 @@ const AppContent = () => {
 export default function App() {
   return (
     <ThemeProvider>
-      <UserProvider>
-        <AppContent />
-      </UserProvider>
+      <AuthProvider>
+        <UserProvider>
+          <AppContent />
+        </UserProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
