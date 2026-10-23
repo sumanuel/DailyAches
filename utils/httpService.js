@@ -7,6 +7,13 @@ class HttpService {
     this.baseURL = API_CONFIG.BASE_URL;
     this.timeout = API_CONFIG.TIMEOUT;
     this.authToken = null;
+    this.onUnauthorized = null;
+  }
+
+  // Called when a request made with a stored token comes back 401 (expired
+  // or revoked session). Login/register 401s are bad credentials, not expiry.
+  setUnauthorizedHandler(handler) {
+    this.onUnauthorized = typeof handler === "function" ? handler : null;
   }
 
   setAuthToken(token) {
@@ -55,7 +62,16 @@ class HttpService {
 
       clearTimeout(timeoutId);
 
-      return await this.handleResponse(response);
+      const result = await this.handleResponse(response);
+      if (
+        result.status === HTTP_STATUS.UNAUTHORIZED &&
+        token &&
+        !endpoint.startsWith("/auth/login") &&
+        !endpoint.startsWith("/auth/register")
+      ) {
+        this.onUnauthorized?.();
+      }
+      return result;
     } catch (error) {
       return this.handleError(error);
     }

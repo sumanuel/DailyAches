@@ -18,7 +18,7 @@ Objetivo: saber qué funciona hoy.
 
 - [ ] Mergear `refactor/260424-add-skill` a `develop` y dejar `CLAUDE.md` y este plan commiteados.
 - [x] Las dependencias instaladas son coherentes y `expo export --platform android` genera el bundle sin errores (2026-10-22). Falta abrir la app en un emulador o dispositivo.
-- [ ] Levantar `Dailyaches-api` y ejecutar el smoke test de `ARRANQUE_RAPIDO.md` (registro, login, personas, tipos de dolor, registros).
+- [x] Smoke test contra `Dailyaches-api` local (2026-10-22), por curl y no desde la app: registro, login, `/auth/me`, crear persona, tipo de dolor y registro, listar `/records` y `/records/today`, borrar todo y un 401 sin token. Todo respondió bien. Falta probarlo desde la app en un dispositivo o emulador.
 - [ ] Anotar cada fallo encontrado en una sección "Bugs detectados" al final de este archivo.
 - [x] `constants/api.js`: quitar la IP `192.168.1.10` hardcodeada, usar solo `EXPO_PUBLIC_API_URL` y añadir `.env.example`.
 - [x] Quitar el `console.log` de requests en `utils/httpService.js` (o dejarlo solo bajo `__DEV__`).
@@ -29,7 +29,7 @@ Objetivo: poder cambiar cosas sin romperlas.
 
 - [ ] Partir `context/UserContext.js` (~1.000 líneas) en piezas: `AuthContext`, datos remotos (personas, tipos de dolor, registros) y gamificación (puntos, niveles, logros como funciones puras).
 - [ ] Definir una sola fuente de verdad: con sesión manda la API y AsyncStorage queda como caché; sin sesión, decidir si hay modo local o se exige cuenta.
-- [ ] Manejo de sesión expirada: ante un 401 en `httpService`, limpiar token y volver al login.
+- [x] Manejo de sesión expirada: `httpService.setUnauthorizedHandler` y `UserProvider` cierran la sesión ante un 401 con token (sin probar en dispositivo).
 - [ ] Tests con Jest (jest-expo) para lo más frágil: cálculo de nivel y logros, y servicios (`utils/*Service.js`) con `fetch` simulado.
 - [ ] Añadir ESLint y un script `npm run lint`.
 - [ ] Estados de carga y error consistentes en todas las pantallas que llaman a la API (hoy los servicios devuelven `{ success, error }`, falta que la UI los muestre de forma uniforme).
@@ -129,5 +129,7 @@ _Hallazgos de la fase 0 (2026-10-22):_
 
 - [ ] `Dailyaches-api` (carpeta hermana `../Dailyaches-api`, Nuxt + PostgreSQL) no responde en `localhost:3000`. Para el smoke test hay que levantarla con `npm run dev:lan` y tener PostgreSQL y su `.env` configurados.
 - [x] Resuelto el 2026-10-22: `expo-doctor` pasa 18/18. Se instalaron `react-native-worklets` y `react-native-svg`, se actualizaron `expo` (~54.0.37) y `babel-preset-expo`, se añadió `expo-constants` como dependencia directa y un `overrides` en `package.json` fija `react-native-safe-area-context` en ~5.6.0 (antes `react-native-calendars` anidaba la 4.5.0).
-- [ ] `babel.config.js` usa `react-native-reanimated/plugin`, pero ningún archivo JS del proyecto importa Reanimated. Valorar quitar el plugin o usarlo.
-- [ ] `app.json` conserva `name` y `slug` genéricos (`expo-app`) y `userInterfaceStyle: "light"`, lo que choca con el modo oscuro planeado.
+- [x] Quitado el plugin explícito de Reanimated de `babel.config.js` (`babel-preset-expo` lo añade solo si hace falta); las dependencias siguen instaladas.
+- [x] `app.json`: `name` pasó a `DailyAches` y `slug` a `dailyaches`. `userInterfaceStyle` se queda en `light` porque el modo oscuro es un interruptor dentro de la app (`ThemeContext`), no sigue al sistema.
+- [ ] Los ids que devuelve la API son strings (`"id": "13"`), no números; revisar comparaciones con `===` en `UserContext` y las pantallas.
+- [ ] `AuthService.isAuthenticated()` trata cualquier fallo de `/auth/me`, incluido un corte de red, como sesión cerrada; distinguir 401 de errores de red.

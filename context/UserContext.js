@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AuthService from "../utils/authService";
+import HttpService from "../utils/httpService";
 import PeopleService from "../utils/peopleService";
 import PainTypesService from "../utils/painTypesService";
 import RecordsService from "../utils/recordsService";
@@ -270,6 +271,15 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     initializeApp();
+  }, []);
+
+  // Expired or revoked token: drop the session so the navigator shows login.
+  // logout only uses state setters, so the closure from the first render is safe.
+  useEffect(() => {
+    HttpService.setUnauthorizedHandler(() => {
+      logout();
+    });
+    return () => HttpService.setUnauthorizedHandler(null);
   }, []);
 
   const initializeApp = async () => {
