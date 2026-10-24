@@ -50,8 +50,8 @@ Los puntos son hipótesis a validar usando la app en la fase 0.
 - [x] Registros agrupados por día con encabezados "Hoy", "Ayer" o "mar 20 oct 2026" y su conteo, en la pestaña Histórico. La agrupación en varios días solo está probada con pruebas unitarias: la API no permite crear registros con otra fecha.
 
 **Estadísticas** (`StatsScreen`)
-- [ ] Selector semana/mes/año y comparación con el periodo anterior.
-- [ ] Gráficos por tipo de dolor y por persona; promedio de intensidad.
+- [x] Pantalla Estadísticas (Más > Estadísticas, 2026-10-24) con selector semana/mes/año, navegación entre periodos y comparación con el periodo anterior (registros e intensidad media). Lógica en `utils/periodStats.js` con 16 pruebas. Probado en web con datos de prueba; la comparación entre periodos solo con pruebas unitarias, porque la API no permite fechas pasadas.
+- [x] Gráficos de columnas (por día o por mes), barras por tipo de dolor y por persona, e intensidad media, dibujados con vistas (`components/BarCharts.js`) sin librería; `react-native-chart-kit` y `react-native-svg` siguen instalados pero sin usarse. Se pueden quitar o usar para gráficos más complejos.
 - [ ] Estado vacío con ilustración y llamada a la acción.
 
 **Progreso, niveles y logros**

@@ -15,6 +15,7 @@ import HistoryPeopleScreen from "../screens/HistoryPeopleScreen";
 import StatsScreen from "../screens/StatsScreen";
 import MoreScreen from "../screens/MoreScreen";
 import ProgressScreen from "../screens/ProgressScreen";
+import InsightsScreen from "../screens/InsightsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import PainSettingsScreen from "../screens/PainSettingsScreen";
@@ -165,6 +166,11 @@ const MoreStackNavigator = () => {
         name="Progress"
         component={ProgressScreen}
         options={{ title: "Progreso" }}
+      />
+      <Stack.Screen
+        name="Insights"
+        component={InsightsScreen}
+        options={{ title: "Estadísticas" }}
       />
       <Stack.Screen
         name="Profile"

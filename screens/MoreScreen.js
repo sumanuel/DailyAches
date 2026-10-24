@@ -162,6 +162,14 @@ const MoreScreen = ({ navigation }) => {
         />
         <View style={styles.divider} />
         <List.Item
+          title="Estadísticas"
+          description="Resumen por semana, mes o año"
+          left={(props) => <List.Icon {...props} icon="chart-bar" />}
+          right={(props) => <List.Icon {...props} icon="arrow-right" />}
+          onPress={() => navigation.navigate("Insights")}
+        />
+        <View style={styles.divider} />
+        <List.Item
           title="Perfil"
           description="Datos principales y ajustes personales"
           left={(props) => (
