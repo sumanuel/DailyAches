@@ -238,6 +238,7 @@ const StatsScreen = ({ route }) => {
               numberOfLines={1}
             >
               😣 {record.pain}
+              {record.painLevel ? ` · ${record.painLevel}/10` : ""}
             </Text>
           </View>
         </Card.Content>

@@ -19,6 +19,12 @@ import {
   resolvePainIllustrationKey,
 } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
+import PainLevelPicker from "../components/PainLevelPicker";
+import {
+  DEFAULT_PAIN_LEVEL,
+  getLastPainTypeForPerson,
+  normalizePainLevel,
+} from "../utils/painLevel";
 
 const schema = yup.object({
   pain: yup.string().required("Selecciona un dolor"),
@@ -40,6 +46,8 @@ const RecordPainScreen = ({ navigation, route }) => {
   const [editRecord, setEditRecord] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPainType, setSelectedPainType] = useState(null);
+  const [painLevel, setPainLevel] = useState(DEFAULT_PAIN_LEVEL);
+  const [saving, setSaving] = useState(false);
   const {
     personId: paramPersonId,
     personName: paramPersonName,
@@ -51,20 +59,6 @@ const RecordPainScreen = ({ navigation, route }) => {
   useEffect(() => {
     loadPainTypesFromAPI();
   }, [loadPainTypesFromAPI]);
-
-  useEffect(() => {
-    if (record) {
-      setIsEdit(true);
-      setEditRecord(record);
-      // Prefill
-      setValue("pain", record.pain);
-      setValue("notes", record.notes);
-      const matchingPain = painTypes.find((p) => p.name === record.pain);
-      if (matchingPain) {
-        setSelectedPainType(matchingPain);
-      }
-    }
-  }, [record, painTypes, setValue]);
 
   const painTypes = useMemo(() => user.painTypes || [], [user.painTypes]);
 
@@ -88,30 +82,60 @@ const RecordPainScreen = ({ navigation, route }) => {
     },
   });
 
-  const onSubmit = async (data) => {
-    if (!selectedPainType) return;
+  useEffect(() => {
+    if (record) {
+      setIsEdit(true);
+      setEditRecord(record);
+      // Prefill
+      setValue("pain", record.pain);
+      setValue("notes", record.notes);
+      setPainLevel(normalizePainLevel(record.painLevel));
+      const matchingPain = painTypes.find((p) => p.name === record.pain);
+      if (matchingPain) {
+        setSelectedPainType(matchingPain);
+      }
+    }
+  }, [record, painTypes, setValue]);
 
+  // New record: start with the pain type last used for this person.
+  useEffect(() => {
+    if (record || selectedPainType) return;
+    const last = getLastPainTypeForPerson(user.records, personId, painTypes);
+    if (last) {
+      setSelectedPainType(last);
+      setValue("pain", last.name);
+    }
+  }, [record, selectedPainType, user.records, personId, painTypes, setValue]);
+
+  const onSubmit = async (data) => {
+    if (!selectedPainType || saving) return;
+
+    setSaving(true);
     try {
       const recordData = {
         person_id: personId,
         pain_type_id: selectedPainType.id,
-        pain_level: 5,
+        pain_level: painLevel,
         notes: data.notes,
       };
 
-      if (isEdit && editRecord) {
-        await updateRecordAPI(editRecord.id, recordData);
+      const result =
+        isEdit && editRecord
+          ? await updateRecordAPI(editRecord.id, recordData)
+          : await createRecordAPI(recordData);
+
+      if (!result?.success) {
         Alert.alert(
-          "¡Actualizado!",
-          `Registro actualizado para ${personName}: ${selectedPainType.name}`,
+          "No se pudo guardar",
+          result?.error || "Inténtalo de nuevo en un momento.",
         );
-      } else {
-        await createRecordAPI(recordData);
-        Alert.alert(
-          "¡Registrado!",
-          `Dolor registrado para ${personName}: ${selectedPainType.name}`,
-        );
+        return;
       }
+
+      Alert.alert(
+        isEdit ? "¡Actualizado!" : "¡Registrado!",
+        `${isEdit ? "Registro actualizado" : "Dolor registrado"} para ${personName}: ${selectedPainType.name}`,
+      );
       navigation.goBack();
     } catch (error) {
       Alert.alert(
@@ -119,6 +143,8 @@ const RecordPainScreen = ({ navigation, route }) => {
         "No se pudo guardar el registro. Inténtalo de nuevo.",
       );
       console.error("Error saving record:", error);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -248,6 +274,12 @@ const RecordPainScreen = ({ navigation, route }) => {
             </Text>
           )}
 
+          <PainLevelPicker
+            value={painLevel}
+            onChange={setPainLevel}
+            style={styles.level}
+          />
+
           <Controller
             control={control}
             name="notes"
@@ -267,6 +299,8 @@ const RecordPainScreen = ({ navigation, route }) => {
           <Button
             mode="contained"
             onPress={handleSubmit(onSubmit)}
+            loading={saving}
+            disabled={saving}
             style={styles.button}
           >
             {isEdit ? "Actualizar registro" : "Registrar (+10 puntos)"}
@@ -301,6 +335,7 @@ const styles = StyleSheet.create({
   },
   painImage: { width: 60, height: 60, borderRadius: 30, marginBottom: 8 },
   painText: { fontSize: 14, textAlign: "center", fontWeight: "500" },
+  level: { marginTop: 16 },
   input: { marginTop: 12 },
   notesContent: { minHeight: 72, textAlignVertical: "top" },
   button: { marginTop: 24, marginBottom: 8, borderRadius: 16 },

@@ -41,9 +41,9 @@ Objetivo: poder cambiar cosas sin romperlas.
 Los puntos son hipótesis a validar usando la app en la fase 0.
 
 **Registro de dolor** (`RecordPainScreen`)
-- [ ] Registro rápido: persona y tipo de dolor recordados del último uso, deslizador de intensidad 1-10 con valor visible, un solo botón principal.
+- [x] Registro rápido (2026-10-24): el tipo de dolor del último registro de esa persona llega preseleccionado y la intensidad 1-10 se elige con `PainLevelPicker` (antes se guardaba siempre 5, y no se mostraba en ninguna parte). La intensidad aparece ahora en Inicio y en Estadísticas. Probado en web contra la API local; no en dispositivo.
 - [ ] Editar y eliminar registros desde el historial con confirmación y opción de deshacer.
-- [ ] Permitir elegir fecha y hora (registrar un dolor de ayer).
+- [ ] Permitir elegir fecha y hora (registrar un dolor de ayer). Bloqueado por la API: `POST /api/records` no acepta `created_at` (ver fase 4).
 
 **Historial** (`HistoryPeopleScreen`)
 - [ ] Filtros por persona, tipo de dolor y rango de fechas; búsqueda en notas.
@@ -139,3 +139,5 @@ _Hallazgos de la fase 0 (2026-10-22):_
 - [ ] `MoreScreen` confirma el cierre de sesión con `Alert.alert`, que no hace nada en react-native-web; solo funciona en móvil.
 - [x] `httpService` no cancelaba el temporizador de timeout cuando `fetch` fallaba; ahora lo limpia en un `finally` (lo detectó Jest como proceso sin cerrar).
 - [x] `@expo/vector-icons` y `expo-font` se usaban sin estar declarados; ahora son dependencias directas y `expo-doctor` pasa 18/18.
+- [x] `RecordPainScreen` mostraba "¡Registrado!" aunque la API rechazara el registro (los servicios devuelven `{ success: false }` sin lanzar); ahora comprueba el resultado, muestra el error y no sale de la pantalla.
+- [x] `RecordPainScreen` leía `painTypes` y `setValue` en un efecto declarado antes que ellos; reordenado.

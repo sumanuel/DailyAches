@@ -524,6 +524,21 @@ const HomeScreen = () => {
                                     {timeLabel}
                                   </Text>
                                 ) : null}
+                                {record.painLevel ? (
+                                  <Text
+                                    style={[
+                                      styles.timePill,
+                                      {
+                                        backgroundColor:
+                                          paperTheme.colors.accentBerry,
+                                        color: paperTheme.colors.onSurface,
+                                      },
+                                    ]}
+                                    accessibilityLabel={`Intensidad ${record.painLevel} de 10`}
+                                  >
+                                    {record.painLevel}/10
+                                  </Text>
+                                ) : null}
                               </View>
                             </View>
                           </View>
