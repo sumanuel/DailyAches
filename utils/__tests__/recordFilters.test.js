@@ -4,6 +4,7 @@ import {
   formatDayHeader,
   getPainTypeOptions,
   groupRecordsByDay,
+  insertRecordSorted,
   normalizeText,
 } from "../recordFilters";
 
@@ -114,5 +115,20 @@ describe("formatDayHeader", () => {
 
   it("builds stable day keys from local dates", () => {
     expect(dayKey(new Date(2026, 0, 5, 23, 59))).toBe("2026-01-05");
+  });
+});
+
+describe("insertRecordSorted", () => {
+  it("restores a record in its place by date, newest first", () => {
+    const list = [records[2], records[0]]; // ids 3 and 1
+    const result = insertRecordSorted(list, records[1]); // id 2 (older than 3)
+    expect(result.map((r) => r.id)).toEqual(["3", "2", "1"]);
+  });
+
+  it("does not mutate the original list", () => {
+    const list = [records[0]];
+    insertRecordSorted(list, records[1]);
+    expect(list).toHaveLength(1);
+    expect(insertRecordSorted(undefined, records[0])).toHaveLength(1);
   });
 });

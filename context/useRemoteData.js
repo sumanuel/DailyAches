@@ -1,15 +1,19 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { buildProgressState } from "../utils/gamification";
 import PeopleService from "../utils/peopleService";
 import PainTypesService from "../utils/painTypesService";
 import RecordsService from "../utils/recordsService";
 import { mapPerson, mapPainType, mapRecord } from "../utils/apiMappers";
+import { insertRecordSorted } from "../utils/recordFilters";
 import {
   failLoad,
   finishLoad,
   initialRemoteStatus,
   startLoad,
 } from "../utils/loadStatus";
+
+// How long a deleted record can still be restored before the API call is made.
+export const DELETE_UNDO_MS = 6000;
 
 // People, pain types and records: API calls plus the matching `user` state updates.
 // Shares the UserProvider state so useUser() keeps exposing a single flat API.
@@ -20,6 +24,10 @@ export default function useRemoteData({
   incrementRecords,
 }) {
   const [remoteStatus, setRemoteStatus] = useState(initialRemoteStatus);
+  // Record hidden from the lists while its delete can still be undone.
+  const pendingDeletionRef = useRef(null);
+  const [pendingDeletion, setPendingDeletion] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
 
   const setStatus = useCallback((key, update) => {
     setRemoteStatus((prev) => ({ ...prev, [key]: update(prev[key]) }));
@@ -77,7 +85,9 @@ export default function useRemoteData({
       runLoad("records", "records", () => RecordsService.getRecords(), (response) =>
         setUser((prevUser) => ({
           ...prevUser,
-          records: (response.records || []).map(mapRecord),
+          records: (response.records || [])
+            .map(mapRecord)
+            .filter((record) => record.id !== pendingDeletionRef.current?.record.id),
         })),
       ),
     [runLoad, setUser],
@@ -308,17 +318,6 @@ export default function useRemoteData({
     }
   };
 
-  const deleteRecord = (recordId) => {
-    setUser((prevUser) => {
-      const newUser = {
-        ...prevUser,
-        records: prevUser.records.filter((r) => r.id !== recordId),
-      };
-      saveUserData(newUser);
-      return newUser;
-    });
-  };
-
   const removePainType = async (painTypeId) => {
     try {
       const response = await PainTypesService.deletePainType(painTypeId);
@@ -434,8 +433,64 @@ export default function useRemoteData({
     }
   };
 
+  const commitDeletion = useCallback(async () => {
+    const pending = pendingDeletionRef.current;
+    if (!pending) return;
+    clearTimeout(pending.timer);
+    pendingDeletionRef.current = null;
+    setPendingDeletion(null);
+
+    try {
+      const result = await RecordsService.deleteRecord(pending.record.id);
+      if (!result.success) {
+        setDeleteError(result.error || "No se pudo eliminar el registro");
+      }
+    } catch (error) {
+      console.error("Error deleting record:", error);
+      setDeleteError("No se pudo eliminar el registro");
+    }
+    // Reloading restores the record if the server refused to delete it.
+    await loadRecordsFromAPI();
+  }, [loadRecordsFromAPI]);
+
+  // Hides the record now and deletes it for real after DELETE_UNDO_MS, unless
+  // undoDeleteRecord runs first. Only one delete can wait at a time.
+  const scheduleDeleteRecord = useCallback(
+    async (record) => {
+      if (pendingDeletionRef.current) await commitDeletion();
+      setDeleteError(null);
+      setUser((prevUser) => ({
+        ...prevUser,
+        records: prevUser.records.filter((r) => r.id !== record.id),
+      }));
+      const timer = setTimeout(commitDeletion, DELETE_UNDO_MS);
+      pendingDeletionRef.current = { record, timer };
+      setPendingDeletion({ record });
+    },
+    [commitDeletion, setUser],
+  );
+
+  const undoDeleteRecord = useCallback(() => {
+    const pending = pendingDeletionRef.current;
+    if (!pending) return;
+    clearTimeout(pending.timer);
+    pendingDeletionRef.current = null;
+    setPendingDeletion(null);
+    setUser((prevUser) => ({
+      ...prevUser,
+      records: insertRecordSorted(prevUser.records, pending.record),
+    }));
+  }, [setUser]);
+
+  const dismissDeleteError = useCallback(() => setDeleteError(null), []);
+
   return {
     remoteStatus,
+    pendingDeletion,
+    deleteError,
+    scheduleDeleteRecord,
+    undoDeleteRecord,
+    dismissDeleteError,
     loadPeopleFromAPI,
     loadPainTypesFromAPI,
     loadRecordsFromAPI,
@@ -443,7 +498,6 @@ export default function useRemoteData({
     removePerson,
     updatePerson,
     updateRecord,
-    deleteRecord,
     addPainType,
     removePainType,
     updatePainType,

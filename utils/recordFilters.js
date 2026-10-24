@@ -105,3 +105,9 @@ export const formatDayHeader = (date, now = new Date()) => {
     MONTHS_ES[d.getMonth()]
   } ${d.getFullYear()}`;
 };
+
+// Puts a record back where it belongs (newest first) after an undone delete.
+export const insertRecordSorted = (records, record) =>
+  [...(records || []), record].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+  );

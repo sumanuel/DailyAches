@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   Chip,
+  IconButton,
   Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
@@ -110,10 +111,15 @@ const getPresetRange = (preset, now = new Date()) => {
 
 const RECORDS_PAGE_SIZE = 30;
 
-const StatsScreen = ({ route }) => {
+const StatsScreen = ({ route, navigation }) => {
   const paperTheme = usePaperTheme();
-  const { user, getTodayRecords, loadRecordsFromAPI, remoteStatus } =
-    useUser();
+  const {
+    user,
+    getTodayRecords,
+    loadRecordsFromAPI,
+    remoteStatus,
+    scheduleDeleteRecord,
+  } = useUser();
   const { personId, personName } = route?.params || {};
   const [tab, setTab] = useState("today"); // today | history
   const [preset, setPreset] = useState("this_month"); // this_month | prev_month | this_week | custom
@@ -307,6 +313,23 @@ const StatsScreen = ({ route }) => {
             </Text>
             <Text numberOfLines={1}>{record.notes ? record.notes : "-"}</Text>
           </View>
+        </Card.Content>
+
+        <Card.Content style={styles.recordActions}>
+          <IconButton
+            icon="square-edit-outline"
+            size={18}
+            style={{ backgroundColor: paperTheme.colors.surfaceVariant }}
+            onPress={() => navigation.navigate("RecordPain", { record })}
+            accessibilityLabel="Editar registro"
+          />
+          <IconButton
+            icon="delete-circle-outline"
+            size={18}
+            style={{ backgroundColor: paperTheme.colors.surfaceVariant }}
+            onPress={() => scheduleDeleteRecord(record)}
+            accessibilityLabel="Eliminar registro"
+          />
         </Card.Content>
       </Card>
     );
@@ -677,6 +700,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 12, paddingBottom: 24 },
   searchInput: { marginTop: 16 },
+  recordActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8 },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
   filterChip: { borderRadius: 16 },
   dayHeader: {

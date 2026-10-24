@@ -42,7 +42,7 @@ Los puntos son hipótesis a validar usando la app en la fase 0.
 
 **Registro de dolor** (`RecordPainScreen`)
 - [x] Registro rápido (2026-10-24): el tipo de dolor del último registro de esa persona llega preseleccionado y la intensidad 1-10 se elige con `PainLevelPicker` (antes se guardaba siempre 5, y no se mostraba en ninguna parte). La intensidad aparece ahora en Inicio y en Estadísticas. Probado en web contra la API local; no en dispositivo.
-- [ ] Editar y eliminar registros desde el historial con confirmación y opción de deshacer.
+- [x] Editar y eliminar registros desde Inicio y desde el Historial de cada persona (2026-10-24). Eliminar oculta el registro al instante y muestra "Registro eliminado · Deshacer" durante 6 s; pasado ese tiempo se borra en la API (si el servidor falla, el registro vuelve y se avisa). Sustituye al diálogo de confirmación porque deshacer es menos intrusivo y funciona también en web. Si se cierra la app durante esos 6 s el registro no se borra. Probado en web contra la API local; no en dispositivo.
 - [ ] Permitir elegir fecha y hora (registrar un dolor de ayer). Bloqueado por la API: `POST /api/records` no acepta `created_at` (ver fase 4).
 
 **Historial** (`HistoryPeopleScreen`)
@@ -142,3 +142,5 @@ _Hallazgos de la fase 0 (2026-10-22):_
 - [x] `RecordPainScreen` mostraba "¡Registrado!" aunque la API rechazara el registro (los servicios devuelven `{ success: false }` sin lanzar); ahora comprueba el resultado, muestra el error y no sale de la pantalla.
 - [x] `RecordPainScreen` leía `painTypes` y `setValue` en un efecto declarado antes que ellos; reordenado.
 - [ ] Los filtros del Historial no se pueden usar sin elegir antes una persona; valorar una vista global (todas las personas) y los presets "este año" y "todo".
+- [x] Inicio borraba registros solo en local (`deleteRecord`): el registro seguía en el servidor y reaparecía al recargar. Ahora todos los borrados pasan por la API (`scheduleDeleteRecord`).
+- [ ] Al borrar un registro no se restan los puntos que dio (los logros ya desbloqueados tampoco se revierten); decidir si es lo deseado.

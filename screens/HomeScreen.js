@@ -35,7 +35,7 @@ const HomeScreen = () => {
     user,
     getTodayRecords,
     unlockAchievement,
-    deleteRecord,
+    scheduleDeleteRecord,
     loadPeopleFromAPI,
     loadRecordsFromAPI,
     remoteStatus,
@@ -146,23 +146,7 @@ const HomeScreen = () => {
     }
   };
 
-  const handleDeleteRecord = (record) => {
-    Alert.alert(
-      "Eliminar registro",
-      `¿Estás seguro de que quieres eliminar el registro de dolor "${record.pain}" para ${record.personName}?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: () => {
-            deleteRecord(record.id);
-            // El estado se actualizará automáticamente a través del useMemo
-          },
-        },
-      ],
-    );
-  };
+  const handleDeleteRecord = (record) => scheduleDeleteRecord(record);
 
   const groupedByPerson = useMemo(() => {
     return Object.entries(

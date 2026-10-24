@@ -142,6 +142,11 @@ const StatsStackNavigator = () => {
             : "Historial",
         })}
       />
+      <Stack.Screen
+        name="RecordPain"
+        component={RecordPainScreen}
+        options={{ title: "Editar registro" }}
+      />
     </Stack.Navigator>
   );
 };
