@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from "react";
-import { StyleSheet, View, FlatList, Alert } from "react-native";
+import { StyleSheet, View, FlatList } from "react-native";
 import {
   Card,
   Text,
@@ -16,6 +16,8 @@ import {
   resolveAvatarIllustrationKey,
 } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
+import { confirmAction, showMessage } from "../utils/confirm";
+import { countRecordsFor, describeRecordCount } from "../utils/recordFilters";
 
 const keyExtractor = (person) => String(person.id);
 
@@ -44,24 +46,28 @@ const PeopleScreen = ({ navigation }) => {
     loadPeopleFromAPI();
   }, [loadPeopleFromAPI]);
 
-  const handleRemovePerson = (person) => {
-    Alert.alert(
-      "Eliminar persona",
-      `¿Quitamos a ${person.name} de tu radar de achaques?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            const result = await removePerson(person.id);
-            if (!result.success) {
-              Alert.alert("No se pudo eliminar", result.error);
-            }
+  const handleRemovePerson = async (person) => {
+    const recordCount = countRecordsFor(user.records, { personId: person.id });
+    const confirmed = await confirmAction(
+      recordCount === 0
+        ? {
+            title: "Eliminar persona",
+            message: `¿Quitamos a ${person.name} de tu radar de achaques?`,
+          }
+        : {
+            title: "Eliminar persona y sus registros",
+            message: `${person.name} tiene ${describeRecordCount(
+              recordCount,
+            )}. Si la eliminas, también se borrarán y no se podrán recuperar.`,
+            confirmText: "Eliminar todo",
           },
-        },
-      ],
     );
+    if (!confirmed) return;
+
+    const result = await removePerson(person.id, {
+      withRecords: recordCount > 0,
+    });
+    if (!result.success) showMessage("No se pudo eliminar", result.error);
   };
 
   const renderPerson = ({ item: p }) => (

@@ -60,7 +60,7 @@ Los puntos son hipótesis a validar usando la app en la fase 0.
 
 **Personas y tipos de dolor**
 - [x] Validaciones y errores en español (2026-10-24): `utils/apiErrors.js` traduce los mensajes de la API (el original queda en `rawError`), `utils/validation.js` valida nombre, teléfono y fecha de nacimiento, y los formularios de Acceso, Registro, Persona, Dolor y Perfil muestran el error junto al campo o bajo el formulario (antes eran `Alert`, que no se ven en web). Con 20 pruebas nuevas y probado en web.
-- [ ] Avisar qué pasa con los registros al eliminar una persona o un tipo de dolor.
+- [x] Avisos al eliminar (2026-10-24): al eliminar una persona con registros se dice cuántos tiene y que se borrarán con ella («Eliminar todo»); al eliminar un tipo de dolor que se usa se explica en cuántos registros y no se intenta. Hallazgo: la API devolvía un error 500 al borrar una persona con registros (clave foránea sin cascada en la tabla `records`), así que antes esa persona no se podía eliminar; ahora la app borra primero sus registros y después a la persona. Probado en web contra la API local.
 
 **Perfil y ajustes**
 - [ ] Cambio de contraseña y eliminación de cuenta (requiere API).
@@ -151,3 +151,5 @@ _Hallazgos de la fase 0 (2026-10-22):_
 - [x] Con la fecha de nacimiento, la API devuelve un timestamp ISO; ahora se muestra solo la parte AAAA-MM-DD (`toDateInput`). Se puede vaciar teléfono y fecha (antes se quedaba el valor anterior).
 - [x] En web, un fallo de red salía como "Failed to fetch"; ahora es "Error de conexión. Verifica tu conexión a internet.". Ningún mensaje de excepción en inglés llega ya al usuario.
 - [ ] Falta aviso de cuántos registros se pierden al eliminar una persona (la API los borra en cascada; no verificado) y la pantalla de recuperar contraseña no llama a ninguna API.
+- [ ] Backend (fase 4): poner `ON DELETE CASCADE` en `records.person_id` (o un endpoint que borre persona y registros en una sola transacción). Hoy, si falla a mitad, la persona queda sin parte de sus registros; la app lo avisa y recarga.
+- [x] Los diálogos de confirmación y aviso usan `utils/confirm.js`, que en web recurre a `window.confirm`/`alert` (`Alert.alert` no hace nada en react-native-web).

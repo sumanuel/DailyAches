@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from "react";
-import { FlatList, StyleSheet, View, Alert } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import {
   Card,
   FAB,
@@ -9,6 +9,8 @@ import {
 } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
+import { confirmAction, showMessage } from "../utils/confirm";
+import { countRecordsFor, describeRecordCount } from "../utils/recordFilters";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import IllustrationBadge from "../components/IllustrationBadge";
@@ -41,33 +43,28 @@ const PainSettingsScreen = () => {
   };
 
   const handleDeletePainType = async (painType) => {
-    Alert.alert(
-      "Eliminar tipo de dolor",
-      `¿Estás seguro de que quieres eliminar "${painType.name}"?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const result = await removePainType(painType.id);
-              if (result.success) {
-                Alert.alert("Listo", "Tipo de dolor eliminado.");
-              } else {
-                Alert.alert("No se pudo eliminar", result.error);
-              }
-            } catch (error) {
-              console.error("Error deleting pain type:", error);
-              Alert.alert(
-                "Error",
-                "No se pudo eliminar el tipo de dolor. Inténtalo de nuevo.",
-              );
-            }
-          },
-        },
-      ],
-    );
+    // The API does not allow deleting a type that records still use.
+    const recordCount = countRecordsFor(user.records, {
+      painTypeId: painType.id,
+    });
+    if (recordCount > 0) {
+      showMessage(
+        "No se puede eliminar",
+        `"${painType.name}" se usa en ${describeRecordCount(
+          recordCount,
+        )}. Cambia o elimina esos registros y vuelve a intentarlo.`,
+      );
+      return;
+    }
+
+    const confirmed = await confirmAction({
+      title: "Eliminar tipo de dolor",
+      message: `¿Seguro que quieres eliminar "${painType.name}"?`,
+    });
+    if (!confirmed) return;
+
+    const result = await removePainType(painType.id);
+    if (!result.success) showMessage("No se pudo eliminar", result.error);
   };
 
   return (
