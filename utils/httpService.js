@@ -1,4 +1,5 @@
 import { API_CONFIG, HTTP_STATUS, API_ERRORS } from "../constants/api";
+import { translateApiError } from "./apiErrors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Base HTTP Service
@@ -90,18 +91,19 @@ class HttpService {
     }
 
     // Handle error responses
-    let errorMessage = API_ERRORS.UNKNOWN_ERROR;
+    let rawError = "";
     try {
       const errorData = await response.json();
-      errorMessage =
-        errorData.statusMessage || errorData.message || errorMessage;
+      rawError = errorData.statusMessage || errorData.message || "";
     } catch {
-      // Use default error message
+      // No readable body: the status alone picks the message
     }
 
+    // `error` is what the user reads (Spanish); `rawError` is the API's text.
     return {
       success: false,
-      error: errorMessage,
+      error: translateApiError(rawError, status),
+      rawError,
       status,
     };
   }
@@ -114,16 +116,22 @@ class HttpService {
       };
     }
 
-    if (error.message === "Network request failed") {
+    // fetch rejects with a different text on each platform when there is no connection
+    const message = String(error?.message || "");
+    if (
+      error instanceof TypeError ||
+      /network request failed|failed to fetch|load failed|networkerror/i.test(message)
+    ) {
       return {
         success: false,
         error: API_ERRORS.NETWORK_ERROR,
       };
     }
 
+    // Never show a raw (English) exception message to the user.
     return {
       success: false,
-      error: error.message || API_ERRORS.UNKNOWN_ERROR,
+      error: API_ERRORS.UNKNOWN_ERROR,
     };
   }
 

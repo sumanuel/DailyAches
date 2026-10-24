@@ -59,7 +59,7 @@ Los puntos son hipótesis a validar usando la app en la fase 0.
 - [x] Progreso visible: tarjeta «Próximo logro» y, en cada logro bloqueado, barra y texto («12 de 20 registros», «295 de 395 pts»); contador «6 de 12 desbloqueados». Probado en web.
 
 **Personas y tipos de dolor**
-- [ ] Validaciones de formulario más claras en español (yup) y mensajes de error de la API traducidos.
+- [x] Validaciones y errores en español (2026-10-24): `utils/apiErrors.js` traduce los mensajes de la API (el original queda en `rawError`), `utils/validation.js` valida nombre, teléfono y fecha de nacimiento, y los formularios de Acceso, Registro, Persona, Dolor y Perfil muestran el error junto al campo o bajo el formulario (antes eran `Alert`, que no se ven en web). Con 20 pruebas nuevas y probado en web.
 - [ ] Avisar qué pasa con los registros al eliminar una persona o un tipo de dolor.
 
 **Perfil y ajustes**
@@ -147,3 +147,7 @@ _Hallazgos de la fase 0 (2026-10-22):_
 - [x] Compartir un registro desbloqueaba el logro 5 («Veinte al Archivo») en lugar del 12 («Compartidor»), porque los ids cambiaron; ahora usa `SHARE_ACHIEVEMENT_ID`.
 - [ ] `AchievementsScreen` y `LevelScreen` no están en ninguna ruta; revisar si se eliminan.
 - [ ] Al migrar la clave antigua `userData`, el primer usuario que inicie sesión en el dispositivo se queda con ese progreso (no hay forma de saber de quién era).
+- [x] Guardar una persona, un tipo de dolor o el perfil cerraba la pantalla aunque la API fallara (o, en el perfil, decía "actualizados" tras guardar solo en local). Ahora esas acciones devuelven `{ success, error }`, no cierran si falla y muestran el motivo. Eliminar una persona o un tipo de dolor tampoco los quita ya de la lista local si el servidor lo rechaza.
+- [x] Con la fecha de nacimiento, la API devuelve un timestamp ISO; ahora se muestra solo la parte AAAA-MM-DD (`toDateInput`). Se puede vaciar teléfono y fecha (antes se quedaba el valor anterior).
+- [x] En web, un fallo de red salía como "Failed to fetch"; ahora es "Error de conexión. Verifica tu conexión a internet.". Ningún mensaje de excepción en inglés llega ya al usuario.
+- [ ] Falta aviso de cuántos registros se pierden al eliminar una persona (la API los borra en cascada; no verificado) y la pantalla de recuperar contraseña no llama a ninguna API.

@@ -14,23 +14,33 @@ import AuthService from "../utils/authService";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import AppTextField from "../components/AppTextField";
+import FieldError from "../components/FieldError";
 
 const schema = yup.object({
-  name: yup.string().required("Nombre es requerido"),
-  email: yup.string().email("Email inválido").required("Email es requerido"),
+  name: yup
+    .string()
+    .trim()
+    .required("Escribe tu nombre.")
+    .max(60, "El nombre no puede pasar de 60 caracteres."),
+  email: yup
+    .string()
+    .trim()
+    .required("Escribe tu correo.")
+    .email("Escribe un correo válido."),
   password: yup
     .string()
-    .min(6, "Contraseña debe tener al menos 6 caracteres")
-    .required("Contraseña es requerida"),
+    .required("Escribe una contraseña.")
+    .min(6, "La contraseña debe tener al menos 6 caracteres."),
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref("password"), null], "Las contraseñas no coinciden")
-    .required("Confirmar contraseña es requerida"),
+    .required("Repite la contraseña.")
+    .oneOf([yup.ref("password")], "Las contraseñas no coinciden."),
 });
 
 const RegisterScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const {
     control,
@@ -42,6 +52,7 @@ const RegisterScreen = ({ navigation }) => {
 
   const onSubmit = async (data) => {
     setLoading(true);
+    setFormError("");
     try {
       const response = await AuthService.register(
         data.email,
@@ -61,18 +72,10 @@ const RegisterScreen = ({ navigation }) => {
           ],
         );
       } else {
-        Alert.alert(
-          "Error de registro",
-          response.error || "Ha ocurrido un error al crear tu cuenta.",
-          [{ text: "OK" }],
-        );
+        setFormError(response.error || "No se pudo crear la cuenta.");
       }
     } catch {
-      Alert.alert(
-        "Error",
-        "Ha ocurrido un error inesperado. Inténtalo de nuevo.",
-        [{ text: "OK" }],
-      );
+      setFormError("Ocurrió un error inesperado. Inténtalo de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -181,6 +184,7 @@ const RegisterScreen = ({ navigation }) => {
             </Text>
           )}
 
+          <FieldError message={formError} />
           <Button
             mode="contained"
             onPress={handleSubmit(onSubmit)}

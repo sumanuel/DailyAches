@@ -26,7 +26,7 @@ describe("HttpService", () => {
     expect(config.headers.Authorization).toBe("Bearer abc");
   });
 
-  it("returns the server error message without throwing", async () => {
+  it("returns a Spanish error and keeps the raw one without throwing", async () => {
     global.fetch.mockResolvedValue(
       jsonResponse(400, { message: "Nombre requerido" }),
     );
@@ -35,7 +35,8 @@ describe("HttpService", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "Nombre requerido",
+      error: "Revisa los datos e inténtalo de nuevo.",
+      rawError: "Nombre requerido",
       status: 400,
     });
   });
@@ -73,12 +74,35 @@ describe("HttpService", () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it("maps network failures to a friendly message", async () => {
-    global.fetch.mockRejectedValue(new Error("Network request failed"));
+  it.each([
+    ["Network request failed", Error],
+    ["Failed to fetch", TypeError],
+    ["Load failed", TypeError],
+  ])("maps the network failure %s to a friendly message", async (message, ErrorType) => {
+    global.fetch.mockRejectedValue(new ErrorType(message));
 
     const result = await HttpService.get("/people");
 
     expect(result.success).toBe(false);
     expect(result.error).toMatch(/conexi/i);
+  });
+
+  it("never exposes a raw exception message", async () => {
+    global.fetch.mockRejectedValue(new Error("Unexpected token < in JSON"));
+
+    const result = await HttpService.get("/people");
+
+    expect(result.error).toBe("Ha ocurrido un error desconocido.");
+  });
+
+  it("translates the API's English messages", async () => {
+    global.fetch.mockResolvedValue(
+      jsonResponse(401, { statusMessage: "Invalid credentials" }),
+    );
+
+    const result = await HttpService.post("/auth/login", {});
+
+    expect(result.error).toBe("El correo o la contraseña no son correctos.");
+    expect(result.rawError).toBe("Invalid credentials");
   });
 });

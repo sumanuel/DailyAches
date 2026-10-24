@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Alert } from "react-native";
+import { StyleSheet } from "react-native";
 import {
   Button,
   Text,
@@ -14,19 +14,22 @@ import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import AppTextField from "../components/AppTextField";
+import FieldError from "../components/FieldError";
 
 const schema = yup.object({
-  email: yup.string().email("Email inválido").required("Email es requerido"),
-  password: yup
+  email: yup
     .string()
-    .min(6, "Contraseña debe tener al menos 6 caracteres")
-    .required("Contraseña es requerida"),
+    .trim()
+    .required("Escribe tu correo.")
+    .email("Escribe un correo válido."),
+  password: yup.string().required("Escribe tu contraseña."),
 });
 
 const LoginScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
   const { login } = useUser();
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const {
     control,
@@ -38,24 +41,17 @@ const LoginScreen = ({ navigation }) => {
 
   const onSubmit = async (data) => {
     setLoading(true);
+    setFormError("");
     try {
       const response = await login(data.email, data.password);
 
       if (response.success) {
         navigation.getParent()?.replace("Main");
       } else {
-        Alert.alert(
-          "Error de inicio de sesión",
-          response.error || "Credenciales inválidas",
-          [{ text: "OK" }],
-        );
+        setFormError(response.error || "No se pudo iniciar sesión.");
       }
     } catch {
-      Alert.alert(
-        "Error",
-        "Ha ocurrido un error inesperado. Inténtalo de nuevo.",
-        [{ text: "OK" }],
-      );
+      setFormError("Ocurrió un error inesperado. Inténtalo de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -125,6 +121,7 @@ const LoginScreen = ({ navigation }) => {
             </Text>
           )}
 
+          <FieldError message={formError} />
           <Button
             mode="contained"
             onPress={handleSubmit(onSubmit)}

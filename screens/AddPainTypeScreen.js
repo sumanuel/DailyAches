@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Button, Card, useTheme as usePaperTheme } from "react-native-paper";
+import { PAIN_NAME_MAX_LENGTH, validateName } from "../utils/validation";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
@@ -23,11 +24,16 @@ const AddPainTypeScreen = ({ navigation, route }) => {
     existingPain?.image || "Mujer feliz.png",
   );
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     const trimmedName = painName.trim();
-    if (!trimmedName) {
-      setError("El nombre del dolor es obligatorio");
+    const nameError = validateName(painName, {
+      label: "El nombre del dolor",
+      max: PAIN_NAME_MAX_LENGTH,
+    });
+    if (nameError) {
+      setError(nameError);
       return;
     }
 
@@ -36,7 +42,7 @@ const AddPainTypeScreen = ({ navigation, route }) => {
         (p) => p.name.toLowerCase() === trimmedName.toLowerCase(),
       );
       if (exists) {
-        setError("Ya existe un tipo de dolor con este nombre");
+        setError("Ya existe un tipo de dolor con ese nombre.");
         return;
       }
     }
@@ -48,24 +54,25 @@ const AddPainTypeScreen = ({ navigation, route }) => {
           p.name.toLowerCase() === trimmedName.toLowerCase(),
       );
       if (exists) {
-        setError("Ya existe otro tipo de dolor con este nombre");
+        setError("Ya existe otro tipo de dolor con ese nombre.");
         return;
       }
     }
 
     setError("");
 
-    try {
-      if (isEdit && existingPain) {
-        await updatePainType(existingPain.id, trimmedName, selectedImage);
-      } else {
-        await addPainType(trimmedName, selectedImage);
-      }
-      navigation.goBack();
-    } catch (error) {
-      console.error("Error saving pain type:", error);
-      setError(error.message || "Error al guardar el tipo de dolor");
+    setSaving(true);
+    const result =
+      isEdit && existingPain
+        ? await updatePainType(existingPain.id, trimmedName, selectedImage)
+        : await addPainType(trimmedName, selectedImage);
+    setSaving(false);
+
+    if (!result.success) {
+      setError(result.error);
+      return;
     }
+    navigation.goBack();
   };
 
   const renderImageGrid = () => {
@@ -169,7 +176,8 @@ const AddPainTypeScreen = ({ navigation, route }) => {
             <Button
               mode="contained"
               onPress={handleSave}
-              disabled={!painName.trim()}
+              loading={saving}
+              disabled={saving}
               style={styles.saveButton}
             >
               {isEdit ? "Actualizar" : "Agregar"}

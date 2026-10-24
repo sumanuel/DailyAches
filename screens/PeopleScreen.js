@@ -53,7 +53,12 @@ const PeopleScreen = ({ navigation }) => {
         {
           text: "Eliminar",
           style: "destructive",
-          onPress: () => removePerson(person.id),
+          onPress: async () => {
+            const result = await removePerson(person.id);
+            if (!result.success) {
+              Alert.alert("No se pudo eliminar", result.error);
+            }
+          },
         },
       ],
     );

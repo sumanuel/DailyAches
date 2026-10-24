@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Alert, Platform } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import {
   Button,
   Card,
@@ -11,6 +11,8 @@ import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import AppTextField from "../components/AppTextField";
+import FieldError from "../components/FieldError";
+import { toDateInput, validateProfile } from "../utils/validation";
 
 const ProfileScreen = () => {
   const paperTheme = usePaperTheme();
@@ -21,6 +23,8 @@ const ProfileScreen = () => {
   const [phone, setPhone] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [status, setStatus] = useState(null); // { ok, text }
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const styles = StyleSheet.create({
@@ -41,7 +45,7 @@ const ProfileScreen = () => {
     setName(user.profile?.name || "");
     setEmail(user.profile?.email || "");
     setPhone(user.profile?.phone || "");
-    setBirthDate(user.profile?.birth_date || "");
+    setBirthDate(toDateInput(user.profile?.birth_date));
   }, [user.profile]);
 
   const onDateChange = (event, selectedDate) => {
@@ -53,21 +57,24 @@ const ProfileScreen = () => {
   };
 
   const onSave = async () => {
+    setStatus(null);
+    const nextErrors = validateProfile({ name, phone, birthDate });
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
     setLoading(true);
-    try {
-      await updateProfile({
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone.trim() || null,
-        birth_date: birthDate.trim() || null,
-      });
-      Alert.alert("Éxito", "Datos actualizados correctamente");
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      Alert.alert("Error", "No se pudieron actualizar los datos");
-    } finally {
-      setLoading(false);
-    }
+    const result = await updateProfile({
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim() || null,
+      birth_date: birthDate.trim() || null,
+    });
+    setLoading(false);
+    setStatus(
+      result.success
+        ? { ok: true, text: "Datos guardados en tu cuenta." }
+        : { ok: false, text: result.error },
+    );
   };
 
   return (
@@ -96,15 +103,19 @@ const ProfileScreen = () => {
             label="Nombre"
             value={name}
             onChangeText={setName}
+            error={Boolean(errors.name)}
             style={styles.input}
           />
+          <FieldError message={errors.name} />
           <AppTextField
             label="Teléfono"
             value={phone}
             onChangeText={setPhone}
+            error={Boolean(errors.phone)}
             keyboardType="phone-pad"
             style={styles.input}
           />
+          <FieldError message={errors.phone} />
           <Text variant="bodySmall" style={styles.label}>
             Fecha de nacimiento
           </Text>
@@ -123,9 +134,22 @@ const ProfileScreen = () => {
               onChange={onDateChange}
             />
           )}
-          <Text style={styles.hint}>
-            Tip: En modo demo, estos datos son locales.
-          </Text>
+          <FieldError message={errors.birthDate} />
+          {status ? (
+            <Text
+              style={[
+                styles.hint,
+                {
+                  color: status.ok
+                    ? paperTheme.colors.primary
+                    : paperTheme.colors.error,
+                },
+              ]}
+              accessibilityLiveRegion="polite"
+            >
+              {status.text}
+            </Text>
+          ) : null}
           <Button
             mode="contained"
             onPress={onSave}

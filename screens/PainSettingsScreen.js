@@ -53,23 +53,9 @@ const PainSettingsScreen = () => {
             try {
               const result = await removePainType(painType.id);
               if (result.success) {
-                Alert.alert("Éxito", "Tipo de dolor eliminado correctamente");
+                Alert.alert("Listo", "Tipo de dolor eliminado.");
               } else {
-                // Check if the error is because the pain type is being used
-                if (
-                  result.error &&
-                  result.error.includes("being used in existing records")
-                ) {
-                  Alert.alert(
-                    "No se puede eliminar",
-                    "Este tipo de dolor no se puede eliminar porque ya está siendo usado en registros existentes.",
-                  );
-                } else {
-                  Alert.alert(
-                    "Advertencia",
-                    "El tipo de dolor se eliminó localmente, pero puede que no se haya sincronizado con el servidor.",
-                  );
-                }
+                Alert.alert("No se pudo eliminar", result.error);
               }
             } catch (error) {
               console.error("Error deleting pain type:", error);

@@ -19,6 +19,8 @@ import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import IllustrationBadge from "../components/IllustrationBadge";
 import AppTextField from "../components/AppTextField";
+import FieldError from "../components/FieldError";
+import { validateName, validatePhone } from "../utils/validation";
 import {
   avatarIllustrationKeys,
   getAvatarIllustration,
@@ -44,6 +46,9 @@ const AddPersonScreen = ({ navigation, route }) => {
     editPerson?.avatar || "Mujer feliz.png",
   );
   const [expanded, setExpanded] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const avatars = avatarIllustrationKeys;
 
@@ -57,11 +62,14 @@ const AddPersonScreen = ({ navigation, route }) => {
     "Otro",
   ];
 
-  const handleSave = () => {
-    if (!name.trim()) {
-      alert("Por favor ingresa un nombre");
-      return;
-    }
+  const handleSave = async () => {
+    const nextErrors = {
+      name: validateName(name),
+      phone: validatePhone(phone),
+    };
+    setErrors(nextErrors);
+    setFormError("");
+    if (nextErrors.name || nextErrors.phone) return;
 
     const personData = {
       name: name.trim(),
@@ -71,18 +79,23 @@ const AddPersonScreen = ({ navigation, route }) => {
       avatar: selectedAvatar,
     };
 
-    if (isEdit && editPerson) {
-      updatePerson(editPerson.id, personData);
-    } else {
-      addPerson(
-        personData.name,
-        personData.relationship,
-        personData.avatar,
-        personData.phone,
-        personData.whatsappEnabled,
-      );
-    }
+    setSaving(true);
+    const result =
+      isEdit && editPerson
+        ? await updatePerson(editPerson.id, personData)
+        : await addPerson(
+            personData.name,
+            personData.relationship,
+            personData.avatar,
+            personData.phone,
+            personData.whatsappEnabled,
+          );
+    setSaving(false);
 
+    if (!result.success) {
+      setFormError(result.error);
+      return;
+    }
     navigation.goBack();
   };
 
@@ -118,9 +131,14 @@ const AddPersonScreen = ({ navigation, route }) => {
             <AppTextField
               label="Nombre *"
               value={name}
-              onChangeText={setName}
+              onChangeText={(text) => {
+                setName(text);
+                if (errors.name) setErrors((prev) => ({ ...prev, name: "" }));
+              }}
+              error={Boolean(errors.name)}
               style={styles.input}
             />
+            <FieldError message={errors.name} />
 
             <List.Accordion
               title="Relación"
@@ -142,11 +160,16 @@ const AddPersonScreen = ({ navigation, route }) => {
             <AppTextField
               label="Número de teléfono"
               value={phone}
-              onChangeText={setPhone}
+              onChangeText={(text) => {
+                setPhone(text);
+                if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }));
+              }}
+              error={Boolean(errors.phone)}
               keyboardType="phone-pad"
               style={styles.input}
               placeholder="Ej: +58 412 123 4567"
             />
+            <FieldError message={errors.phone} />
 
             <View style={styles.checkboxSection}>
               <Checkbox
@@ -214,6 +237,7 @@ const AddPersonScreen = ({ navigation, route }) => {
               </View>
             </View>
 
+            <FieldError message={formError} />
             <View style={styles.buttonContainer}>
               <Button
                 mode="outlined"
@@ -226,7 +250,8 @@ const AddPersonScreen = ({ navigation, route }) => {
                 mode="contained"
                 onPress={handleSave}
                 style={styles.button}
-                disabled={!name.trim()}
+                loading={saving}
+                disabled={saving}
               >
                 {isEdit ? "Actualizar" : "Agregar"}
               </Button>

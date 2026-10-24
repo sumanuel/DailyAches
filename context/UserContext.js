@@ -9,6 +9,8 @@ import React, {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AuthService from "../utils/authService";
 import { useAuth } from "./AuthContext";
+import { UNKNOWN_ERROR } from "../utils/apiErrors";
+import { toDateInput } from "../utils/validation";
 import useRemoteData from "./useRemoteData";
 import {
   levels,
@@ -162,47 +164,31 @@ export const UserProvider = ({ children }) => {
     });
   };
 
+  // Returns { success, error }; the profile only changes when the API accepts it.
   const updateProfile = async (partial) => {
     try {
       const response = await AuthService.updateProfile(partial);
-      if (response.success) {
-        setUser((prevUser) => {
-          const newUser = {
-            ...prevUser,
-            profile: {
-              ...prevUser.profile,
-              name: response.user.name || prevUser.profile.name,
-              email: response.user.email || prevUser.profile.email,
-              phone: response.user.phone || prevUser.profile.phone,
-              birth_date:
-                response.user.birth_date || prevUser.profile.birth_date,
-            },
-          };
-          saveUserData(newUser);
-          return newUser;
-        });
-      } else {
-        // Fallback to local update if API fails
-        setUser((prevUser) => {
-          const newUser = {
-            ...prevUser,
-            profile: { ...prevUser.profile, ...(partial || {}) },
-          };
-          saveUserData(newUser);
-          return newUser;
-        });
+      if (!response.success) {
+        return { success: false, error: response.error };
       }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      // Fallback to local update
       setUser((prevUser) => {
         const newUser = {
           ...prevUser,
-          profile: { ...prevUser.profile, ...(partial || {}) },
+          profile: {
+            ...prevUser.profile,
+            name: response.user.name ?? prevUser.profile.name,
+            email: response.user.email || prevUser.profile.email,
+            phone: response.user.phone ?? "",
+            birth_date: toDateInput(response.user.birth_date),
+          },
         };
         saveUserData(newUser);
         return newUser;
       });
+      return { success: true };
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      return { success: false, error: UNKNOWN_ERROR };
     }
   };
 
@@ -225,7 +211,8 @@ export const UserProvider = ({ children }) => {
             name: response.user.name || prevUser.profile.name,
             email: response.user.email || prevUser.profile.email,
             phone: response.user.phone || prevUser.profile.phone,
-            birth_date: response.user.birth_date || prevUser.profile.birth_date,
+            birth_date:
+              toDateInput(response.user.birth_date) || prevUser.profile.birth_date,
           },
         }));
         // Load API data

@@ -27,7 +27,7 @@ import {
 } from "../utils/painLevel";
 
 const schema = yup.object({
-  pain: yup.string().required("Selecciona un dolor"),
+  pain: yup.string().required("Elige un tipo de dolor."),
   notes: yup.string(),
 });
 

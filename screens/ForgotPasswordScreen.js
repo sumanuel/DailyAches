@@ -14,7 +14,11 @@ import HeroPanel from "../components/HeroPanel";
 import AppTextField from "../components/AppTextField";
 
 const schema = yup.object({
-  email: yup.string().email("Email inválido").required("Email es requerido"),
+  email: yup
+    .string()
+    .trim()
+    .required("Escribe tu correo.")
+    .email("Escribe un correo válido."),
 });
 
 const ForgotPasswordScreen = ({ navigation }) => {
