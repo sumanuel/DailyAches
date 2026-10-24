@@ -70,7 +70,7 @@ Los puntos son hipótesis a validar usando la app en la fase 0.
 
 Ordenadas por valor estimado frente a esfuerzo.
 
-1. [ ] **Recordatorios diarios** con `expo-notifications` (hora configurable): "¿Hubo algún dolor hoy?". Es lo que más retiene en una app de registro diario.
+1. [x] **Recordatorios diarios** (2026-10-24): `Más > Configuración > Recordatorio diario`, con interruptor y hora (por defecto 20:00); notificación local diaria «¿Hubo algún dolor hoy?» con `expo-notifications`. Lógica en `utils/reminders.js` y `utils/reminderService.js` (14 pruebas con el módulo simulado). Pendiente de probar en un móvil real: no se pudo verificar que la notificación llegue; en web el interruptor sale desactivado. Es una notificación diaria fija: no se omite si ya hubo registros ese día, y se pierde al reinstalar hasta volver a activarla.
 2. [ ] **Compartir** un registro, el resumen semanal o "día sin dolor" con `expo-sharing` (ya instalado) y una imagen generada; sin SDK de Facebook.
 3. [ ] **Exportar historial** a CSV o PDF, útil para llevar a una consulta médica.
 4. [ ] **Resumen semanal**: tarjeta en Inicio con total, tipo de dolor más frecuente y tendencia.
@@ -151,3 +151,4 @@ _Hallazgos de la fase 0 (2026-10-22):_
 - [x] Con la fecha de nacimiento, la API devuelve un timestamp ISO; ahora se muestra solo la parte AAAA-MM-DD (`toDateInput`). Se puede vaciar teléfono y fecha (antes se quedaba el valor anterior).
 - [x] En web, un fallo de red salía como "Failed to fetch"; ahora es "Error de conexión. Verifica tu conexión a internet.". Ningún mensaje de excepción en inglés llega ya al usuario.
 - [ ] Falta aviso de cuántos registros se pierden al eliminar una persona (la API los borra en cascada; no verificado) y la pantalla de recuperar contraseña no llama a ninguna API.
+- [ ] Probar el recordatorio en un dispositivo (permiso, hora exacta, Android 13+ y iOS) antes de darlo por bueno; en Expo Go para Android las notificaciones remotas no existen pero las locales deberían funcionar.
