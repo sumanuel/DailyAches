@@ -34,6 +34,8 @@ Backend URL: set `EXPO_PUBLIC_API_URL` (the `/api` suffix is appended if missing
 - **API contract**: payloads use snake_case (`image_url`, `whatsapp_enabled`, `person_id`, `pain_type_id`, `pain_level` 1–10); `/records` responses include enriched `person_name`, `pain_type_name`, `pain_type_image`. Renaming any of these breaks at runtime with no compile error. Field-by-field table in `MATRIZ_APP_BACKEND.md`; update it together with `constants/api.js` when the contract changes.
 - **UI building blocks**: `components/` (`AppScreen`, `AppTextField`, `HeroPanel`, `IllustrationBadge`) and `constants/illustrations.js`. Forms use react-hook-form + yup.
 
+Export: `utils/exportRecords.js` builds the CSV / PDF HTML (pure) and `utils/exportService.js` writes and shares it (browser download on web, PDF native only).
+
 Daily reminder: `utils/reminders.js` (pure) and `utils/reminderService.js` (expo-notifications, saved per device under `reminderSettings`); it only works on native, on web the switch in Settings is disabled.
 
 ## UI conventions

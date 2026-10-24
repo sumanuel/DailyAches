@@ -72,7 +72,7 @@ Ordenadas por valor estimado frente a esfuerzo.
 
 1. [x] **Recordatorios diarios** (2026-10-24): `Más > Configuración > Recordatorio diario`, con interruptor y hora (por defecto 20:00); notificación local diaria «¿Hubo algún dolor hoy?» con `expo-notifications`. Lógica en `utils/reminders.js` y `utils/reminderService.js` (14 pruebas con el módulo simulado). Pendiente de probar en un móvil real: no se pudo verificar que la notificación llegue; en web el interruptor sale desactivado. Es una notificación diaria fija: no se omite si ya hubo registros ese día, y se pierde al reinstalar hasta volver a activarla.
 2. [ ] **Compartir** un registro, el resumen semanal o "día sin dolor" con `expo-sharing` (ya instalado) y una imagen generada; sin SDK de Facebook.
-3. [ ] **Exportar historial** a CSV o PDF, útil para llevar a una consulta médica.
+3. [x] **Exportar historial** a CSV o PDF (2026-10-24): `Más > Exportar historial`, con persona, periodo (este mes, mes anterior, este año, todo) y formato. `utils/exportRecords.js` crea el CSV (con BOM para Excel, comillas escapadas y celdas que empiezan por `=`, `+`, `-` o `@` neutralizadas) y el informe HTML para el PDF (`expo-print`); `utils/exportService.js` escribe el archivo y lo comparte (`expo-file-system`, `expo-sharing`). 28 pruebas con los módulos simulados. En web se descarga el CSV (probado) y el PDF queda desactivado; en el móvil, la hoja de compartir y el PDF no están probados en un dispositivo real.
 4. [ ] **Resumen semanal**: tarjeta en Inicio con total, tipo de dolor más frecuente y tendencia.
 5. [ ] **Detección de patrones** simple: día de la semana o momento del mes con más registros por persona (ciclo, por ejemplo).
 6. [ ] **Etiquetas o desencadenantes** opcionales en cada registro (sueño, estrés, comida, medicación).
@@ -153,3 +153,5 @@ _Hallazgos de la fase 0 (2026-10-22):_
 - [ ] Probar el recordatorio en un dispositivo (permiso, hora exacta, Android 13+ y iOS) antes de darlo por bueno; en Expo Go para Android las notificaciones remotas no existen pero las locales deberían funcionar.
 - [ ] Backend (fase 4): poner `ON DELETE CASCADE` en `records.person_id` (o un endpoint que borre persona y registros en una sola transacción). Hoy, si falla a mitad, la persona queda sin parte de sus registros; la app lo avisa y recarga.
 - [x] Los diálogos de confirmación y aviso usan `utils/confirm.js`, que en web recurre a `window.confirm`/`alert` (`Alert.alert` no hace nada en react-native-web).
+- [ ] Probar en un móvil real la exportación: que `Sharing.shareAsync` abra la hoja de compartir con el CSV y el PDF, y que el PDF se vea bien (saltos de página en historiales largos).
+- [ ] Los datos exportados son de salud: no hay aviso de privacidad antes de compartirlos; valorar un texto breve en la pantalla.

@@ -171,6 +171,14 @@ const MoreScreen = ({ navigation }) => {
         />
         <View style={styles.divider} />
         <List.Item
+          title="Exportar historial"
+          description="Archivo CSV o PDF para llevar a consulta"
+          left={(props) => <List.Icon {...props} icon="file-export-outline" />}
+          right={(props) => <List.Icon {...props} icon="arrow-right" />}
+          onPress={() => navigation.navigate("Export")}
+        />
+        <View style={styles.divider} />
+        <List.Item
           title="Perfil"
           description="Datos principales y ajustes personales"
           left={(props) => (
