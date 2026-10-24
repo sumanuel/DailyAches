@@ -1,5 +1,7 @@
 import {
+  countRecordsFor,
   dayKey,
+  describeRecordCount,
   filterRecords,
   formatDayHeader,
   getPainTypeOptions,
@@ -130,5 +132,22 @@ describe("insertRecordSorted", () => {
     insertRecordSorted(list, records[1]);
     expect(list).toHaveLength(1);
     expect(insertRecordSorted(undefined, records[0])).toHaveLength(1);
+  });
+});
+
+describe("countRecordsFor / describeRecordCount", () => {
+  it("counts the records of a person or of a pain type", () => {
+    expect(countRecordsFor(records, { personId: "7" })).toBe(3);
+    expect(countRecordsFor(records, { personId: "8" })).toBe(1);
+    expect(countRecordsFor(records, { painTypeId: "1" })).toBe(3);
+    expect(countRecordsFor(records, { personId: "7", painTypeId: "2" })).toBe(1);
+    expect(countRecordsFor(records, { personId: "99" })).toBe(0);
+    expect(countRecordsFor(undefined, { personId: "7" })).toBe(0);
+  });
+
+  it("writes the amount in Spanish", () => {
+    expect(describeRecordCount(0)).toBe("0 registros");
+    expect(describeRecordCount(1)).toBe("1 registro");
+    expect(describeRecordCount(12)).toBe("12 registros");
   });
 });

@@ -111,3 +111,15 @@ export const insertRecordSorted = (records, record) =>
   [...(records || []), record].sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
   );
+
+// How many records point at a person or a pain type, for the warnings shown
+// before deleting them.
+export const countRecordsFor = (records, { personId, painTypeId } = {}) =>
+  (records || []).filter(
+    (record) =>
+      (!personId || record.personId === personId) &&
+      (!painTypeId || record.painTypeId === painTypeId),
+  ).length;
+
+export const describeRecordCount = (count) =>
+  count === 1 ? "1 registro" : `${count} registros`;
