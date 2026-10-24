@@ -25,6 +25,8 @@ const schema = yup.object({
   notes: yup.string(),
 });
 
+const keyExtractor = (item) => String(item.id ?? item.name);
+
 const RecordPainScreen = ({ navigation, route }) => {
   const {
     user,
@@ -189,7 +191,7 @@ const RecordPainScreen = ({ navigation, route }) => {
 
           <FlatList
             data={filteredPainTypes}
-            keyExtractor={(item) => item.name}
+            keyExtractor={keyExtractor}
             numColumns={3}
             scrollEnabled={false}
             renderItem={({ item }) => {

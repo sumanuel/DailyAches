@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from "react";
-import { StyleSheet, View, ScrollView, Alert } from "react-native";
+import { StyleSheet, View, FlatList, Alert } from "react-native";
 import {
   Card,
   Text,
@@ -16,6 +16,8 @@ import {
   resolveAvatarIllustrationKey,
 } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
+
+const keyExtractor = (person) => String(person.id);
 
 const PeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
@@ -57,6 +59,74 @@ const PeopleScreen = ({ navigation }) => {
     );
   };
 
+  const renderPerson = ({ item: p }) => (
+      <Card
+        style={[
+          styles.card,
+          { backgroundColor: paperTheme.colors.surface },
+        ]}
+        onPress={() => onSelectPerson(p)}
+      >
+        <Card.Content style={styles.row}>
+          <View style={styles.rowLeft}>
+            {p.avatar ? (
+              <IllustrationBadge
+                preset={getAvatarIllustration(
+                  resolveAvatarIllustrationKey(p.avatar),
+                )}
+                size={52}
+                style={styles.avatar}
+              />
+            ) : (
+              <View
+                style={[
+                  styles.avatar,
+                  { backgroundColor: paperTheme.colors.surfaceVariant },
+                ]}
+              >
+                <Text style={styles.avatarText}>
+                  {(p.name || "?").slice(0, 1).toUpperCase()}
+                </Text>
+              </View>
+            )}
+            <View style={styles.meta}>
+              <Text variant="titleMedium" numberOfLines={1}>
+                {p.name}
+              </Text>
+              <Text
+                style={{
+                  color: paperTheme.colors.onSurfaceVariant,
+                  marginTop: 4,
+                }}
+              >
+                {p.relationship || "Relacion sin etiqueta"}
+              </Text>
+              <Text
+                style={[
+                  styles.ctaText,
+                  { color: paperTheme.colors.primary },
+                ]}
+              >
+                Toca para registrar el achaque que presente
+              </Text>
+            </View>
+          </View>
+          <View style={styles.actions}>
+            <IconButton
+              icon="square-edit-outline"
+              onPress={() => openEdit(p)}
+              accessibilityLabel="Editar persona"
+            />
+            <IconButton
+              icon="delete-circle-outline"
+              onPress={() => handleRemovePerson(p)}
+              accessibilityLabel="Eliminar persona"
+            />
+          </View>
+        </Card.Content>
+      </Card>
+  );
+
   return (
     <AppScreen scroll={false} contentContainerStyle={styles.container}>
       <HeroPanel
@@ -96,107 +166,43 @@ const PeopleScreen = ({ navigation }) => {
         ]}
       />
 
-      <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
-        {filtered.length === 0 ? (
-          <Card
+      <FlatList
+        style={styles.list}
+        data={filtered}
+        keyExtractor={keyExtractor}
+        renderItem={renderPerson}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+      <Card
+        style={[
+          styles.emptyCard,
+          { backgroundColor: paperTheme.colors.surface },
+        ]}
+      >
+        <Card.Content>
+          <Text variant="titleMedium" style={styles.emptyTitle}>
+            Todavia no hay elenco
+          </Text>
+          <Text
+            variant="bodyMedium"
             style={[
-              styles.emptyCard,
-              { backgroundColor: paperTheme.colors.surface },
+              styles.muted,
+              { color: paperTheme.colors.onSurfaceVariant },
             ]}
           >
-            <Card.Content>
-              <Text variant="titleMedium" style={styles.emptyTitle}>
-                Todavia no hay elenco
-              </Text>
-              <Text
-                variant="bodyMedium"
-                style={[
-                  styles.muted,
-                  { color: paperTheme.colors.onSurfaceVariant },
-                ]}
-              >
-                Agrega una persona para empezar a registrar sus molestias con
-                claridad y un tono ligero.
-              </Text>
-              <Text
-                style={[styles.emptyHint, { color: paperTheme.colors.primary }]}
-              >
-                El boton + ya esta listo para sumar a la primera persona del
-                listado.
-              </Text>
-            </Card.Content>
-          </Card>
-        ) : (
-          filtered.map((p) => (
-            <Card
-              key={p.id}
-              style={[
-                styles.card,
-                { backgroundColor: paperTheme.colors.surface },
-              ]}
-              onPress={() => onSelectPerson(p)}
-            >
-              <Card.Content style={styles.row}>
-                <View style={styles.rowLeft}>
-                  {p.avatar ? (
-                    <IllustrationBadge
-                      preset={getAvatarIllustration(
-                        resolveAvatarIllustrationKey(p.avatar),
-                      )}
-                      size={52}
-                      style={styles.avatar}
-                    />
-                  ) : (
-                    <View
-                      style={[
-                        styles.avatar,
-                        { backgroundColor: paperTheme.colors.surfaceVariant },
-                      ]}
-                    >
-                      <Text style={styles.avatarText}>
-                        {(p.name || "?").slice(0, 1).toUpperCase()}
-                      </Text>
-                    </View>
-                  )}
-                  <View style={styles.meta}>
-                    <Text variant="titleMedium" numberOfLines={1}>
-                      {p.name}
-                    </Text>
-                    <Text
-                      style={{
-                        color: paperTheme.colors.onSurfaceVariant,
-                        marginTop: 4,
-                      }}
-                    >
-                      {p.relationship || "Relacion sin etiqueta"}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.ctaText,
-                        { color: paperTheme.colors.primary },
-                      ]}
-                    >
-                      Toca para registrar el achaque que presente
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.actions}>
-                  <IconButton
-                    icon="square-edit-outline"
-                    onPress={() => openEdit(p)}
-                    accessibilityLabel="Editar persona"
-                  />
-                  <IconButton
-                    icon="delete-circle-outline"
-                    onPress={() => handleRemovePerson(p)}
-                    accessibilityLabel="Eliminar persona"
-                  />
-                </View>
-              </Card.Content>
-            </Card>
-          ))
-        )}
-      </ScrollView>
+            Agrega una persona para empezar a registrar sus molestias con
+            claridad y un tono ligero.
+          </Text>
+          <Text
+            style={[styles.emptyHint, { color: paperTheme.colors.primary }]}
+          >
+            El boton + ya esta listo para sumar a la primera persona del
+            listado.
+          </Text>
+        </Card.Content>
+      </Card>
+        }
+      />
 
       <FAB
         icon="plus"

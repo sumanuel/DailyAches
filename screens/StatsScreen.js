@@ -100,6 +100,8 @@ const getPresetRange = (preset, now = new Date()) => {
   return { start, end };
 };
 
+const RECORDS_PAGE_SIZE = 30;
+
 const StatsScreen = ({ route }) => {
   const paperTheme = usePaperTheme();
   const { user, getTodayRecords, loadRecordsFromAPI, remoteStatus } =
@@ -111,6 +113,7 @@ const StatsScreen = ({ route }) => {
     getPresetRange("this_month"),
   );
   const [rangeOpen, setRangeOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(RECORDS_PAGE_SIZE);
   const [selectingStart, setSelectingStart] = useState(true); // true for start, false for end
   const [tempRange, setTempRange] = useState(historyRange);
 
@@ -150,6 +153,11 @@ const StatsScreen = ({ route }) => {
 
   const records = tab === "today" ? todayRecords : historyRecords;
   const count = records.length;
+
+  // A new tab, range or person starts again from the first page.
+  useEffect(() => {
+    setVisibleCount(RECORDS_PAGE_SIZE);
+  }, [tab, historyRange, personId]);
 
   const getMarkedDates = () => {
     const marked = {};
@@ -557,7 +565,19 @@ const StatsScreen = ({ route }) => {
           </Card.Content>
         </Card>
       ) : (
-        <View style={styles.recordsList}>{records.map(renderRecord)}</View>
+        <View style={styles.recordsList}>
+          {records.slice(0, visibleCount).map(renderRecord)}
+          {count > visibleCount ? (
+            <Button
+              mode="text"
+              onPress={() =>
+                setVisibleCount((current) => current + RECORDS_PAGE_SIZE)
+              }
+            >
+              Ver más registros ({count - visibleCount} restantes)
+            </Button>
+          ) : null}
+        </View>
       )}
     </AppScreen>
   );

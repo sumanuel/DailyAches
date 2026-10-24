@@ -18,6 +18,8 @@ import {
 } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 
+const keyExtractor = (item) => String(item.id ?? item.name);
+
 const PainSettingsScreen = () => {
   const paperTheme = usePaperTheme();
   const navigation = useNavigation();
@@ -148,7 +150,7 @@ const PainSettingsScreen = () => {
 
         <FlatList
           data={painTypes}
-          keyExtractor={(item) => item.name}
+          keyExtractor={keyExtractor}
           ListEmptyComponent={
             <View style={styles.emptyWrap}>
               <Text variant="titleMedium" style={styles.emptyTitle}>
