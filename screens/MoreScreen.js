@@ -10,6 +10,7 @@ import {
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
+import { SHARE_ACHIEVEMENT_ID } from "../utils/gamification";
 
 const MoreScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
@@ -29,7 +30,7 @@ const MoreScreen = ({ navigation }) => {
       });
 
       Alert.alert("¡Listo!", "Se abrió el panel para compartir.");
-      unlockAchievement(5); // ID del logro "Compartidor"
+      unlockAchievement(SHARE_ACHIEVEMENT_ID);
     } catch (error) {
       console.error("Error sharing:", error);
       Alert.alert("Error", "No se pudo compartir.");

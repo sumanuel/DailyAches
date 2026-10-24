@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { buildProgressState } from "../utils/gamification";
+import { buildProgressState, reconcileProgress } from "../utils/gamification";
 import PeopleService from "../utils/peopleService";
 import PainTypesService from "../utils/painTypesService";
 import RecordsService from "../utils/recordsService";
@@ -80,17 +80,31 @@ export default function useRemoteData({
     [runLoad, setUser],
   );
 
+  // `reconcile`: also count records the server has that this device never
+  // counted (first load after login, new device, reinstall).
   const loadRecordsFromAPI = useCallback(
-    () =>
-      runLoad("records", "records", () => RecordsService.getRecords(), (response) =>
-        setUser((prevUser) => ({
-          ...prevUser,
-          records: (response.records || [])
-            .map(mapRecord)
-            .filter((record) => record.id !== pendingDeletionRef.current?.record.id),
-        })),
+    (options) =>
+      runLoad(
+        "records",
+        "records",
+        () => RecordsService.getRecords(),
+        (response) =>
+          setUser((prevUser) => {
+            const records = (response.records || [])
+              .map(mapRecord)
+              .filter(
+                (record) => record.id !== pendingDeletionRef.current?.record.id,
+              );
+            const next = { ...prevUser, records };
+            if (!options?.reconcile) return next;
+            const reconciled = reconcileProgress(next, records.length);
+            if (reconciled.recordsCount !== prevUser.recordsCount) {
+              saveUserData(reconciled);
+            }
+            return reconciled;
+          }),
       ),
-    [runLoad, setUser],
+    [runLoad, setUser, saveUserData],
   );
 
   const addPerson = async (

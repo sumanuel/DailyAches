@@ -22,7 +22,11 @@ import {
   applyAutomaticAchievements,
   buildProgressState,
   isSameDay,
+  getUserStorageKey,
 } from "../utils/gamification";
+
+// Progress saved before it was kept per user lived under this single key.
+const LEGACY_STORAGE_KEY = getUserStorageKey(null);
 
 const UserContext = createContext();
 
@@ -43,11 +47,25 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(getInitialUser);
   const [hydrated, setHydrated] = useState(false);
   const wasAuthenticated = useRef(false);
+  // Where this session's progress is saved: one key per user, so a second
+  // account on the same device does not inherit the first one's points.
+  const storageKeyRef = useRef(LEGACY_STORAGE_KEY);
   const auth = useAuth();
 
-  const loadUserData = useCallback(async () => {
+  const loadUserData = useCallback(async (userId) => {
     try {
-      const data = await AsyncStorage.getItem("userData");
+      const key = getUserStorageKey(userId);
+      storageKeyRef.current = key;
+      let data = await AsyncStorage.getItem(key);
+      if (!data && userId) {
+        // One-time move of progress saved before it was kept per user.
+        const legacy = await AsyncStorage.getItem(LEGACY_STORAGE_KEY);
+        if (legacy) {
+          data = legacy;
+          await AsyncStorage.setItem(key, legacy);
+          await AsyncStorage.removeItem(LEGACY_STORAGE_KEY);
+        }
+      }
       if (data) {
         const parsed = JSON.parse(data);
         setUser({
@@ -78,13 +96,17 @@ export const UserProvider = ({ children }) => {
     }
   }, []);
 
-  const saveUserData = async (userData) => {
+  // Stable: it only reads a ref, and useRemoteData depends on it.
+  const saveUserData = useCallback(async (userData) => {
     try {
-      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+      await AsyncStorage.setItem(
+        storageKeyRef.current,
+        JSON.stringify(userData),
+      );
     } catch (error) {
       console.error("Error saving user data:", error);
     }
-  };
+  }, []);
 
   const addPoints = (points) => {
     setUser((prevUser) => {
@@ -196,7 +218,7 @@ export const UserProvider = ({ children }) => {
       const response = await AuthService.getCurrentUser();
       if (response.success && response.user) {
         // Load local data and merge with API user data
-        await loadUserData();
+        await loadUserData(response.user.id);
         setUser((prevUser) => ({
           ...prevUser,
           profile: {
@@ -209,7 +231,7 @@ export const UserProvider = ({ children }) => {
         // Load API data
         await loadPeopleFromAPI();
         await loadPainTypesFromAPI();
-        await loadRecordsFromAPI();
+        await loadRecordsFromAPI({ reconcile: true });
       }
     } catch (error) {
       console.error("Error loading user profile:", error);
@@ -227,6 +249,7 @@ export const UserProvider = ({ children }) => {
         await loadUserProfile();
       } else if (wasAuthenticated.current) {
         wasAuthenticated.current = false;
+        storageKeyRef.current = LEGACY_STORAGE_KEY;
         setUser(getInitialUser());
       } else {
         await loadUserData();

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, View, FlatList } from "react-native";
 import {
   Card,
@@ -10,6 +10,11 @@ import {
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
+import {
+  describeAchievementProgress,
+  getAchievementProgress,
+  getNextAchievement,
+} from "../utils/gamification";
 
 const ProgressScreen = () => {
   const paperTheme = usePaperTheme();
@@ -23,10 +28,42 @@ const ProgressScreen = () => {
     ? getLevelMeta(progress.nextLevel)
     : null;
 
+  const progressState = useMemo(
+    () => ({ recordsCount: user.recordsCount, points: user.points }),
+    [user.recordsCount, user.points],
+  );
+  const nextAchievement = useMemo(
+    () => getNextAchievement(user.achievements, progressState),
+    [user.achievements, progressState],
+  );
+  const unlockedCount = user.achievements.filter((a) => a.unlocked).length;
+
   const renderAchievement = ({ item }) => (
     <List.Item
       title={item.name}
-      description={item.description}
+      description={() => {
+        const progress = getAchievementProgress(item, progressState);
+        return (
+          <View>
+            <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
+              {item.description}
+            </Text>
+            {item.unlocked ? (
+              <Text style={styles.achievementStatus}>Desbloqueado</Text>
+            ) : (
+              <View style={styles.achievementProgress}>
+                <ProgressBar
+                  progress={progress.ratio}
+                  style={styles.achievementBar}
+                />
+                <Text style={styles.achievementStatus}>
+                  {describeAchievementProgress(progress)}
+                </Text>
+              </View>
+            )}
+          </View>
+        );
+      }}
       left={(props) => (
         <List.Icon
           {...props}
@@ -102,8 +139,33 @@ const ProgressScreen = () => {
       <Card
         style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
       >
-        <Card.Title title="Logros" />
+        <Card.Title
+          title="Logros"
+          subtitle={`${unlockedCount} de ${user.achievements.length} desbloqueados`}
+        />
         <Card.Content>
+          {nextAchievement ? (
+            <View
+              style={[
+                styles.nextAchievement,
+                { backgroundColor: paperTheme.colors.secondaryContainer },
+              ]}
+            >
+              <Text style={styles.nextAchievementLabel}>PRÓXIMO LOGRO</Text>
+              <Text variant="titleMedium">{nextAchievement.achievement.name}</Text>
+              <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
+                {nextAchievement.achievement.description}
+              </Text>
+              <ProgressBar
+                progress={nextAchievement.progress.ratio}
+                style={styles.progress}
+              />
+              <Text style={styles.sub}>
+                {describeAchievementProgress(nextAchievement.progress)} · +
+                {nextAchievement.achievement.points} pts
+              </Text>
+            </View>
+          ) : null}
           <Text style={styles.subtitle}>
             Desbloquea hitos registrando dolores, sumando constancia y subiendo
             de rango.
@@ -124,6 +186,11 @@ const ProgressScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingBottom: 24 },
+  nextAchievement: { borderRadius: 20, padding: 14, marginBottom: 16, gap: 4 },
+  nextAchievementLabel: { fontSize: 11, fontWeight: "800", letterSpacing: 0.6 },
+  achievementProgress: { marginTop: 6, gap: 4 },
+  achievementBar: { height: 6, borderRadius: 3 },
+  achievementStatus: { fontSize: 12, marginTop: 2 },
   card: { marginBottom: 16, borderRadius: 24, overflow: "hidden" },
   levelBadge: {
     borderRadius: 22,

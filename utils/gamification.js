@@ -241,3 +241,80 @@ export const isSameDay = (a, b) => {
     a.getDate() === b.getDate()
   );
 };
+
+export const POINTS_PER_RECORD = 10;
+
+// "Compartidor": the only achievement that is unlocked by an action, not a count.
+export const SHARE_ACHIEVEMENT_ID = 12;
+
+// How far the user is from an achievement. Record-based ones use the record
+// count, level-based ones the points needed for that level; the rest are manual.
+export const getAchievementProgress = (
+  achievement,
+  { recordsCount = 0, points = 0 } = {},
+) => {
+  const rule = achievementRules.find((entry) => entry.id === achievement.id);
+  let kind = "manual";
+  let target = 1;
+  let current = 0;
+
+  if (rule && typeof rule.recordsCount === "number") {
+    kind = "records";
+    target = rule.recordsCount;
+    current = recordsCount;
+  } else if (rule && typeof rule.level === "number") {
+    kind = "points";
+    target = levels.find((entry) => entry.level === rule.level).pointsRequired;
+    current = points;
+  }
+
+  if (achievement.unlocked) current = target;
+  current = Math.min(current, target);
+  return { kind, current, target, ratio: target > 0 ? current / target : 1 };
+};
+
+export const describeAchievementProgress = (progress) => {
+  if (progress.kind === "records") {
+    return `${progress.current} de ${progress.target} registros`;
+  }
+  if (progress.kind === "points") {
+    return `${progress.current} de ${progress.target} pts`;
+  }
+  return "Se desbloquea al compartir un registro";
+};
+
+// The locked achievement that is closest to being unlocked (manual ones are
+// left out because there is nothing to count towards).
+export const getNextAchievement = (achievements, state) => {
+  let best = null;
+  for (const achievement of achievements || []) {
+    if (achievement.unlocked) continue;
+    const progress = getAchievementProgress(achievement, state);
+    if (progress.kind === "manual") continue;
+    if (
+      !best ||
+      progress.ratio > best.progress.ratio ||
+      (progress.ratio === best.progress.ratio &&
+        progress.target < best.progress.target)
+    ) {
+      best = { achievement, progress };
+    }
+  }
+  return best;
+};
+
+// Rebuilds progress from the records the server holds, so a new device, a
+// reinstall or records created before gamification still count.
+export const reconcileProgress = (user, serverRecordsCount) => {
+  const missing = serverRecordsCount - user.recordsCount;
+  if (!(missing > 0)) return user;
+  return buildProgressState(user, {
+    recordsAdded: missing,
+    basePoints: missing * POINTS_PER_RECORD,
+  });
+};
+
+export const getUserStorageKey = (userId) =>
+  userId === null || userId === undefined || userId === ""
+    ? "userData"
+    : `userData:${userId}`;

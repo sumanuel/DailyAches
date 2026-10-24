@@ -55,8 +55,8 @@ Los puntos son hipótesis a validar usando la app en la fase 0.
 - [ ] Estado vacío con ilustración y llamada a la acción.
 
 **Progreso, niveles y logros**
-- [ ] Revisar que los logros se desbloqueen solo una vez y se sincronicen con el servidor (hoy se calculan en `UserContext`).
-- [ ] Mostrar cuánto falta para el siguiente logro y nivel.
+- [x] Logros (2026-10-24): se desbloquean una sola vez (probado con pruebas); el progreso se reconstruye con los registros del servidor al iniciar sesión (`reconcileProgress`), de modo que un dispositivo nuevo o registros anteriores también cuentan; y el progreso local se guarda por usuario (`userData:<id>`), con migración única de la clave antigua. Antes dos cuentas en el mismo dispositivo compartían puntos y logros. Los logros siguen calculándose en el cliente: la API no los guarda (fase 4).
+- [x] Progreso visible: tarjeta «Próximo logro» y, en cada logro bloqueado, barra y texto («12 de 20 registros», «295 de 395 pts»); contador «6 de 12 desbloqueados». Probado en web.
 
 **Personas y tipos de dolor**
 - [ ] Validaciones de formulario más claras en español (yup) y mensajes de error de la API traducidos.
@@ -144,3 +144,6 @@ _Hallazgos de la fase 0 (2026-10-22):_
 - [ ] Los filtros del Historial no se pueden usar sin elegir antes una persona; valorar una vista global (todas las personas) y los presets "este año" y "todo".
 - [x] Inicio borraba registros solo en local (`deleteRecord`): el registro seguía en el servidor y reaparecía al recargar. Ahora todos los borrados pasan por la API (`scheduleDeleteRecord`).
 - [ ] Al borrar un registro no se restan los puntos que dio (los logros ya desbloqueados tampoco se revierten); decidir si es lo deseado.
+- [x] Compartir un registro desbloqueaba el logro 5 («Veinte al Archivo») en lugar del 12 («Compartidor»), porque los ids cambiaron; ahora usa `SHARE_ACHIEVEMENT_ID`.
+- [ ] `AchievementsScreen` y `LevelScreen` no están en ninguna ruta; revisar si se eliminan.
+- [ ] Al migrar la clave antigua `userData`, el primer usuario que inicie sesión en el dispositivo se queda con ese progreso (no hay forma de saber de quién era).

@@ -17,6 +17,7 @@ import {
   resolvePainIllustrationKey,
 } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
+import { SHARE_ACHIEVEMENT_ID } from "../utils/gamification";
 
 const defaultMessages = [
   "Hoy ya puede revisarse como va el panorama de achaques.",
@@ -140,7 +141,7 @@ const HomeScreen = () => {
         message: shareLines.join("\n"),
       });
 
-      unlockAchievement(5);
+      unlockAchievement(SHARE_ACHIEVEMENT_ID);
     } catch {
       Alert.alert("No se pudo compartir", "Intenta de nuevo en un momento.");
     }
