@@ -18,6 +18,7 @@ import {
   getPainIllustration,
   resolvePainIllustrationKey,
 } from "../constants/illustrations";
+import LoadStatusNotice from "../components/LoadStatusNotice";
 
 const schema = yup.object({
   pain: yup.string().required("Selecciona un dolor"),
@@ -25,8 +26,13 @@ const schema = yup.object({
 });
 
 const RecordPainScreen = ({ navigation, route }) => {
-  const { user, createRecordAPI, updateRecordAPI, loadPainTypesFromAPI } =
-    useUser();
+  const {
+    user,
+    createRecordAPI,
+    updateRecordAPI,
+    loadPainTypesFromAPI,
+    remoteStatus,
+  } = useUser();
   const paperTheme = usePaperTheme();
   const [isEdit, setIsEdit] = useState(false);
   const [editRecord, setEditRecord] = useState(null);
@@ -162,6 +168,12 @@ const RecordPainScreen = ({ navigation, route }) => {
           </Text>
         ) : null}
       </HeroPanel>
+
+      <LoadStatusNotice
+        sources={[
+          { status: remoteStatus.painTypes, hasData: (user.painTypes || []).length > 0, label: "los tipos de dolor", onRetry: loadPainTypesFromAPI },
+        ]}
+      />
 
       <Card
         style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}

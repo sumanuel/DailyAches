@@ -15,10 +15,11 @@ import {
   getAvatarIllustration,
   resolveAvatarIllustrationKey,
 } from "../constants/illustrations";
+import LoadStatusNotice from "../components/LoadStatusNotice";
 
 const PeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
-  const { user, removePerson, loadPeopleFromAPI } = useUser();
+  const { user, removePerson, loadPeopleFromAPI, remoteStatus } = useUser();
 
   const openAdd = () => {
     navigation.navigate("AddPerson");
@@ -88,6 +89,12 @@ const PeopleScreen = ({ navigation }) => {
           </Text>
         </View>
       </HeroPanel>
+
+      <LoadStatusNotice
+        sources={[
+          { status: remoteStatus.people, hasData: (user.people || []).length > 0, label: "las personas", onRetry: loadPeopleFromAPI },
+        ]}
+      />
 
       <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
         {filtered.length === 0 ? (

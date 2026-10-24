@@ -15,6 +15,7 @@ import {
   getPainIllustration,
   resolvePainIllustrationKey,
 } from "../constants/illustrations";
+import LoadStatusNotice from "../components/LoadStatusNotice";
 
 const monthShortEs = [
   "ene",
@@ -101,7 +102,8 @@ const getPresetRange = (preset, now = new Date()) => {
 
 const StatsScreen = ({ route }) => {
   const paperTheme = usePaperTheme();
-  const { user, getTodayRecords, loadRecordsFromAPI } = useUser();
+  const { user, getTodayRecords, loadRecordsFromAPI, remoteStatus } =
+    useUser();
   const { personId, personName } = route?.params || {};
   const [tab, setTab] = useState("today"); // today | history
   const [preset, setPreset] = useState("this_month"); // this_month | prev_month | this_week | custom
@@ -315,6 +317,12 @@ const StatsScreen = ({ route }) => {
           Registros: {count}
         </Text>
       </HeroPanel>
+
+      <LoadStatusNotice
+        sources={[
+          { status: remoteStatus.records, hasData: (user.records || []).length > 0, label: "los registros", onRetry: loadRecordsFromAPI },
+        ]}
+      />
 
       <View
         style={[

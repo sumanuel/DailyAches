@@ -1,9 +1,15 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { buildProgressState } from "../utils/gamification";
 import PeopleService from "../utils/peopleService";
 import PainTypesService from "../utils/painTypesService";
 import RecordsService from "../utils/recordsService";
 import { mapPerson, mapPainType, mapRecord } from "../utils/apiMappers";
+import {
+  failLoad,
+  finishLoad,
+  initialRemoteStatus,
+  startLoad,
+} from "../utils/loadStatus";
 
 // People, pain types and records: API calls plus the matching `user` state updates.
 // Shares the UserProvider state so useUser() keeps exposing a single flat API.
@@ -13,47 +19,69 @@ export default function useRemoteData({
   saveUserData,
   incrementRecords,
 }) {
-  const loadPeopleFromAPI = useCallback(async () => {
-    try {
-      const response = await PeopleService.getPeople();
-      if (response.success) {
+  const [remoteStatus, setRemoteStatus] = useState(initialRemoteStatus);
+
+  const setStatus = useCallback((key, update) => {
+    setRemoteStatus((prev) => ({ ...prev, [key]: update(prev[key]) }));
+  }, []);
+
+  // Runs one list request, records loading/error per resource and applies the
+  // result to `user` only on success (failed loads keep the previous data).
+  const runLoad = useCallback(
+    async (key, label, request, apply) => {
+      setStatus(key, startLoad);
+      try {
+        const response = await request();
+        if (response.success) {
+          apply(response);
+          setStatus(key, finishLoad);
+        } else {
+          setStatus(key, (prev) => failLoad(prev, response.error));
+        }
+      } catch (error) {
+        console.error("Error loading " + label + " from API:", error);
+        setStatus(key, (prev) => failLoad(prev, error.message));
+      }
+    },
+    [setStatus],
+  );
+
+  const loadPeopleFromAPI = useCallback(
+    () =>
+      runLoad("people", "people", () => PeopleService.getPeople(), (response) =>
         setUser((prevUser) => ({
           ...prevUser,
           people: response.people.map(mapPerson),
-        }));
-      }
-    } catch (error) {
-      console.error("Error loading people from API:", error);
-    }
-  }, [setUser]);
+        })),
+      ),
+    [runLoad, setUser],
+  );
 
-  const loadPainTypesFromAPI = useCallback(async () => {
-    try {
-      const response = await PainTypesService.getPainTypes();
-      if (response.success) {
+  const loadPainTypesFromAPI = useCallback(
+    () =>
+      runLoad(
+        "painTypes",
+        "pain types",
+        () => PainTypesService.getPainTypes(),
+        (response) =>
+          setUser((prevUser) => ({
+            ...prevUser,
+            painTypes: response.painTypes.map(mapPainType),
+          })),
+      ),
+    [runLoad, setUser],
+  );
+
+  const loadRecordsFromAPI = useCallback(
+    () =>
+      runLoad("records", "records", () => RecordsService.getRecords(), (response) =>
         setUser((prevUser) => ({
           ...prevUser,
-          painTypes: response.painTypes.map(mapPainType),
-        }));
-      }
-    } catch (error) {
-      console.error("Error loading pain types from API:", error);
-    }
-  }, [setUser]);
-
-  const loadRecordsFromAPI = useCallback(async () => {
-    try {
-      const response = await RecordsService.getRecords();
-      if (response.success && response.records) {
-        setUser((prevUser) => ({
-          ...prevUser,
-          records: response.records.map(mapRecord),
-        }));
-      }
-    } catch (error) {
-      console.error("Error loading records from API:", error);
-    }
-  }, [setUser]);
+          records: (response.records || []).map(mapRecord),
+        })),
+      ),
+    [runLoad, setUser],
+  );
 
   const addPerson = async (
     name,
@@ -407,6 +435,7 @@ export default function useRemoteData({
   };
 
   return {
+    remoteStatus,
     loadPeopleFromAPI,
     loadPainTypesFromAPI,
     loadRecordsFromAPI,

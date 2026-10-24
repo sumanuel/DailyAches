@@ -16,11 +16,13 @@ import {
   getPainIllustration,
   resolvePainIllustrationKey,
 } from "../constants/illustrations";
+import LoadStatusNotice from "../components/LoadStatusNotice";
 
 const PainSettingsScreen = () => {
   const paperTheme = usePaperTheme();
   const navigation = useNavigation();
-  const { user, removePainType, loadPainTypesFromAPI } = useUser();
+  const { user, removePainType, loadPainTypesFromAPI, remoteStatus } =
+    useUser();
 
   const painTypes = useMemo(() => user.painTypes || [], [user.painTypes]);
 
@@ -99,6 +101,12 @@ const PainSettingsScreen = () => {
           Tipos: {painTypes.length}
         </Text>
       </HeroPanel>
+
+      <LoadStatusNotice
+        sources={[
+          { status: remoteStatus.painTypes, hasData: painTypes.length > 0, label: "los tipos de dolor", onRetry: loadPainTypesFromAPI },
+        ]}
+      />
 
       <Card
         style={[

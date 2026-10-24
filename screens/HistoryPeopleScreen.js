@@ -14,10 +14,11 @@ import {
   getAvatarIllustration,
   resolveAvatarIllustrationKey,
 } from "../constants/illustrations";
+import LoadStatusNotice from "../components/LoadStatusNotice";
 
 const HistoryPeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
-  const { user, loadPeopleFromAPI } = useUser();
+  const { user, loadPeopleFromAPI, remoteStatus } = useUser();
 
   useEffect(() => {
     loadPeopleFromAPI();
@@ -51,6 +52,12 @@ const HistoryPeopleScreen = ({ navigation }) => {
           Coincidencias: {filtered.length}
         </Text>
       </HeroPanel>
+
+      <LoadStatusNotice
+        sources={[
+          { status: remoteStatus.people, hasData: (user.people || []).length > 0, label: "las personas", onRetry: loadPeopleFromAPI },
+        ]}
+      />
 
       <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
         {filtered.length === 0 ? (

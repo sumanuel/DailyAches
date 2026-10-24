@@ -32,7 +32,7 @@ Objetivo: poder cambiar cosas sin romperlas.
 - [x] Manejo de sesión expirada: `httpService.setUnauthorizedHandler` y `UserProvider` cierran la sesión ante un 401 con token (sin probar en dispositivo).
 - [x] Jest (jest-expo) instalado (2026-10-23): 24 pruebas para `gamification`, `apiMappers` y `httpService` (`npm test`). Pendiente: pruebas de `utils/*Service.js` y de los contextos (hace falta `@testing-library/react-native`).
 - [x] ESLint con `eslint-config-expo` y `npm run lint` (0 errores, 0 avisos desde 2026-10-23). Para ello los cargadores de `useRemoteData` y `getTodayRecords` ahora son estables con `useCallback`.
-- [ ] Estados de carga y error consistentes en todas las pantallas que llaman a la API (hoy los servicios devuelven `{ success, error }`, falta que la UI los muestre de forma uniforme).
+- [x] Estados de carga y error (2026-10-23): `useRemoteData` guarda `{ loading, loaded, error }` por recurso (`remoteStatus` en `useUser()`) y el componente `LoadStatusNotice` muestra un indicador de carga o un aviso con `Reintentar` en Inicio, Personas, Historial, Configurar dolores, Registro y Estadísticas. Probado en web con la API apagada y encendida; no revisado visualmente ni en dispositivo. Quedan fuera los errores al guardar (crear/editar/borrar), que cada pantalla sigue manejando por su cuenta.
 - [ ] Revisar listas largas (historial, registros) contra las reglas de `.agents/skills/vercel-react-native-skills` (FlatList, `memo`, `expo-image`).
 - [ ] Actualizar `CONTEXTO_PROYECTO.md` y `MATRIZ_APP_BACKEND.md` al terminar la refactorización.
 

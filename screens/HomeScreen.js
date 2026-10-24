@@ -16,6 +16,7 @@ import {
   resolveAvatarIllustrationKey,
   resolvePainIllustrationKey,
 } from "../constants/illustrations";
+import LoadStatusNotice from "../components/LoadStatusNotice";
 
 const defaultMessages = [
   "Hoy ya puede revisarse como va el panorama de achaques.",
@@ -37,6 +38,7 @@ const HomeScreen = () => {
     deleteRecord,
     loadPeopleFromAPI,
     loadRecordsFromAPI,
+    remoteStatus,
   } = useUser();
   const paperTheme = usePaperTheme();
   const navigation = useNavigation();
@@ -196,6 +198,13 @@ const HomeScreen = () => {
       ]}
       contentContainerStyle={styles.content}
     >
+
+      <LoadStatusNotice
+        sources={[
+          { status: remoteStatus.people, hasData: (user.people || []).length > 0, label: "las personas", onRetry: loadPeopleFromAPI },
+          { status: remoteStatus.records, hasData: (user.records || []).length > 0, label: "los registros", onRetry: loadRecordsFromAPI },
+        ]}
+      />
       <Card
         style={[
           styles.heroCard,
