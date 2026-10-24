@@ -1,5 +1,6 @@
 import {
   bucketByPeriod,
+  buildWeeklyShareText,
   compareSummaries,
   computeSummary,
   countByPerson,
@@ -7,6 +8,7 @@ import {
   describeCountChange,
   formatAverage,
   getPeriodRange,
+  getWeeklyHighlights,
 } from "../periodStats";
 
 // Thursday 22 Oct 2026, mid-day
@@ -174,5 +176,44 @@ describe("countByPerson", () => {
       { key: "8", name: "Luz M.", count: 2 },
       { key: "7", name: "Ana", count: 1 },
     ]);
+  });
+});
+
+describe("getWeeklyHighlights and the share text", () => {
+  // Thursday 22 Oct 2026: this week started Monday 19, last week Monday 12
+  const records = [
+    rec("1", "7", "Cabeza", at(2026, 10, 19), 6),
+    rec("2", "7", "Cabeza", at(2026, 10, 20), 8),
+    rec("3", "8", "Espalda", at(2026, 10, 21), 4),
+    rec("4", "7", "Cabeza", at(2026, 10, 13), 5),
+  ];
+
+  it("compares this week with the previous one", () => {
+    const week = getWeeklyHighlights(records, NOW);
+    expect(week.range.label).toBe("19 – 25 oct 2026");
+    expect(week.summary.count).toBe(3);
+    expect(week.summary.activeDays).toBe(3);
+    expect(week.previous.count).toBe(1);
+    expect(week.comparison.countDelta).toBe(2);
+  });
+
+  it("writes a share message with counts but no names or notes", () => {
+    const text = buildWeeklyShareText(getWeeklyHighlights(records, NOW));
+    expect(text).toBe(
+      "Mi semana en DailyAches (19 – 25 oct 2026): 3 registros, sobre todo Cabeza, intensidad media 6. 2 más que el periodo anterior. #DailyAches",
+    );
+    expect(text).not.toMatch(/Ana|Luz/);
+  });
+
+  it("has its own wording for a week without records", () => {
+    const text = buildWeeklyShareText(getWeeklyHighlights([], NOW));
+    expect(text).toBe("Semana del 19 – 25 oct 2026: sin achaques registrados en DailyAches. #DailyAches");
+  });
+
+  it("uses the singular for one record", () => {
+    const text = buildWeeklyShareText(
+      getWeeklyHighlights([rec("1", "7", "Cabeza", at(2026, 10, 20), 7)], NOW),
+    );
+    expect(text).toContain(": 1 registro,");
   });
 });

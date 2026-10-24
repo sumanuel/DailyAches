@@ -18,6 +18,9 @@ import {
 } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 import { SHARE_ACHIEVEMENT_ID } from "../utils/gamification";
+import WeeklySummaryCard from "../components/WeeklySummaryCard";
+import { buildWeeklyShareText } from "../utils/periodStats";
+import { showMessage } from "../utils/confirm";
 
 const defaultMessages = [
   "Hoy ya puede revisarse como va el panorama de achaques.",
@@ -121,6 +124,15 @@ const HomeScreen = () => {
 
     return resolveRecordIllustrationKey(todayRecords[0]);
   }, [todayRecords, resolveRecordIllustrationKey]);
+
+  const handleShareWeek = async (week) => {
+    try {
+      await Share.share({ message: buildWeeklyShareText(week) });
+      unlockAchievement(SHARE_ACHIEVEMENT_ID);
+    } catch {
+      showMessage("No se pudo compartir", "Intenta de nuevo en un momento.");
+    }
+  };
 
   const handleShareRecord = async (record) => {
     try {
@@ -379,6 +391,14 @@ const HomeScreen = () => {
           )}
         </Card.Content>
       </Card>
+
+      {(user.records || []).length > 0 ? (
+        <WeeklySummaryCard
+          records={user.records}
+          onSeeStats={() => navigation.navigate("Más", { screen: "Insights" })}
+          onShare={handleShareWeek}
+        />
+      ) : null}
 
       {dailyRecords.length > 0 && (
         <View style={styles.section}>

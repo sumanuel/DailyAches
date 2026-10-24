@@ -196,3 +196,28 @@ export const countByPerson = (records, people) => {
     (a, b) => b.count - a.count || a.name.localeCompare(b.name, "es"),
   );
 };
+
+// The current week (Monday to Sunday) next to the one before it.
+export const getWeeklyHighlights = (records, now = new Date()) => {
+  const range = getPeriodRange("week", 0, now);
+  const previousRange = getPeriodRange("week", -1, now);
+  const summary = computeSummary(records, range);
+  const previous = computeSummary(records, previousRange);
+  return { range, summary, previous, comparison: compareSummaries(summary, previous) };
+};
+
+// A short message to share: it gives counts and the most frequent pain, but no
+// names or notes.
+export const buildWeeklyShareText = ({ range, summary, comparison }) => {
+  if (summary.count === 0) {
+    return `Semana del ${range.label}: sin achaques registrados en DailyAches. #DailyAches`;
+  }
+  const parts = [
+    `${summary.count} ${summary.count === 1 ? "registro" : "registros"}`,
+  ];
+  if (summary.topPain) parts.push(`sobre todo ${summary.topPain.name}`);
+  if (summary.averageLevel !== null) {
+    parts.push(`intensidad media ${formatAverage(summary.averageLevel)}`);
+  }
+  return `Mi semana en DailyAches (${range.label}): ${parts.join(", ")}. ${describeCountChange(comparison)}. #DailyAches`;
+};
