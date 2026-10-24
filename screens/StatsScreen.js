@@ -3,6 +3,7 @@ import { StyleSheet, View, Modal } from "react-native";
 import {
   Button,
   Card,
+  Chip,
   Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
@@ -16,6 +17,13 @@ import {
   resolvePainIllustrationKey,
 } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
+import AppTextField from "../components/AppTextField";
+import {
+  filterRecords,
+  formatDayHeader,
+  getPainTypeOptions,
+  groupRecordsByDay,
+} from "../utils/recordFilters";
 
 const monthShortEs = [
   "ene",
@@ -114,6 +122,8 @@ const StatsScreen = ({ route }) => {
   );
   const [rangeOpen, setRangeOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(RECORDS_PAGE_SIZE);
+  const [painTypeKey, setPainTypeKey] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectingStart, setSelectingStart] = useState(true); // true for start, false for end
   const [tempRange, setTempRange] = useState(historyRange);
 
@@ -138,18 +148,39 @@ const StatsScreen = ({ route }) => {
     return allToday.filter((r) => r.personId === personId);
   }, [getTodayRecords, personId]);
 
-  const historyRecords = useMemo(() => {
-    const start = historyRange.start.getTime();
-    const end = historyRange.end.getTime();
-    if (!personId) return [];
-    return (user.records || [])
-      .filter((r) => {
-        if (r.personId !== personId) return false;
-        const t = new Date(r.createdAt).getTime();
-        return t >= start && t <= end;
-      })
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, [historyRange.end, historyRange.start, personId, user.records]);
+  // Pain types the person has in the chosen range, for the filter chips.
+  const rangeRecords = useMemo(
+    () =>
+      filterRecords(user.records, {
+        personId,
+        start: historyRange.start,
+        end: historyRange.end,
+      }),
+    [historyRange.end, historyRange.start, personId, user.records],
+  );
+  const painTypeOptions = useMemo(
+    () => getPainTypeOptions(rangeRecords),
+    [rangeRecords],
+  );
+
+  const historyRecords = useMemo(
+    () =>
+      filterRecords(rangeRecords, { painTypeKey, query: searchQuery }),
+    [rangeRecords, painTypeKey, searchQuery],
+  );
+  const hasActiveFilters = Boolean(painTypeKey) || searchQuery.trim() !== "";
+
+  // A pain type that disappears with the range can no longer stay selected.
+  useEffect(() => {
+    if (painTypeKey && !painTypeOptions.some((o) => o.key === painTypeKey)) {
+      setPainTypeKey(null);
+    }
+  }, [painTypeKey, painTypeOptions]);
+
+  const clearFilters = () => {
+    setPainTypeKey(null);
+    setSearchQuery("");
+  };
 
   const records = tab === "today" ? todayRecords : historyRecords;
   const count = records.length;
@@ -157,7 +188,7 @@ const StatsScreen = ({ route }) => {
   // A new tab, range or person starts again from the first page.
   useEffect(() => {
     setVisibleCount(RECORDS_PAGE_SIZE);
-  }, [tab, historyRange, personId]);
+  }, [tab, historyRange, personId, painTypeKey, searchQuery]);
 
   const getMarkedDates = () => {
     const marked = {};
@@ -462,6 +493,40 @@ const StatsScreen = ({ route }) => {
                 Esta semana
               </Button>
             </View>
+
+            <AppTextField
+              label="Buscar en notas"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Ej. migraña, trabajo"
+              style={styles.searchInput}
+            />
+
+            {painTypeOptions.length > 1 ? (
+              <View style={styles.chipRow}>
+                <Chip
+                  selected={!painTypeKey}
+                  onPress={() => setPainTypeKey(null)}
+                  style={styles.filterChip}
+                >
+                  Todos
+                </Chip>
+                {painTypeOptions.map((option) => (
+                  <Chip
+                    key={option.key}
+                    selected={painTypeKey === option.key}
+                    onPress={() =>
+                      setPainTypeKey(
+                        painTypeKey === option.key ? null : option.key,
+                      )
+                    }
+                    style={styles.filterChip}
+                  >
+                    {option.name} ({option.count})
+                  </Chip>
+                ))}
+              </View>
+            ) : null}
           </Card.Content>
         </Card>
       )}
@@ -558,16 +623,40 @@ const StatsScreen = ({ route }) => {
             <Text variant="titleMedium">
               {tab === "today"
                 ? "Sin registros hoy"
-                : "Sin registros en este rango"}
+                : hasActiveFilters
+                  ? "Sin registros con estos filtros"
+                  : "Sin registros en este rango"}
             </Text>
             <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
-              Ve a “Registro” para agregar un dolor.
+              {tab === "history" && hasActiveFilters
+                ? "Prueba con otra búsqueda o quita los filtros."
+                : "Ve a “Registro” para agregar un dolor."}
             </Text>
+            {tab === "history" && hasActiveFilters ? (
+              <Button mode="text" onPress={clearFilters}>
+                Limpiar filtros
+              </Button>
+            ) : null}
           </Card.Content>
         </Card>
       ) : (
         <View style={styles.recordsList}>
-          {records.slice(0, visibleCount).map(renderRecord)}
+          {tab === "history"
+            ? groupRecordsByDay(records.slice(0, visibleCount)).map((group) => (
+                <View key={group.key}>
+                  <Text
+                    style={[
+                      styles.dayHeader,
+                      { color: paperTheme.colors.onSurfaceVariant },
+                    ]}
+                    accessibilityRole="header"
+                  >
+                    {formatDayHeader(group.date)} · {group.records.length}
+                  </Text>
+                  {group.records.map(renderRecord)}
+                </View>
+              ))
+            : records.slice(0, visibleCount).map(renderRecord)}
           {count > visibleCount ? (
             <Button
               mode="text"
@@ -587,6 +676,17 @@ const StatsScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 12, paddingBottom: 24 },
+  searchInput: { marginTop: 16 },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
+  filterChip: { borderRadius: 16 },
+  dayHeader: {
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    marginTop: 12,
+    marginBottom: 6,
+  },
   heroChip: {
     alignSelf: "flex-start",
     paddingHorizontal: 12,

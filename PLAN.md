@@ -46,8 +46,8 @@ Los puntos son hipótesis a validar usando la app en la fase 0.
 - [ ] Permitir elegir fecha y hora (registrar un dolor de ayer). Bloqueado por la API: `POST /api/records` no acepta `created_at` (ver fase 4).
 
 **Historial** (`HistoryPeopleScreen`)
-- [ ] Filtros por persona, tipo de dolor y rango de fechas; búsqueda en notas.
-- [ ] Agrupar por día con encabezados; orden de lectura: persona, tipo de dolor, hora y notas.
+- [x] Filtros del historial por persona (se elige antes), rango de fechas (ya existía), tipo de dolor (chips con conteo) y búsqueda en notas y nombre del dolor, sin distinguir mayúsculas ni acentos (2026-10-24). Lógica en `utils/recordFilters.js` con 13 pruebas. Probado en web.
+- [x] Registros agrupados por día con encabezados "Hoy", "Ayer" o "mar 20 oct 2026" y su conteo, en la pestaña Histórico. La agrupación en varios días solo está probada con pruebas unitarias: la API no permite crear registros con otra fecha.
 
 **Estadísticas** (`StatsScreen`)
 - [ ] Selector semana/mes/año y comparación con el periodo anterior.
@@ -141,3 +141,4 @@ _Hallazgos de la fase 0 (2026-10-22):_
 - [x] `@expo/vector-icons` y `expo-font` se usaban sin estar declarados; ahora son dependencias directas y `expo-doctor` pasa 18/18.
 - [x] `RecordPainScreen` mostraba "¡Registrado!" aunque la API rechazara el registro (los servicios devuelven `{ success: false }` sin lanzar); ahora comprueba el resultado, muestra el error y no sale de la pantalla.
 - [x] `RecordPainScreen` leía `painTypes` y `setValue` en un efecto declarado antes que ellos; reordenado.
+- [ ] Los filtros del Historial no se pueden usar sin elegir antes una persona; valorar una vista global (todas las personas) y los presets "este año" y "todo".
