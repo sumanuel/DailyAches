@@ -24,6 +24,11 @@ import {
   formatAverage,
   getPeriodRange,
 } from "../utils/periodStats";
+import {
+  PATTERNS_DISCLAIMER,
+  describeMissingData,
+  findPatterns,
+} from "../utils/patterns";
 
 const PERIOD_OPTIONS = [
   { value: "week", label: "Semana", chartTitle: "Registros por día" },
@@ -78,6 +83,7 @@ const InsightsScreen = () => {
     () => getPainTypeOptions(summary.records).slice(0, TOP_ITEMS),
     [summary.records],
   );
+  const patterns = useMemo(() => findPatterns(summary.records), [summary.records]);
   const people = useMemo(
     () => countByPerson(summary.records, user.people).slice(0, TOP_ITEMS),
     [summary.records, user.people],
@@ -259,6 +265,31 @@ const InsightsScreen = () => {
             </Card.Content>
           </Card>
 
+          <Card
+            style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+          >
+            <Card.Title title="Patrones" />
+            <Card.Content style={styles.patterns}>
+              {patterns.length > 0 ? (
+                patterns.map((pattern) => (
+                  <Text key={pattern.kind}>{pattern.text}</Text>
+                ))
+              ) : (
+                <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
+                  {describeMissingData(summary.count)}
+                </Text>
+              )}
+              <Text
+                style={[
+                  styles.disclaimer,
+                  { color: paperTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                {PATTERNS_DISCLAIMER}
+              </Text>
+            </Card.Content>
+          </Card>
+
           {!personId && people.length > 1 ? (
             <Card
               style={[
@@ -305,6 +336,8 @@ const styles = StyleSheet.create({
   tileValue: { fontWeight: "800" },
   tileNote: { fontSize: 12 },
   card: { borderRadius: 24, overflow: "hidden" },
+  patterns: { gap: 8 },
+  disclaimer: { fontSize: 12 },
 });
 
 export default InsightsScreen;
