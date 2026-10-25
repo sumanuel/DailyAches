@@ -11,6 +11,7 @@ import {
 } from "../exportService";
 
 const mockFileInstance = { create: jest.fn(), write: jest.fn(), uri: "file:///cache/export.csv" };
+const order = [];
 
 jest.mock("expo-file-system", () => ({
   File: jest.fn(() => mockFileInstance),
@@ -63,6 +64,23 @@ describe("exportRecords", () => {
       "file:///cache/export.csv",
       expect.objectContaining({ mimeType: "text/csv" }),
     );
+  });
+
+  it("waits for the file to be written before sharing it", async () => {
+    let finishWrite;
+    mockFileInstance.write.mockImplementation(
+      () => new Promise((resolve) => { finishWrite = () => { order.push("written"); resolve(); }; }),
+    );
+    Sharing.shareAsync.mockImplementation(async () => { order.push("shared"); });
+
+    const pending = exportRecords({ ...args, format: "csv" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(Sharing.shareAsync).not.toHaveBeenCalled();
+    finishWrite();
+    await pending;
+
+    expect(order).toEqual(["written", "shared"]);
+    mockFileInstance.write.mockReset();
   });
 
   it("prints the report to a PDF and shares that file", async () => {

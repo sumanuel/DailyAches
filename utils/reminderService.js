@@ -1,6 +1,15 @@
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
+import {
+  AndroidImportance,
+  SchedulableTriggerInputTypes,
+  cancelScheduledNotificationAsync,
+  getPermissionsAsync,
+  requestPermissionsAsync,
+  scheduleNotificationAsync,
+  setNotificationChannelAsync,
+  setNotificationHandler,
+} from "expo-notifications";
 import {
   DEFAULT_REMINDER,
   REMINDER_BODY,
@@ -21,7 +30,7 @@ export const isReminderSupported = () => Platform.OS !== "web";
 
 // Show the reminder as a banner even if the app happens to be open.
 if (isReminderSupported()) {
-  Notifications.setNotificationHandler({
+  setNotificationHandler({
     handleNotification: async () => ({
       shouldShowBanner: true,
       shouldShowList: true,
@@ -45,9 +54,9 @@ const saveReminder = (reminder) =>
   AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(reminder));
 
 const ensurePermission = async () => {
-  const current = await Notifications.getPermissionsAsync();
+  const current = await getPermissionsAsync();
   if (current.granted) return true;
-  const requested = await Notifications.requestPermissionsAsync();
+  const requested = await requestPermissionsAsync();
   return requested.granted;
 };
 
@@ -61,7 +70,7 @@ export const applyReminder = async (value) => {
   }
 
   try {
-    await Notifications.cancelScheduledNotificationAsync(REMINDER_ID);
+    await cancelScheduledNotificationAsync(REMINDER_ID);
 
     if (reminder.enabled) {
       if (!(await ensurePermission())) {
@@ -70,17 +79,17 @@ export const applyReminder = async (value) => {
       }
 
       if (Platform.OS === "android") {
-        await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
+        await setNotificationChannelAsync(CHANNEL_ID, {
           name: "Recordatorio diario",
-          importance: Notifications.AndroidImportance.DEFAULT,
+          importance: AndroidImportance.DEFAULT,
         });
       }
 
-      await Notifications.scheduleNotificationAsync({
+      await scheduleNotificationAsync({
         identifier: REMINDER_ID,
         content: { title: REMINDER_TITLE, body: REMINDER_BODY },
         trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DAILY,
+          type: SchedulableTriggerInputTypes.DAILY,
           hour: reminder.hour,
           minute: reminder.minute,
           channelId: CHANNEL_ID,

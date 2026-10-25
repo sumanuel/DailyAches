@@ -116,19 +116,21 @@ export const ThemeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    loadTheme();
-  }, []);
-
-  const loadTheme = async () => {
-    try {
-      const theme = await AsyncStorage.getItem("theme");
-      if (theme) {
-        setIsDarkMode(JSON.parse(theme));
+    let active = true;
+    (async () => {
+      try {
+        const theme = await AsyncStorage.getItem("theme");
+        if (active && theme) {
+          setIsDarkMode(JSON.parse(theme));
+        }
+      } catch (error) {
+        console.error("Error loading theme:", error);
       }
-    } catch (error) {
-      console.error("Error loading theme:", error);
-    }
-  };
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const saveTheme = async (theme) => {
     try {

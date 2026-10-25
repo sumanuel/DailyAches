@@ -127,8 +127,10 @@ const StatsScreen = ({ route, navigation }) => {
     getPresetRange("this_month"),
   );
   const [rangeOpen, setRangeOpen] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(RECORDS_PAGE_SIZE);
-  const [painTypeKey, setPainTypeKey] = useState(null);
+  // How many extra pages were revealed, and for which filters (a change of
+  // filters starts again from the first page without needing an effect).
+  const [page, setPage] = useState({ key: "", extra: 0 });
+  const [painTypeChoice, setPainTypeChoice] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectingStart, setSelectingStart] = useState(true); // true for start, false for end
   const [tempRange, setTempRange] = useState(historyRange);
@@ -169,6 +171,11 @@ const StatsScreen = ({ route, navigation }) => {
     [rangeRecords],
   );
 
+  // A pain type that disappears with the range can no longer stay selected.
+  const painTypeKey = painTypeOptions.some((o) => o.key === painTypeChoice)
+    ? painTypeChoice
+    : null;
+
   const historyRecords = useMemo(
     () =>
       filterRecords(rangeRecords, { painTypeKey, query: searchQuery }),
@@ -176,25 +183,24 @@ const StatsScreen = ({ route, navigation }) => {
   );
   const hasActiveFilters = Boolean(painTypeKey) || searchQuery.trim() !== "";
 
-  // A pain type that disappears with the range can no longer stay selected.
-  useEffect(() => {
-    if (painTypeKey && !painTypeOptions.some((o) => o.key === painTypeKey)) {
-      setPainTypeKey(null);
-    }
-  }, [painTypeKey, painTypeOptions]);
-
   const clearFilters = () => {
-    setPainTypeKey(null);
+    setPainTypeChoice(null);
     setSearchQuery("");
   };
 
   const records = tab === "today" ? todayRecords : historyRecords;
   const count = records.length;
 
-  // A new tab, range or person starts again from the first page.
-  useEffect(() => {
-    setVisibleCount(RECORDS_PAGE_SIZE);
-  }, [tab, historyRange, personId, painTypeKey, searchQuery]);
+  const pageKey = [
+    tab,
+    historyRange.start.getTime(),
+    historyRange.end.getTime(),
+    personId,
+    painTypeKey,
+    searchQuery,
+  ].join("|");
+  const visibleCount =
+    RECORDS_PAGE_SIZE + (page.key === pageKey ? page.extra : 0);
 
   const getMarkedDates = () => {
     const marked = {};
@@ -529,7 +535,7 @@ const StatsScreen = ({ route, navigation }) => {
               <View style={styles.chipRow}>
                 <Chip
                   selected={!painTypeKey}
-                  onPress={() => setPainTypeKey(null)}
+                  onPress={() => setPainTypeChoice(null)}
                   style={styles.filterChip}
                 >
                   Todos
@@ -539,7 +545,7 @@ const StatsScreen = ({ route, navigation }) => {
                     key={option.key}
                     selected={painTypeKey === option.key}
                     onPress={() =>
-                      setPainTypeKey(
+                      setPainTypeChoice(
                         painTypeKey === option.key ? null : option.key,
                       )
                     }
@@ -684,7 +690,10 @@ const StatsScreen = ({ route, navigation }) => {
             <Button
               mode="text"
               onPress={() =>
-                setVisibleCount((current) => current + RECORDS_PAGE_SIZE)
+                setPage({
+                  key: pageKey,
+                  extra: visibleCount, // the next page adds RECORDS_PAGE_SIZE more
+                })
               }
             >
               Ver más registros ({count - visibleCount} restantes)

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-DailyAches: Expo SDK 54 / React Native 0.81 / React 19 app (plain JavaScript, no TypeScript) for logging people, pain types, pain records, progress and stats. UI copy is in Spanish. It talks to a separate backend, `Dailyaches-api` (not in this repo). Existing docs worth reading before cross-cutting changes: `CONTEXTO_PROYECTO.md`, `ARRANQUE_RAPIDO.md`, `MATRIZ_APP_BACKEND.md`. `roadmap.md` is old aspirational planning, not a source of truth.
+DailyAches: Expo SDK 58 / React Native 0.88 / React 19 app (plain JavaScript, no TypeScript) for logging people, pain types, pain records, progress and stats. UI copy is in Spanish. It talks to a separate backend, `Dailyaches-api` (not in this repo). Existing docs worth reading before cross-cutting changes: `CONTEXTO_PROYECTO.md`, `ARRANQUE_RAPIDO.md`, `MATRIZ_APP_BACKEND.md`. `roadmap.md` is old aspirational planning, not a source of truth.
 
 ## Commands
 

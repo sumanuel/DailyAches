@@ -82,7 +82,9 @@ const RecordPainScreen = ({ navigation, route }) => {
     },
   });
 
+  // Editing: fill the form with the record being edited.
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (record) {
       setIsEdit(true);
       setEditRecord(record);
@@ -95,6 +97,7 @@ const RecordPainScreen = ({ navigation, route }) => {
         setSelectedPainType(matchingPain);
       }
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [record, painTypes, setValue]);
 
   // New record: start with the pain type last used for this person.
@@ -102,6 +105,7 @@ const RecordPainScreen = ({ navigation, route }) => {
     if (record || selectedPainType) return;
     const last = getLastPainTypeForPerson(user.records, personId, painTypes);
     if (last) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- also sets a react-hook-form value
       setSelectedPainType(last);
       setValue("pain", last.name);
     }

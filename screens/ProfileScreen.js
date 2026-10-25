@@ -41,11 +41,14 @@ const ProfileScreen = () => {
     button: { marginTop: 16, borderRadius: 16 },
   });
 
+  // The form mirrors the saved profile, which can arrive after the screen opens.
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     setName(user.profile?.name || "");
     setEmail(user.profile?.email || "");
     setPhone(user.profile?.phone || "");
     setBirthDate(toDateInput(user.profile?.birth_date));
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [user.profile]);
 
   const onDateChange = (event, selectedDate) => {

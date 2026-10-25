@@ -29,10 +29,12 @@ const downloadInBrowser = (content, fileName, mimeType) => {
   URL.revokeObjectURL(url);
 };
 
-const writeCacheFile = (fileName, content) => {
+// In SDK 58 File.write is asynchronous: sharing before it resolves would hand
+// over an empty or partial file.
+const writeCacheFile = async (fileName, content) => {
   const file = new File(Paths.cache, fileName);
   file.create({ overwrite: true });
-  file.write(content);
+  await file.write(content);
   return file.uri;
 };
 
@@ -67,7 +69,7 @@ export const exportRecords = async ({
 
     let uri;
     if (format === "csv") {
-      uri = writeCacheFile(fileName, buildCsv(records, people));
+      uri = await writeCacheFile(fileName, buildCsv(records, people));
     } else {
       const html = buildReportHtml(records, people, { rangeLabel, personLabel });
       ({ uri } = await Print.printToFileAsync({ html }));
