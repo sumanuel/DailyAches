@@ -21,18 +21,7 @@ import { SHARE_ACHIEVEMENT_ID } from "../utils/gamification";
 import WeeklySummaryCard from "../components/WeeklySummaryCard";
 import { buildWeeklyShareText } from "../utils/periodStats";
 import { showMessage } from "../utils/confirm";
-
-const defaultMessages = [
-  "Hoy ya puede revisarse como va el panorama de achaques.",
-  "Los dolores registrados aqui siguen sumando puntos y logros.",
-  "Un dia sin dolor tambien merece quedar anotado.",
-  "Si aparece un achaque nuevo, desde aqui se registra rapido.",
-];
-
-const surpriseMessages = [
-  "Todavia no aparece ningun dolor registrado hoy.",
-  "Por ahora el dia va en calma y sin achaques reportados.",
-];
+import { getCalmDayShareText, getHomeMessages } from "../utils/homeMessages";
 
 const HomeScreen = () => {
   const {
@@ -47,7 +36,6 @@ const HomeScreen = () => {
   const paperTheme = usePaperTheme();
   const navigation = useNavigation();
   const [dailyRecords, setDailyRecords] = useState([]);
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     // Load data from API when screen opens
@@ -57,20 +45,10 @@ const HomeScreen = () => {
 
   const todayRecords = useMemo(() => getTodayRecords(), [getTodayRecords]);
 
-  // Memoizar el mensaje para evitar cambios constantes
-  const currentMessage = useMemo(() => {
-    if (todayRecords.length === 0) {
-      return surpriseMessages[0]; // Usar mensaje fijo en lugar de aleatorio
-    } else {
-      return defaultMessages[0]; // Usar mensaje fijo en lugar de aleatorio
-    }
-  }, [todayRecords.length]);
-
   useFocusEffect(
     useCallback(() => {
       setDailyRecords(todayRecords);
-      setMessage(currentMessage);
-    }, [todayRecords, currentMessage]),
+    }, [todayRecords]),
   );
 
   const peopleById = useMemo(() => {
@@ -125,6 +103,15 @@ const HomeScreen = () => {
     return resolveRecordIllustrationKey(todayRecords[0]);
   }, [todayRecords, resolveRecordIllustrationKey]);
 
+  const handleShareCalmDay = async () => {
+    try {
+      await Share.share({ message: getCalmDayShareText(new Date()) });
+      unlockAchievement(SHARE_ACHIEVEMENT_ID);
+    } catch {
+      showMessage("No se pudo compartir", "Intenta de nuevo en un momento.");
+    }
+  };
+
   const handleShareWeek = async (week) => {
     try {
       await Share.share({ message: buildWeeklyShareText(week) });
@@ -175,17 +162,17 @@ const HomeScreen = () => {
 
   const todayCount = dailyRecords.length;
   const totalPeople = user.people?.length || 0;
-  const heroTitle =
-    todayCount === 0 ? "Hoy manda la paz" : "Radar del drama corporal";
-  const heroDescription =
-    todayCount === 0
-      ? "Todavia no hay achaques fichados. Si todo sigue en calma, este tablero queda listo para cuando toque registrar alguno."
-      : "Aqui se resume quien presento molestias, que dolio y a que hora comenzo el episodio del dia.";
-  const moodChip = todayCount === 0 ? "Dia en calma" : "Hoy hubo registro";
-  const forecastChip =
-    todayCount === 0
-      ? "Pronostico: sin novedad"
-      : "Pronostico: seguimiento y cuidado";
+  const home = getHomeMessages({
+    todayRecords: dailyRecords,
+    now: new Date(),
+    name: user.profile?.name,
+  });
+  const {
+    title: heroTitle,
+    description: heroDescription,
+    moodChip,
+    forecastChip,
+  } = home;
 
   return (
     <ScrollView
@@ -256,7 +243,7 @@ const HomeScreen = () => {
               <Text
                 style={[styles.eyebrow, { color: paperTheme.colors.primary }]}
               >
-                DAILYACHES, PERO CON PERSONALIDAD
+                {home.greeting}
               </Text>
               <Text variant="headlineSmall" style={styles.heroTitle}>
                 {heroTitle}
@@ -280,6 +267,25 @@ const HomeScreen = () => {
               style={styles.heroImage}
             />
           </View>
+
+          {home.celebrate ? (
+            <View style={styles.calmActions}>
+              <Button
+                mode="outlined"
+                icon="share-variant-outline"
+                onPress={handleShareCalmDay}
+              >
+                Compartir día tranquilo
+              </Button>
+              <Button
+                mode="text"
+                icon="plus"
+                onPress={() => navigation.navigate("Registro")}
+              >
+                Anotar un dolor
+              </Button>
+            </View>
+          ) : null}
 
           <View style={styles.statsRow}>
             <View
@@ -353,7 +359,7 @@ const HomeScreen = () => {
                 { color: paperTheme.colors.onSurfaceVariant },
               ]}
             >
-              {message}
+              {home.note}
             </Text>
           </View>
 
@@ -364,7 +370,7 @@ const HomeScreen = () => {
             contentStyle={styles.primaryActionContent}
             style={styles.primaryAction}
           >
-            Ir a Registro
+            {home.cta}
           </Button>
 
           {dailyRecords.length === 0 && (
@@ -375,7 +381,7 @@ const HomeScreen = () => {
               ]}
             >
               <Text variant="titleMedium" style={styles.emptyTitle}>
-                Cero registros, cero caos
+                {home.emptyTitle}
               </Text>
               <Text
                 style={[
@@ -383,9 +389,7 @@ const HomeScreen = () => {
                   { color: paperTheme.colors.onSurfaceVariant },
                 ]}
               >
-                Cuando aparezca el primer dolor, este espacio se convierte en tu
-                tablero de seguimiento con un poco menos de drama y bastante más
-                claridad.
+                {home.emptyText}
               </Text>
             </View>
           )}
@@ -405,7 +409,7 @@ const HomeScreen = () => {
           <View style={styles.sectionHeader}>
             <View>
               <Text variant="titleMedium" style={styles.sectionTitle}>
-                Bitácora del día
+                {home.logTitle}
               </Text>
               <Text
                 style={[
@@ -413,7 +417,7 @@ const HomeScreen = () => {
                   { color: paperTheme.colors.onSurfaceVariant },
                 ]}
               >
-                Primero aparece la persona y luego cada achaque registrado.
+                {home.logSubtitle}
               </Text>
             </View>
             <Text
@@ -695,6 +699,7 @@ const styles = StyleSheet.create({
   heroCopy: { flex: 1, gap: 6 },
   eyebrow: { fontSize: 12, fontWeight: "800", letterSpacing: 1.2 },
   heroTitle: { fontWeight: "900", lineHeight: 30 },
+  calmActions: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
   heroText: { lineHeight: 21, maxWidth: 250 },
   heroImage: { width: 132, height: 132 },
   statsRow: {
