@@ -88,7 +88,7 @@ const SettingsScreen = () => {
               <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
                 {reminderSupported
                   ? describeReminder(reminder)
-                  : "Disponible solo en la app del móvil."}
+                  : "No disponible en Expo Go ni en el navegador: funciona en la app instalada."}
               </Text>
             </View>
             <Switch

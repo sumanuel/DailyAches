@@ -36,7 +36,7 @@ Backend URL: set `EXPO_PUBLIC_API_URL` (the `/api` suffix is appended if missing
 
 Export: `utils/exportRecords.js` builds the CSV / PDF HTML (pure) and `utils/exportService.js` writes and shares it (browser download on web, PDF native only).
 
-Daily reminder: `utils/reminders.js` (pure) and `utils/reminderService.js` (expo-notifications, saved per device under `reminderSettings`); it only works on native, on web the switch in Settings is disabled.
+Daily reminder: `utils/reminders.js` (pure) and `utils/reminderService.js` (expo-notifications, saved per device under `reminderSettings`). Native modules that Expo Go may lack (`expo-notifications`, `expo-file-system`, `expo-sharing`, `expo-print`) are loaded lazily with `require` inside the functions that need them, never imported at the top of a file: a missing module would crash the whole app at start. Reminders need a development build; on web and in Expo Go the switch in Settings is disabled.
 
 ## UI conventions
 

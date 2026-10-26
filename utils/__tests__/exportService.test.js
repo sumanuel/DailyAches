@@ -4,6 +4,7 @@ import * as Sharing from "expo-sharing";
 import * as Print from "expo-print";
 import {
   EXPORT_FAILED_MESSAGE,
+  NATIVE_UNAVAILABLE_MESSAGE,
   NO_RECORDS_MESSAGE,
   PDF_ON_WEB_MESSAGE,
   SHARING_UNAVAILABLE_MESSAGE,
@@ -130,5 +131,21 @@ describe("exportRecords", () => {
       success: false,
       error: EXPORT_FAILED_MESSAGE,
     });
+  });
+});
+
+// Last on purpose: it resets the module registry.
+describe("exportRecords without the native modules (Expo Go)", () => {
+  it("explains it instead of crashing", async () => {
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+    jest.resetModules();
+    jest.doMock("expo-sharing", () => {
+      throw new Error("Cannot find native module 'ExpoSharing'");
+    });
+    const fresh = require("../exportService");
+
+    const result = await fresh.exportRecords({ ...args, format: "csv" });
+
+    expect(result).toEqual({ success: false, error: NATIVE_UNAVAILABLE_MESSAGE });
   });
 });

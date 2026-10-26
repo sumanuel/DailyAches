@@ -1,7 +1,4 @@
 import { Platform } from "react-native";
-import { File, Paths } from "expo-file-system";
-import * as Sharing from "expo-sharing";
-import * as Print from "expo-print";
 import { buildCsv, buildReportHtml, exportFileName } from "./exportRecords";
 
 export const FORMATS = {
@@ -15,6 +12,26 @@ export const SHARING_UNAVAILABLE_MESSAGE = "Este dispositivo no permite comparti
 export const EXPORT_FAILED_MESSAGE = "No se pudo crear el archivo. Inténtalo de nuevo.";
 
 export const isPdfSupported = () => Platform.OS !== "web";
+
+export const NATIVE_UNAVAILABLE_MESSAGE =
+  "Este dispositivo o Expo Go no permite crear archivos para compartir.";
+
+// The file, sharing and print modules are native: they are loaded when an export
+// starts, so a build that lacks one cannot crash the app at start-up.
+const loadNativeModules = () => {
+  try {
+    const { File, Paths } = require("expo-file-system");
+    return {
+      File,
+      Paths,
+      Sharing: require("expo-sharing"),
+      Print: require("expo-print"),
+    };
+  } catch (error) {
+    console.warn("Export modules are not available:", error?.message);
+    return null;
+  }
+};
 
 // In the browser there is no share sheet: the file is simply downloaded.
 const downloadInBrowser = (content, fileName, mimeType) => {
@@ -31,7 +48,7 @@ const downloadInBrowser = (content, fileName, mimeType) => {
 
 // In SDK 58 File.write is asynchronous: sharing before it resolves would hand
 // over an empty or partial file.
-const writeCacheFile = async (fileName, content) => {
+const writeCacheFile = async ({ File, Paths }, fileName, content) => {
   const file = new File(Paths.cache, fileName);
   file.create({ overwrite: true });
   await file.write(content);
@@ -63,13 +80,17 @@ export const exportRecords = async ({
       return { success: true, fileName };
     }
 
+    const native = loadNativeModules();
+    if (!native) return { success: false, error: NATIVE_UNAVAILABLE_MESSAGE };
+    const { Sharing, Print } = native;
+
     if (!(await Sharing.isAvailableAsync())) {
       return { success: false, error: SHARING_UNAVAILABLE_MESSAGE };
     }
 
     let uri;
     if (format === "csv") {
-      uri = await writeCacheFile(fileName, buildCsv(records, people));
+      uri = await writeCacheFile(native, fileName, buildCsv(records, people));
     } else {
       const html = buildReportHtml(records, people, { rangeLabel, personLabel });
       ({ uri } = await Print.printToFileAsync({ html }));
