@@ -48,6 +48,7 @@ const RegisterScreen = ({ navigation }) => {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
 
   const onSubmit = async (data) => {

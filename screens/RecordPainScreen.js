@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { StyleSheet, Alert, Pressable, FlatList } from "react-native";
+import { StyleSheet, Alert, Pressable, View } from "react-native";
 import {
   Button,
   Text,
@@ -219,18 +219,15 @@ const RecordPainScreen = ({ navigation, route }) => {
             placeholder="Filtrar por nombre"
           />
 
-          <FlatList
-            data={filteredPainTypes}
-            keyExtractor={keyExtractor}
-            numColumns={3}
-            scrollEnabled={false}
-            renderItem={({ item }) => {
+          <View style={styles.painGrid}>
+            {filteredPainTypes.map((item) => {
               const preset = getPainIllustration(
                 resolvePainIllustrationKey(item),
               );
               const isSelected = selectedPainType?.name === item.name;
 
               return (
+                <View key={keyExtractor(item)} style={styles.painCell}>
                 <Pressable
                   style={[
                     styles.painOption,
@@ -267,11 +264,10 @@ const RecordPainScreen = ({ navigation, route }) => {
                     {item.name}
                   </Text>
                 </Pressable>
+                </View>
               );
-            }}
-            contentContainerStyle={styles.painGrid}
-            showsVerticalScrollIndicator={false}
-          />
+            })}
+          </View>
           {errors.pain && (
             <Text style={[styles.error, { color: paperTheme.colors.error }]}>
               {errors.pain.message}
@@ -328,9 +324,9 @@ const styles = StyleSheet.create({
   },
   card: { borderRadius: 24, overflow: "hidden" },
   searchInput: { marginBottom: 16 },
-  painGrid: { paddingVertical: 8 },
+  painGrid: { flexDirection: "row", flexWrap: "wrap", paddingVertical: 8 },
+  painCell: { width: "33.333%" },
   painOption: {
-    flex: 1,
     alignItems: "center",
     padding: 12,
     margin: 4,

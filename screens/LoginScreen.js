@@ -37,6 +37,7 @@ const LoginScreen = ({ navigation }) => {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit = async (data) => {
@@ -45,9 +46,8 @@ const LoginScreen = ({ navigation }) => {
     try {
       const response = await login(data.email, data.password);
 
-      if (response.success) {
-        navigation.getParent()?.replace("Main");
-      } else {
+      // On success the navigator switches to the app by itself (isAuthenticated).
+      if (!response.success) {
         setFormError(response.error || "No se pudo iniciar sesión.");
       }
     } catch {

@@ -93,7 +93,7 @@ const HistoryPeopleScreen = ({ navigation }) => {
   );
 
   return (
-    <AppScreen contentContainerStyle={styles.container}>
+    <AppScreen scroll={false} contentContainerStyle={styles.container}>
       <HeroPanel
         eyebrow="HISTORIAL"
         title="Historial disponible por persona"

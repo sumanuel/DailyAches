@@ -29,6 +29,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: { email: "" },
   });
 
   const onSubmit = (data) => {

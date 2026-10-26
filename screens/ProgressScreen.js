@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { StyleSheet, View, FlatList } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   Card,
   List,
@@ -170,13 +170,13 @@ const ProgressScreen = () => {
             Desbloquea hitos registrando dolores, sumando constancia y subiendo
             de rango.
           </Text>
-          <FlatList
-            data={user.achievements}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderAchievement}
-            ListEmptyComponent={<Text>No hay logros disponibles.</Text>}
-            scrollEnabled={false}
-          />
+          {user.achievements.length === 0 ? (
+            <Text>No hay logros disponibles.</Text>
+          ) : (
+            user.achievements.map((item) => (
+              <View key={item.id}>{renderAchievement({ item })}</View>
+            ))
+          )}
         </Card.Content>
       </Card>
     </AppScreen>
