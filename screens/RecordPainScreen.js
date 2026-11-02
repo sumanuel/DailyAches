@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { StyleSheet, Alert, Pressable, View } from "react-native";
+import { StyleSheet, Alert, View } from "react-native";
 import {
   Button,
   Text,
@@ -14,6 +14,7 @@ import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import IllustrationBadge from "../components/IllustrationBadge";
 import AppTextField from "../components/AppTextField";
+import PressableScale from "../components/PressableScale";
 import {
   getPainIllustration,
   resolvePainIllustrationKey,
@@ -228,7 +229,8 @@ const RecordPainScreen = ({ navigation, route }) => {
 
               return (
                 <View key={keyExtractor(item)} style={styles.painCell}>
-                <Pressable
+                <PressableScale
+                  pop={isSelected}
                   accessibilityRole="button"
                   accessibilityLabel={item.name}
                   accessibilityState={{ selected: isSelected }}
@@ -266,7 +268,7 @@ const RecordPainScreen = ({ navigation, route }) => {
                   >
                     {item.name}
                   </Text>
-                </Pressable>
+                </PressableScale>
                 </View>
               );
             })}

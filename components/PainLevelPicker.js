@@ -1,6 +1,7 @@
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Text, useTheme as usePaperTheme } from "react-native-paper";
+import PressableScale from "./PressableScale";
 import { PAIN_LEVELS, getPainLevelLabel } from "../utils/painLevel";
 
 // Pick an intensity from 1 to 10. Large circles keep comfortable tap targets.
@@ -19,8 +20,9 @@ const PainLevelPicker = ({ value, onChange, style }) => {
         {PAIN_LEVELS.map((level) => {
           const selected = level === value;
           return (
-            <Pressable
+            <PressableScale
               key={level}
+              pop={selected}
               onPress={() => onChange(level)}
               accessibilityRole="button"
               accessibilityLabel={`Intensidad ${level} de 10`}
@@ -44,7 +46,7 @@ const PainLevelPicker = ({ value, onChange, style }) => {
               >
                 {level}
               </Text>
-            </Pressable>
+            </PressableScale>
           );
         })}
       </View>
