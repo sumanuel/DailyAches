@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -22,9 +22,14 @@ import SettingsScreen from "../screens/SettingsScreen";
 import PainSettingsScreen from "../screens/PainSettingsScreen";
 import AddPainTypeScreen from "../screens/AddPainTypeScreen";
 import AddPersonScreen from "../screens/AddPersonScreen";
+import OnboardingScreen from "../screens/OnboardingScreen";
 
 import { useTheme } from "../context/ThemeContext";
 import { useUser } from "../context/UserContext";
+import {
+  loadOnboardingSeen,
+  saveOnboardingSeen,
+} from "../utils/onboardingService";
 
 const RootStack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
@@ -248,8 +253,26 @@ const MainTabsNavigator = () => {
 const AppNavigator = () => {
   const { navigationTheme } = useTheme();
   const { isAuthenticated, authLoading } = useUser();
+  // undefined = still reading the flag; the guide is shown once per device.
+  const [onboardingSeen, setOnboardingSeen] = useState(undefined);
 
-  if (authLoading) {
+  useEffect(() => {
+    if (!isAuthenticated) return undefined;
+    let active = true;
+    loadOnboardingSeen().then((seen) => {
+      if (active) setOnboardingSeen(seen);
+    });
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated]);
+
+  const finishOnboarding = useCallback(() => {
+    setOnboardingSeen(true);
+    saveOnboardingSeen();
+  }, []);
+
+  if (authLoading || (isAuthenticated && onboardingSeen === undefined)) {
     return null;
   }
 
@@ -257,7 +280,21 @@ const AppNavigator = () => {
     <NavigationContainer theme={navigationTheme}>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
-          <RootStack.Screen name="Main" component={MainTabsNavigator} />
+          <>
+            {onboardingSeen ? null : (
+              <RootStack.Screen name="FirstRunOnboarding">
+                {(props) => (
+                  <OnboardingScreen {...props} onDone={finishOnboarding} />
+                )}
+              </RootStack.Screen>
+            )}
+            <RootStack.Screen name="Main" component={MainTabsNavigator} />
+            <RootStack.Screen
+              name="Onboarding"
+              component={OnboardingScreen}
+              options={{ presentation: "modal" }}
+            />
+          </>
         ) : (
           <RootStack.Screen name="Auth" component={AuthStackNavigator} />
         )}
