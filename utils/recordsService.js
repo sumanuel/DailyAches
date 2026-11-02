@@ -1,14 +1,13 @@
 import HttpService from "./httpService";
+import { collectRecordPages } from "./recordsPaging";
 
 class RecordsService {
-  // Get all records for the current user
+  // Get all records for the current user, one page per request
   static async getRecords() {
     try {
-      const response = await HttpService.get("/records");
-      if (response.success) {
-        return { success: true, records: response.data.records };
-      }
-      return response;
+      return await collectRecordPages((limit, offset) =>
+        HttpService.get(`/records?limit=${limit}&offset=${offset}`),
+      );
     } catch (error) {
       console.error("Error fetching records:", error);
       return { success: false, error: error.message };
