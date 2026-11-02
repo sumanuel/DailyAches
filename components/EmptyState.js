@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { Button, Card, Text, useTheme as usePaperTheme } from "react-native-paper";
 import IllustrationBadge from "./IllustrationBadge";
 import { getAvatarIllustration } from "../constants/illustrations";
@@ -17,6 +18,7 @@ const EmptyState = ({
   const paperTheme = usePaperTheme();
 
   return (
+    <Animated.View entering={FadeInDown.duration(260)}>
     <Card
       style={[styles.card, { backgroundColor: paperTheme.colors.surface }, style]}
     >
@@ -48,6 +50,7 @@ const EmptyState = ({
         ) : null}
       </Card.Content>
     </Card>
+    </Animated.View>
   );
 };
 
