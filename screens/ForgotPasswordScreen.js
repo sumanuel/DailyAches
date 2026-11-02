@@ -1,96 +1,45 @@
 import React from "react";
-import { StyleSheet, Alert } from "react-native";
-import {
-  Button,
-  Text,
-  Card,
-  useTheme as usePaperTheme,
-} from "react-native-paper";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { StyleSheet } from "react-native";
+import { Button, Card, Text, useTheme as usePaperTheme } from "react-native-paper";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
-import AppTextField from "../components/AppTextField";
 
-const schema = yup.object({
-  email: yup
-    .string()
-    .trim()
-    .required("Escribe tu correo.")
-    .email("Escribe un correo válido."),
-});
-
+// There is no password recovery yet: the API has no endpoint for it (it needs
+// an email service). Until it does, this screen says so instead of pretending
+// to send an email.
 const ForgotPasswordScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: { email: "" },
-  });
-
-  const onSubmit = (data) => {
-    console.log(data);
-    Alert.alert("Listo", "Email de recuperación enviado");
-    navigation.goBack();
-  };
 
   return (
-    <AppScreen scroll={false} contentContainerStyle={styles.container}>
+    <AppScreen contentContainerStyle={styles.container}>
       <HeroPanel
         compact
-        eyebrow="PLAN DE RESCATE"
-        title="Vamos a traerte de vuelta"
-        description="Escribe tu correo y te mandamos la ruta de escape para recuperar la cuenta sin mas melodrama del necesario."
+        eyebrow="RECUPERAR CUENTA"
+        title="Aún no podemos enviarte un correo"
+        description="La recuperación de contraseña todavía no está disponible, así que por ahora no hay forma de restablecerla desde la app."
       />
 
       <Card
         style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
       >
         <Card.Content>
-          <Text variant="titleLarge" style={styles.title}>
-            Recuperar Contraseña
-          </Text>
           <Text
-            style={[
-              styles.subtitle,
-              { color: paperTheme.colors.onSurfaceVariant },
-            ]}
+            variant="titleMedium"
+            accessibilityRole="header"
+            style={styles.title}
           >
-            Solo necesitamos tu email para empezar.
+            Mientras tanto
           </Text>
-
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, value } }) => (
-              <AppTextField
-                label="Email"
-                value={value}
-                onChangeText={onChange}
-                error={!!errors.email}
-                style={styles.input}
-              />
-            )}
-          />
-          {errors.email && (
-            <Text style={[styles.error, { color: paperTheme.colors.error }]}>
-              {errors.email.message}
-            </Text>
-          )}
-
+          <Text style={[styles.text, { color: paperTheme.colors.onSurfaceVariant }]}>
+            Prueba de nuevo con las contraseñas que sueles usar. Cuando la
+            recuperación esté lista, la encontrarás en esta misma pantalla.
+          </Text>
           <Button
             mode="contained"
-            onPress={handleSubmit(onSubmit)}
+            onPress={() => navigation.goBack()}
             style={styles.button}
           >
-            Enviar Email
-          </Button>
-          <Button style={styles.linkButton} onPress={() => navigation.goBack()}>
-            Volver
+            Volver al inicio de sesión
           </Button>
         </Card.Content>
       </Card>
@@ -99,27 +48,11 @@ const ForgotPasswordScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-  },
+  container: { flexGrow: 1, justifyContent: "center" },
   card: { borderRadius: 28, overflow: "hidden" },
-  title: { textAlign: "center", marginBottom: 8, fontWeight: "800" },
-  subtitle: { textAlign: "center", marginBottom: 18, lineHeight: 20 },
-  input: {
-    marginBottom: 10,
-  },
-  button: {
-    marginTop: 16,
-    borderRadius: 16,
-  },
-  linkButton: {
-    marginTop: 4,
-  },
-  error: {
-    fontSize: 12,
-    marginBottom: 8,
-  },
+  title: { fontWeight: "800", marginBottom: 8 },
+  text: { lineHeight: 22 },
+  button: { marginTop: 20, borderRadius: 16 },
 });
 
 export default ForgotPasswordScreen;
