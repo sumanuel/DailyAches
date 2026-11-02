@@ -3,10 +3,10 @@ import { StyleSheet, View, ScrollView, Alert, Share } from "react-native";
 import {
   Card,
   Text,
-  IconButton,
   Button,
   useTheme as usePaperTheme,
 } from "react-native-paper";
+import ActionIcon from "../components/ActionIcon";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
 import IllustrationBadge from "../components/IllustrationBadge";
@@ -568,7 +568,7 @@ const HomeScreen = () => {
                             </View>
 
                             <View style={styles.painActions}>
-                              <IconButton
+                              <ActionIcon
                                 icon="square-edit-outline"
                                 size={18}
                                 style={[
@@ -582,7 +582,7 @@ const HomeScreen = () => {
                                 }
                                 accessibilityLabel="Editar registro"
                               />
-                              <IconButton
+                              <ActionIcon
                                 icon="delete-circle-outline"
                                 size={18}
                                 style={[
@@ -594,7 +594,7 @@ const HomeScreen = () => {
                                 onPress={() => handleDeleteRecord(record)}
                                 accessibilityLabel="Eliminar registro"
                               />
-                              <IconButton
+                              <ActionIcon
                                 icon="share-variant-outline"
                                 size={18}
                                 style={[

@@ -3,10 +3,10 @@ import { StyleSheet, View, FlatList } from "react-native";
 import {
   Card,
   Text,
-  IconButton,
   FAB,
   useTheme as usePaperTheme,
 } from "react-native-paper";
+import ActionIcon from "../components/ActionIcon";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
@@ -123,12 +123,12 @@ const PeopleScreen = ({ navigation }) => {
             </View>
           </View>
           <View style={styles.actions}>
-            <IconButton
+            <ActionIcon
               icon="square-edit-outline"
               onPress={() => openEdit(p)}
               accessibilityLabel="Editar persona"
             />
-            <IconButton
+            <ActionIcon
               icon="delete-circle-outline"
               onPress={() => handleRemovePerson(p)}
               accessibilityLabel="Eliminar persona"
@@ -217,6 +217,7 @@ const PeopleScreen = ({ navigation }) => {
 
       <FAB
         icon="plus"
+        accessibilityLabel="Agregar persona"
         style={[styles.fab, { backgroundColor: paperTheme.colors.primary }]}
         color={paperTheme.colors.onPrimary}
         onPress={openAdd}
