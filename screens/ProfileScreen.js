@@ -14,7 +14,7 @@ import AppTextField from "../components/AppTextField";
 import FieldError from "../components/FieldError";
 import { toDateInput, validateProfile } from "../utils/validation";
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
   const { user, updateProfile } = useUser();
 
@@ -39,6 +39,8 @@ const ProfileScreen = () => {
     },
     hint: { opacity: 0.7, marginTop: 4 },
     button: { marginTop: 16, borderRadius: 16 },
+    securityCard: { marginTop: 16 },
+    securityButton: { marginTop: 8, borderRadius: 16 },
   });
 
   // The form mirrors the saved profile, which can arrive after the screen opens.
@@ -165,6 +167,41 @@ const ProfileScreen = () => {
             style={styles.button}
           >
             {loading ? "Guardando..." : "Guardar"}
+          </Button>
+        </Card.Content>
+      </Card>
+
+      <Card
+        style={[
+          styles.card,
+          styles.securityCard,
+          { backgroundColor: paperTheme.colors.surface },
+        ]}
+      >
+        <Card.Content>
+          <Text
+            variant="titleLarge"
+            accessibilityRole="header"
+            style={styles.formTitle}
+          >
+            Seguridad
+          </Text>
+          <Button
+            mode="outlined"
+            icon="lock-outline"
+            onPress={() => navigation.navigate("ChangePassword")}
+            style={styles.securityButton}
+          >
+            Cambiar contraseña
+          </Button>
+          <Button
+            mode="text"
+            icon="account-remove-outline"
+            textColor={paperTheme.colors.error}
+            onPress={() => navigation.navigate("DeleteAccount")}
+            style={styles.securityButton}
+          >
+            Eliminar mi cuenta
           </Button>
         </Card.Content>
       </Card>

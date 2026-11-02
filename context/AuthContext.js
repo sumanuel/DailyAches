@@ -47,6 +47,13 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
+  // The account (and its token) is gone on success, so the session ends too.
+  const deleteAccount = async (password) => {
+    const response = await AuthService.deleteAccount(password);
+    if (response.success) setIsAuthenticated(false);
+    return response;
+  };
+
   // Expired or revoked token: drop the session so the navigator shows login.
   // logout only uses a state setter, so the closure from the first render is safe.
   useEffect(() => {
@@ -58,7 +65,14 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, authLoading, login, register, logout }}
+      value={{
+        isAuthenticated,
+        authLoading,
+        login,
+        register,
+        logout,
+        deleteAccount,
+      }}
     >
       {children}
     </AuthContext.Provider>

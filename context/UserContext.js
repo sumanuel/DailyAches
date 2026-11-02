@@ -272,6 +272,19 @@ export const UserProvider = ({ children }) => {
     });
   }, [user.records]);
 
+  // Also forgets this account's data on the device: nothing of it should stay
+  // behind once the account no longer exists.
+  const deleteAccount = async (password) => {
+    const storageKey = storageKeyRef.current;
+    const result = await auth.deleteAccount(password);
+    if (result.success) {
+      AsyncStorage.removeItem(storageKey).catch((error) =>
+        console.error("Error clearing user data:", error),
+      );
+    }
+    return result;
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -281,6 +294,8 @@ export const UserProvider = ({ children }) => {
         login: auth.login,
         register: auth.register,
         logout: auth.logout,
+        changePassword: AuthService.changePassword.bind(AuthService),
+        deleteAccount,
         addPoints,
         incrementRecords,
         unlockAchievement,

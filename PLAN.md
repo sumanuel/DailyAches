@@ -93,7 +93,8 @@ Ordenadas por valor estimado frente a esfuerzo.
 - [x] `created_at` opcional en `POST` y `PUT /api/records` (entre 2000-01-01 y ahora). La app todavía no deja elegir la fecha al registrar: pendiente.
 - [x] La API tiene migraciones numeradas (`npm run migrate`) y pruebas de integración (`npm test`, schema `dailyaches_test`, 14 casos). Respaldo previo con `pg_dump` en `C:\Users\user\DailyAches-backups`.
 - [ ] Decidido el 2026-11-02: borrar un tipo con registros se bloquea con 409; los logros y puntos irán al servidor; el correo de recuperación espera datos del proveedor.
-- [ ] Siguiente en la API: borrar cuenta, cambiar contraseña, recuperar contraseña (pendiente proveedor de correo), logros y puntos en el servidor. Pendiente en la app: la pantalla de recuperar contraseña finge enviar un correo.
+- [x] Cambiar contraseña y eliminar cuenta (2026-11-02): `PUT /api/auth/password` y `DELETE /api/auth/account` en la API (migración 003, tokens con marca de versión de contraseña: al cambiarla se cierran las otras sesiones; contraseña incorrecta = 403 para no cerrar la sesión por un 401) y pantallas `ChangePasswordScreen` y `DeleteAccountScreen` desde Más → Perfil → Seguridad. Borrar la cuenta limpia también los datos locales. API: 24 pruebas de integración; app: 264 pruebas. Probado de punta a punta en web.
+- [ ] Siguiente en la API: recuperar contraseña (pendiente proveedor de correo) y logros y puntos en el servidor. Pendiente en la app: la pantalla de recuperar contraseña finge enviar un correo.
 - [ ] Documentar cada cambio en `MATRIZ_APP_BACKEND.md` y probar los contratos snake_case de punta a punta.
 
 ## Fase 5: Mejoras de diseño (M–L)
