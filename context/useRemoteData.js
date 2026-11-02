@@ -149,33 +149,12 @@ export default function useRemoteData({
     }
   };
 
-  // The API refuses to delete a person who still has records (foreign key),
-  // so `withRecords` deletes those first, using the server's own list.
-  const removePerson = async (personId, { withRecords = false } = {}) => {
+  // The API deletes the person's records with them (migration 002), so the
+  // local copy drops them too.
+  const removePerson = async (personId) => {
     try {
-      if (withRecords) {
-        const listed = await RecordsService.getRecords();
-        if (!listed.success) return failure(listed);
-        const owned = listed.records.filter(
-          (record) => String(record.person_id) === String(personId),
-        );
-        for (const record of owned) {
-          const deleted = await RecordsService.deleteRecord(record.id);
-          if (!deleted.success) {
-            await loadRecordsFromAPI();
-            return failure(
-              deleted,
-              "No se pudieron eliminar todos los registros. Inténtalo de nuevo.",
-            );
-          }
-        }
-      }
-
       const response = await PeopleService.deletePerson(personId);
-      if (!response.success) {
-        if (withRecords) await loadRecordsFromAPI();
-        return failure(response);
-      }
+      if (!response.success) return failure(response);
       setUser((prevUser) => {
         const newUser = {
           ...prevUser,

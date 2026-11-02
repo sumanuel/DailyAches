@@ -22,11 +22,13 @@ Resume los contratos entre DailyAches y Dailyaches-api que hoy gobiernan autenti
 | Crear tipo de dolor      | POST /api/pain-types       | utils/painTypesService.js | name, image_url?                                       | name obligatorio, unicidad por usuario                                 |
 | Actualizar tipo de dolor | PUT /api/pain-types/:id    | utils/painTypesService.js | name, image_url?                                       | id entero, name obligatorio, evita duplicados                          |
 | Eliminar tipo de dolor   | DELETE /api/pain-types/:id | utils/painTypesService.js | path param                                             | ownership y dependencia funcional                                      |
-| Listar records           | GET /api/records           | utils/recordsService.js   | sin body                                               | records con person_name, pain_type_name, pain_type_image               |
+| Listar records           | GET /api/records           | utils/recordsService.js   | query opcional: limit (1..200), offset, from, to, person_id, pain_type_id | `{ records, total, limit, offset }`; records con person_name, pain_type_name, pain_type_image; sin limit devuelve todos; from inclusivo y to exclusivo (ISO 8601) |
 | Records de hoy           | GET /api/records/today     | utils/recordsService.js   | sin body                                               | filtro por fecha del servidor                                          |
-| Crear record             | POST /api/records          | utils/recordsService.js   | person_id, pain_type_id, pain_level, notes?            | person_id y pain_type_id deben pertenecer al usuario; pain_level 1..10 |
-| Actualizar record        | PUT /api/records/:id       | utils/recordsService.js   | person_id?, pain_type_id?, pain_level?, notes?         | id entero, ownership, pain_level 1..10                                 |
+| Crear record             | POST /api/records          | utils/recordsService.js   | person_id, pain_type_id, pain_level, notes?, created_at? | person_id y pain_type_id deben pertenecer al usuario; pain_level 1..10; created_at ISO 8601 entre 2000-01-01 y ahora (por defecto, ahora) |
+| Actualizar record        | PUT /api/records/:id       | utils/recordsService.js   | person_id?, pain_type_id?, pain_level?, notes?, created_at? | id entero, ownership, pain_level 1..10, mismas reglas de created_at |
 | Eliminar record          | DELETE /api/records/:id    | utils/recordsService.js   | path param                                             | ownership por user_id                                                  |
+
+Borrados: `DELETE /api/people/:id` elimina tambien los records de esa persona (cascada, migracion 002); `DELETE /api/pain-types/:id` responde 409 mientras haya records que lo usen.
 
 ## Puntos fragiles detectados
 
