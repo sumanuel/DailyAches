@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { buildProgressState, reconcileProgress } from "../utils/gamification";
+import { progressFromApi } from "../utils/serverProgress";
 import PeopleService from "../utils/peopleService";
 import PainTypesService from "../utils/painTypesService";
 import RecordsService from "../utils/recordsService";
@@ -23,6 +24,7 @@ export default function useRemoteData({
   setUser,
   saveUserData,
   incrementRecords,
+  applyProgress,
 }) {
   const [remoteStatus, setRemoteStatus] = useState(initialRemoteStatus);
   // Record hidden from the lists while its delete can still be undone.
@@ -344,8 +346,11 @@ export default function useRemoteData({
       if (response.success) {
         // Reload records from API to get updated data
         await loadRecordsFromAPI();
-        // Update local stats
-        incrementRecords(10);
+        // The server counted the record and answers with the new progress;
+        // without that answer it is counted here.
+        const progress = progressFromApi(response.progress);
+        if (progress) applyProgress(progress, { celebrate: true });
+        else incrementRecords(10);
         return { success: true, record: response.record };
       }
       return response;

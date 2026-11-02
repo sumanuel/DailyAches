@@ -34,7 +34,12 @@ class RecordsService {
     try {
       const response = await HttpService.post("/records", recordData);
       if (response.success) {
-        return { success: true, record: response.data.record };
+        // `progress` is the points and achievements after this record
+        return {
+          success: true,
+          record: response.data.record,
+          progress: response.data.progress,
+        };
       }
       return response;
     } catch (error) {

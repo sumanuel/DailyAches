@@ -247,6 +247,9 @@ export const POINTS_PER_RECORD = 10;
 // "Compartidor": the only achievement that is unlocked by an action, not a count.
 export const SHARE_ACHIEVEMENT_ID = 12;
 
+// Achievements the records alone never unlock: the app claims them from the server.
+export const MANUAL_ACHIEVEMENT_IDS = [SHARE_ACHIEVEMENT_ID];
+
 // How far the user is from an achievement. Record-based ones use the record
 // count, level-based ones the points needed for that level; the rest are manual.
 export const getAchievementProgress = (

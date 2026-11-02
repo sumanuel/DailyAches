@@ -29,6 +29,10 @@ Resume los contratos entre DailyAches y Dailyaches-api que hoy gobiernan autenti
 | Crear record             | POST /api/records          | utils/recordsService.js   | person_id, pain_type_id, pain_level, notes?, created_at? | person_id y pain_type_id deben pertenecer al usuario; pain_level 1..10; created_at ISO 8601 entre 2000-01-01 y ahora (por defecto, ahora) |
 | Actualizar record        | PUT /api/records/:id       | utils/recordsService.js   | person_id?, pain_type_id?, pain_level?, notes?, created_at? | id entero, ownership, pain_level 1..10, mismas reglas de created_at |
 | Eliminar record          | DELETE /api/records/:id    | utils/recordsService.js   | path param                                             | ownership por user_id                                                  |
+| Progreso                 | GET /api/progress          | utils/progressService.js  | sin body                                               | `{ progress: { points, level, records_count, unlocked_achievements: [{ id, unlocked_at }] } }`; la primera vez de una cuenta anterior lo construye con sus registros (10 puntos cada uno) |
+| Reclamar logro manual    | POST /api/progress/achievements/:id | utils/progressService.js | path param (solo el 12, Compartidor)         | `{ progress }`; reclamarlo otra vez no suma; un logro automatico responde 400 y uno desconocido 404 |
+
+`POST /api/records` responde tambien `progress` (puntos y logros despues del registro, guardados en la misma transaccion); el servidor aplica las reglas y la app solo muestra lo que devuelve. Borrar un registro no quita puntos.
 
 Borrados: `DELETE /api/people/:id` elimina tambien los records de esa persona (cascada, migracion 002); `DELETE /api/pain-types/:id` responde 409 mientras haya records que lo usen.
 
