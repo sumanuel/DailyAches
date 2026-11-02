@@ -5,6 +5,7 @@ import { UserProvider } from "./context/UserContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import AppNavigator from "./navigation/AppNavigator";
 import UndoDeleteSnackbar from "./components/UndoDeleteSnackbar";
+import ProgressCelebration from "./components/ProgressCelebration";
 
 const AppContent = () => {
   const { theme } = useTheme();
@@ -12,6 +13,7 @@ const AppContent = () => {
     <PaperProvider theme={theme}>
       <AppNavigator />
       <UndoDeleteSnackbar />
+      <ProgressCelebration />
     </PaperProvider>
   );
 };

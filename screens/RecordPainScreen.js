@@ -137,10 +137,13 @@ const RecordPainScreen = ({ navigation, route }) => {
         return;
       }
 
-      Alert.alert(
-        isEdit ? "¡Actualizado!" : "¡Registrado!",
-        `${isEdit ? "Registro actualizado" : "Dolor registrado"} para ${personName}: ${selectedPainType.name}`,
-      );
+      // A new record is celebrated by the progress banner; an edit has no points.
+      if (isEdit) {
+        Alert.alert(
+          "¡Actualizado!",
+          `Registro actualizado para ${personName}: ${selectedPainType.name}`,
+        );
+      }
       navigation.goBack();
     } catch (error) {
       Alert.alert(
