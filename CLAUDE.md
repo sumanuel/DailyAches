@@ -17,7 +17,7 @@ npm run web
 npm test                              # Jest (jest-expo preset), tests live in utils/__tests__
 npx jest utils/__tests__/gamification.test.js   # a single test file
 npm run lint                          # ESLint (eslint-config-expo), currently clean
-npx expo-doctor                       # should pass 18/18
+npx expo-doctor                       # should pass 20/20
 ```
 
 Tests cover only the pure logic and `httpService` (`gamification`, `apiMappers`, `httpService`); contexts, services and screens are verified manually (smoke test in `ARRANQUE_RAPIDO.md`: register, login, load people/pain-types/records, create each). `npx expo start --web` with `EXPO_PUBLIC_API_URL` pointing at a local `Dailyaches-api` is a quick way to exercise login and the data flow in a browser; `Alert.alert` does nothing on web.
