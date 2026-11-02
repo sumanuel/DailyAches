@@ -66,7 +66,11 @@ const OnboardingScreen = ({ navigation, onDone }) => {
             <Text style={[styles.eyebrow, { color: paperTheme.colors.primary }]}>
               {item.eyebrow}
             </Text>
-            <Text variant="headlineMedium" style={styles.title}>
+            <Text
+              variant="headlineMedium"
+              accessibilityRole="header"
+              style={styles.title}
+            >
               {item.title}
             </Text>
             <Text
@@ -173,7 +177,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
   },
   ctaContent: {
-    height: 48,
+    minHeight: 48,
   },
 });
 

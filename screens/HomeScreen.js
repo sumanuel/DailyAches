@@ -245,7 +245,11 @@ const HomeScreen = () => {
               >
                 {home.greeting}
               </Text>
-              <Text variant="headlineSmall" style={styles.heroTitle}>
+              <Text
+                variant="headlineSmall"
+                accessibilityRole="header"
+                style={styles.heroTitle}
+              >
                 {heroTitle}
               </Text>
               <Text
@@ -408,7 +412,11 @@ const HomeScreen = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View>
-              <Text variant="titleMedium" style={styles.sectionTitle}>
+              <Text
+                variant="titleMedium"
+                accessibilityRole="header"
+                style={styles.sectionTitle}
+              >
                 {home.logTitle}
               </Text>
               <Text

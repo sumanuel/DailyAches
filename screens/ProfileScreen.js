@@ -93,7 +93,11 @@ const ProfileScreen = () => {
         style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
       >
         <Card.Content>
-          <Text variant="titleLarge" style={styles.formTitle}>
+          <Text
+            variant="titleLarge"
+            accessibilityRole="header"
+            style={styles.formTitle}
+          >
             Perfil
           </Text>
           <AppTextField

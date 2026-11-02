@@ -25,7 +25,11 @@ const EmptyState = ({
           preset={getAvatarIllustration(illustration)}
           size={72}
         />
-        <Text variant="titleMedium" style={styles.title}>
+        <Text
+          variant="titleMedium"
+          accessibilityRole="header"
+          style={styles.title}
+        >
           {title}
         </Text>
         {description ? (

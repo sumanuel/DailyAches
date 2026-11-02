@@ -32,8 +32,11 @@ const IllustrationBadge = ({
     paperTheme.colors.primaryContainer,
   );
 
+  // Purely decorative: the emoji would be read aloud, and it must not grow
+  // with the system font size inside its fixed circle.
   return (
     <View
+      aria-hidden
       style={[
         styles.shell,
         {
@@ -89,7 +92,10 @@ const IllustrationBadge = ({
           },
         ]}
       />
-      <Text style={[styles.glyph, { fontSize: size * 0.42 }]}>
+      <Text
+        allowFontScaling={false}
+        style={[styles.glyph, { fontSize: size * 0.42 }]}
+      >
         {preset?.glyph || "✨"}
       </Text>
       {preset?.spark ? (
@@ -104,7 +110,10 @@ const IllustrationBadge = ({
             },
           ]}
         >
-          <Text style={[styles.spark, { fontSize: size * 0.14 }]}>
+          <Text
+            allowFontScaling={false}
+            style={[styles.spark, { fontSize: size * 0.14 }]}
+          >
             {preset.spark}
           </Text>
         </View>

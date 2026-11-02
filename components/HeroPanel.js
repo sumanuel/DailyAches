@@ -27,7 +27,11 @@ const HeroPanel = ({
             {eyebrow}
           </Text>
         ) : null}
-        <Text variant="headlineSmall" style={styles.title}>
+        <Text
+          variant="headlineSmall"
+          accessibilityRole="header"
+          style={styles.title}
+        >
           {title}
         </Text>
         {description ? (
