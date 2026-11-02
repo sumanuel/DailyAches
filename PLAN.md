@@ -88,7 +88,12 @@ Ordenadas por valor estimado frente a esfuerzo.
 - [ ] Endpoints de estadísticas agregadas (por rango y por persona) para no calcular todo en el teléfono.
 - [ ] Registro de token de notificaciones push.
 - [ ] Cambio de contraseña, eliminación de cuenta y exportación.
-- [ ] Paginación en `GET /api/records`.
+- [x] Paginación en `GET /api/records` (2026-11-02, en `Dailyaches-api`): `limit` (1..200), `offset`, `from` (inclusivo), `to` (exclusivo), `person_id` y `pain_type_id`; responde `{ records, total, limit, offset }` y sin `limit` devuelve todo, como antes. La app todavía carga todo: usar la paginación cuando haya estadísticas agregadas.
+- [x] Borrar una persona borra sus registros (migración 002, cascada); borrar un tipo de dolor con registros sigue dando 409. La app ya no borra los registros uno a uno.
+- [x] `created_at` opcional en `POST` y `PUT /api/records` (entre 2000-01-01 y ahora). La app todavía no deja elegir la fecha al registrar: pendiente.
+- [x] La API tiene migraciones numeradas (`npm run migrate`) y pruebas de integración (`npm test`, schema `dailyaches_test`, 14 casos). Respaldo previo con `pg_dump` en `C:\Users\user\DailyAches-backups`.
+- [ ] Decidido el 2026-11-02: borrar un tipo con registros se bloquea con 409; los logros y puntos irán al servidor; el correo de recuperación espera datos del proveedor.
+- [ ] Siguiente en la API: borrar cuenta, cambiar contraseña, recuperar contraseña (pendiente proveedor de correo), logros y puntos en el servidor. Pendiente en la app: la pantalla de recuperar contraseña finge enviar un correo.
 - [ ] Documentar cada cambio en `MATRIZ_APP_BACKEND.md` y probar los contratos snake_case de punta a punta.
 
 ## Fase 5: Mejoras de diseño (M–L)

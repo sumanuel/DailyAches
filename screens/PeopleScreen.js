@@ -65,9 +65,7 @@ const PeopleScreen = ({ navigation }) => {
     );
     if (!confirmed) return;
 
-    const result = await removePerson(person.id, {
-      withRecords: recordCount > 0,
-    });
+    const result = await removePerson(person.id);
     if (!result.success) showMessage("No se pudo eliminar", result.error);
   };
 
