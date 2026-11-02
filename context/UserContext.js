@@ -27,6 +27,8 @@ import {
   getUserStorageKey,
 } from "../utils/gamification";
 import { withProgressEvent } from "../utils/progressEvents";
+import ProgressService from "../utils/progressService";
+import { applyServerProgress, pendingManualAchievements } from "../utils/serverProgress";
 
 // Progress saved before it was kept per user lived under this single key.
 const LEGACY_STORAGE_KEY = getUserStorageKey(null);
@@ -71,7 +73,7 @@ export const UserProvider = ({ children }) => {
       }
       if (data) {
         const parsed = JSON.parse(data);
-        setUser({
+        const loaded = {
           points: typeof parsed.points === "number" ? parsed.points : 0,
           level:
             typeof parsed.level === "number"
@@ -92,11 +94,14 @@ export const UserProvider = ({ children }) => {
               )
             : defaultPainTypes,
           records: Array.isArray(parsed.records) ? parsed.records : [],
-        });
+        };
+        setUser(loaded);
+        return loaded;
       }
     } catch (error) {
       console.error("Error loading user data:", error);
     }
+    return undefined;
   }, []);
 
   // Stable: it only reads a ref, and useRemoteData depends on it.
@@ -113,6 +118,47 @@ export const UserProvider = ({ children }) => {
       console.error("Error saving user data:", error);
     }
   }, []);
+
+  // Puts the server's progress in the state. `celebrate` also stamps the
+  // banner event (a record was saved, an achievement unlocked); a plain sync
+  // on login stays quiet.
+  const applyProgress = useCallback(
+    (progress, { celebrate = false } = {}) => {
+      setUser((prevUser) => {
+        const synced = applyServerProgress(prevUser, progress);
+        const newUser = celebrate ? withProgressEvent(prevUser, synced) : synced;
+        saveUserData(newUser);
+        return newUser;
+      });
+    },
+    [saveUserData],
+  );
+
+  // Reads the progress the server keeps. Achievements only this device had
+  // (sharing, from before the server kept them) are claimed first. Returns
+  // false when the server could not be reached: the local progress stays.
+  const loadProgressFromAPI = useCallback(
+    async (localAchievements) => {
+      try {
+        let response = await ProgressService.getProgress();
+        if (!response.success) return false;
+        const pending = pendingManualAchievements(
+          localAchievements,
+          response.progress,
+        );
+        for (const id of pending) {
+          const claimed = await ProgressService.claimAchievement(id);
+          if (claimed.success) response = claimed;
+        }
+        applyProgress(response.progress);
+        return true;
+      } catch (error) {
+        console.error("Error loading progress from API:", error);
+        return false;
+      }
+    },
+    [applyProgress],
+  );
 
   const addPoints = (points) => {
     setUser((prevUser) => {
@@ -143,7 +189,16 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  const unlockAchievement = (id) => {
+  const unlockAchievement = async (id) => {
+    if (auth.isAuthenticated) {
+      const response = await ProgressService.claimAchievement(id);
+      if (response.success) {
+        applyProgress(response.progress, { celebrate: true });
+        return;
+      }
+      // No answer from the server: it is kept on this device and claimed at
+      // the next login.
+    }
     setUser((prevUser) => {
       let pointsDelta = 0;
       const newAchievements = prevUser.achievements.map((ach) => {
@@ -201,14 +256,14 @@ export const UserProvider = ({ children }) => {
     loadPainTypesFromAPI,
     loadRecordsFromAPI,
     ...remoteActions
-  } = useRemoteData({ user, setUser, saveUserData, incrementRecords });
+  } = useRemoteData({ user, setUser, saveUserData, incrementRecords, applyProgress });
 
   const loadUserProfile = useCallback(async () => {
     try {
       const response = await AuthService.getCurrentUser();
       if (response.success && response.user) {
         // Load local data and merge with API user data
-        await loadUserData(response.user.id);
+        const localData = await loadUserData(response.user.id);
         setUser((prevUser) => ({
           ...prevUser,
           profile: {
@@ -222,12 +277,21 @@ export const UserProvider = ({ children }) => {
         // Load API data
         await loadPeopleFromAPI();
         await loadPainTypesFromAPI();
+        // Counting the records here first keeps a sensible progress if the
+        // server cannot answer; its own progress then replaces it.
         await loadRecordsFromAPI({ reconcile: true });
+        await loadProgressFromAPI(localData?.achievements);
       }
     } catch (error) {
       console.error("Error loading user profile:", error);
     }
-  }, [loadUserData, loadPeopleFromAPI, loadPainTypesFromAPI, loadRecordsFromAPI]);
+  }, [
+    loadUserData,
+    loadPeopleFromAPI,
+    loadPainTypesFromAPI,
+    loadRecordsFromAPI,
+    loadProgressFromAPI,
+  ]);
 
   // Hydrate state whenever the session changes: remote data when logged in,
   // local data when not, and a reset right after logging out.

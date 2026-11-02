@@ -68,6 +68,7 @@ export const API_ENDPOINTS = {
     ACCOUNT: "/auth/account",
   },
   PEOPLE: "/people",
+  PROGRESS: "/progress",
   ADMIN: {
     USERS: "/admin/users",
     BOOTSTRAP: "/admin/bootstrap",
