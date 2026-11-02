@@ -8,6 +8,7 @@ import {
 } from "react-native-paper";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
+import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
 
 const AchievementsScreen = () => {
@@ -67,7 +68,13 @@ const AchievementsScreen = () => {
             data={user.achievements}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderAchievement}
-            ListEmptyComponent={<Text>No hay logros disponibles.</Text>}
+            ListEmptyComponent={
+              <EmptyState
+                illustration="Estrella.png"
+                title="Aún no hay logros"
+                description="Registra dolores y aparecerán aquí."
+              />
+            }
           />
         </Card.Content>
       </Card>

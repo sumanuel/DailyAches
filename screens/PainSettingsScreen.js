@@ -12,6 +12,7 @@ import { useUser } from "../context/UserContext";
 import { confirmAction, showMessage } from "../utils/confirm";
 import { countRecordsFor, describeRecordCount } from "../utils/recordFilters";
 import AppScreen from "../components/AppScreen";
+import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
 import IllustrationBadge from "../components/IllustrationBadge";
 import {
@@ -135,19 +136,13 @@ const PainSettingsScreen = () => {
           data={painTypes}
           keyExtractor={keyExtractor}
           ListEmptyComponent={
-            <View style={styles.emptyWrap}>
-              <Text variant="titleMedium" style={styles.emptyTitle}>
-                No hay tipos cargados
-              </Text>
-              <Text
-                style={{
-                  color: paperTheme.colors.onSurfaceVariant,
-                  textAlign: "center",
-                }}
-              >
-                Agrega uno nuevo para empezar a personalizar el registro.
-              </Text>
-            </View>
+            <EmptyState
+              illustration="Creativa.png"
+              title="No hay tipos de dolor"
+              description="Agrega el primero y personaliza el registro a tu manera."
+              actionLabel="Agregar tipo"
+              onAction={openAddScreen}
+            />
           }
           renderItem={({ item }) => (
             <View
@@ -248,8 +243,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 92 },
-  emptyWrap: { paddingVertical: 32, alignItems: "center", gap: 8 },
-  emptyTitle: { fontWeight: "800" },
   itemRow: {
     padding: 14,
     borderRadius: 22,

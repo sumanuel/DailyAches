@@ -8,6 +8,7 @@ import {
 } from "react-native-paper";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
+import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
 import IllustrationBadge from "../components/IllustrationBadge";
 import {
@@ -125,28 +126,13 @@ const HistoryPeopleScreen = ({ navigation }) => {
         renderItem={renderPerson}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-      <Card
-        style={[
-          styles.card,
-          { backgroundColor: paperTheme.colors.surface },
-        ]}
-      >
-        <Card.Content>
-          <Text variant="titleMedium" style={styles.emptyTitle}>
-            Sin expedientes todavia
-          </Text>
-          <Text
-            style={{
-              color: paperTheme.colors.onSurfaceVariant,
-              marginTop: 4,
-              lineHeight: 20,
-            }}
-          >
-            Agrega una persona en Registro para empezar a construir su
-            historial.
-          </Text>
-        </Card.Content>
-      </Card>
+          <EmptyState
+            illustration="Zen.png"
+            title="Sin expedientes todavía"
+            description="Agrega una persona en Registro y aquí empezará a armarse su historial."
+            actionLabel="Ir a Registro"
+            onAction={() => navigation.getParent()?.navigate("Registro")}
+          />
         }
       />
     </AppScreen>
@@ -182,7 +168,6 @@ const styles = StyleSheet.create({
   },
   avatarText: { fontSize: 18, fontWeight: "700" },
   meta: { flex: 1 },
-  emptyTitle: { fontWeight: "800" },
   ctaText: { marginTop: 6, fontSize: 12, fontWeight: "700" },
 });
 

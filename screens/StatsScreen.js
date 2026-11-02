@@ -11,6 +11,7 @@ import ActionIcon from "../components/ActionIcon";
 import { Calendar } from "react-native-calendars";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
+import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
 import IllustrationBadge from "../components/IllustrationBadge";
 import {
@@ -350,19 +351,12 @@ const StatsScreen = ({ route, navigation }) => {
           title="Primero elige a quien vas a investigar"
           description="Vuelve atras, selecciona una persona y aqui veras su historial ordenado por fechas y episodios."
         />
-        <Card
-          style={[
-            styles.emptyCard,
-            { backgroundColor: paperTheme.colors.surface },
-          ]}
-        >
-          <Card.Content>
-            <Text variant="titleMedium">Selecciona una persona</Text>
-            <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
-              Vuelve atrás y elige a quién deseas ver el historial.
-            </Text>
-          </Card.Content>
-        </Card>
+        <EmptyState
+          illustration="Zen.png"
+          title="Selecciona una persona"
+          description="Vuelve atrás y elige a quién deseas ver el historial."
+          style={styles.emptyCard}
+        />
       </AppScreen>
     );
   }
@@ -642,32 +636,26 @@ const StatsScreen = ({ route, navigation }) => {
       </Modal>
 
       {count === 0 ? (
-        <Card
-          style={[
-            styles.emptyCard,
-            { backgroundColor: paperTheme.colors.surface },
-          ]}
-        >
-          <Card.Content>
-            <Text variant="titleMedium">
-              {tab === "today"
-                ? "Sin registros hoy"
-                : hasActiveFilters
-                  ? "Sin registros con estos filtros"
-                  : "Sin registros en este rango"}
-            </Text>
-            <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
-              {tab === "history" && hasActiveFilters
-                ? "Prueba con otra búsqueda o quita los filtros."
-                : "Ve a “Registro” para agregar un dolor."}
-            </Text>
-            {tab === "history" && hasActiveFilters ? (
-              <Button mode="text" onPress={clearFilters}>
-                Limpiar filtros
-              </Button>
-            ) : null}
-          </Card.Content>
-        </Card>
+        <EmptyState
+          illustration={hasActiveFilters ? "Mareo.png" : "Zen.png"}
+          title={
+            tab === "today"
+              ? "Sin registros hoy"
+              : hasActiveFilters
+                ? "Sin registros con estos filtros"
+                : "Sin registros en este rango"
+          }
+          description={
+            tab === "history" && hasActiveFilters
+              ? "Prueba con otra búsqueda o quita los filtros."
+              : "Ve a “Registro” para agregar un dolor."
+          }
+          actionLabel={
+            tab === "history" && hasActiveFilters ? "Limpiar filtros" : undefined
+          }
+          onAction={clearFilters}
+          style={styles.emptyCard}
+        />
       ) : (
         <View style={styles.recordsList}>
           {tab === "history"

@@ -9,6 +9,7 @@ import {
 } from "react-native-paper";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
+import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
 import {
   describeAchievementProgress,
@@ -171,7 +172,11 @@ const ProgressScreen = () => {
             de rango.
           </Text>
           {user.achievements.length === 0 ? (
-            <Text>No hay logros disponibles.</Text>
+            <EmptyState
+              illustration="Estrella.png"
+              title="Aún no hay logros"
+              description="Registra dolores y aparecerán aquí."
+            />
           ) : (
             user.achievements.map((item) => (
               <View key={item.id}>{renderAchievement({ item })}</View>
