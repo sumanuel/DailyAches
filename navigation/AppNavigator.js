@@ -18,6 +18,8 @@ import ProgressScreen from "../screens/ProgressScreen";
 import InsightsScreen from "../screens/InsightsScreen";
 import ExportScreen from "../screens/ExportScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import ChangePasswordScreen from "../screens/ChangePasswordScreen";
+import DeleteAccountScreen from "../screens/DeleteAccountScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import PainSettingsScreen from "../screens/PainSettingsScreen";
 import AddPainTypeScreen from "../screens/AddPainTypeScreen";
@@ -192,6 +194,16 @@ const MoreStackNavigator = () => {
         name="Profile"
         component={ProfileScreen}
         options={{ title: "Perfil" }}
+      />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{ title: "Cambiar contraseña" }}
+      />
+      <Stack.Screen
+        name="DeleteAccount"
+        component={DeleteAccountScreen}
+        options={{ title: "Eliminar cuenta" }}
       />
       <Stack.Screen
         name="Settings"

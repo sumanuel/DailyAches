@@ -79,6 +79,39 @@ class AuthService {
     return response;
   }
 
+  // Changes the password. The API closes the other sessions and answers with a
+  // fresh token for this device, which replaces the stored one.
+  async changePassword(currentPassword, newPassword) {
+    const response = await HttpService.put(API_ENDPOINTS.AUTH.PASSWORD, {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+
+    if (response.success) {
+      if (response.data?.token) {
+        await this.setAuthToken(response.data.token);
+      }
+      return { success: true };
+    }
+
+    return response;
+  }
+
+  // Deletes the account and everything in it; the password confirms it.
+  // On success the session is gone too.
+  async deleteAccount(password) {
+    const response = await HttpService.delete(API_ENDPOINTS.AUTH.ACCOUNT, {
+      body: { password },
+    });
+
+    if (response.success) {
+      await this.removeAuthToken();
+      return { success: true };
+    }
+
+    return response;
+  }
+
   // Logout user
   async logout() {
     await this.removeAuthToken();

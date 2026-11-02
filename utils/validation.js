@@ -60,3 +60,28 @@ export const toDateInput = (value) => {
   const match = /^(\d{4}-\d{2}-\d{2})/.exec(String(value || ""));
   return match ? match[1] : "";
 };
+
+// Same minimum as the API (register and password change).
+export const PASSWORD_MIN_LENGTH = 6;
+
+// Fields: current, next, confirm. Returns only the ones with a problem.
+export const validatePasswordChange = ({ current, next, confirm }) => {
+  const errors = {};
+  const currentText = String(current || "").trim();
+  const nextText = String(next || "").trim();
+  const confirmText = String(confirm || "").trim();
+
+  if (!currentText) errors.current = "Escribe tu contraseña actual.";
+  if (!nextText) errors.next = "Escribe la nueva contraseña.";
+  else if (nextText.length < PASSWORD_MIN_LENGTH) {
+    errors.next = `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.`;
+  } else if (nextText === currentText) {
+    errors.next = "La nueva contraseña debe ser distinta de la actual.";
+  }
+  if (!confirmText) errors.confirm = "Repite la nueva contraseña.";
+  else if (confirmText !== nextText) errors.confirm = "Las contraseñas no coinciden.";
+  return errors;
+};
+
+export const validatePasswordForDeletion = (password) =>
+  String(password || "").trim() ? "" : "Escribe tu contraseña para confirmar.";

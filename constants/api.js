@@ -64,6 +64,8 @@ export const API_ENDPOINTS = {
     REGISTER: "/auth/register",
     ME: "/auth/me",
     PROFILE: "/auth/profile",
+    PASSWORD: "/auth/password",
+    ACCOUNT: "/auth/account",
   },
   PEOPLE: "/people",
   ADMIN: {

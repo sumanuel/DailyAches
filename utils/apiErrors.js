@@ -11,6 +11,12 @@ const BY_MESSAGE = [
   ["pain_level must be between 1 and 10", "La intensidad debe estar entre 1 y 10."],
   // account and session
   ["invalid credentials", "El correo o la contraseña no son correctos."],
+  ["current password is incorrect", "La contraseña actual no es correcta."],
+  ["password is incorrect", "La contraseña no es correcta."],
+  ["new password must be different", "La nueva contraseña debe ser distinta de la actual."],
+  ["current_password and new_password are required", "Escribe tu contraseña actual y la nueva."],
+  ["password is required", "Escribe tu contraseña."],
+  ["cannot delete the only admin", "No puedes eliminar la única cuenta de administrador."],
   ["email already registered", "Ese correo ya tiene una cuenta."],
   ["email must be a valid email address", "Escribe un correo válido."],
   ["email and password are required", "Escribe tu correo y tu contraseña."],
