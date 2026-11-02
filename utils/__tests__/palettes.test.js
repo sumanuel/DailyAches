@@ -1,5 +1,11 @@
 import { darkColors, lightColors } from "../../constants/palettes";
-import { AA_TEXT, contrastRatio, meetsAA, relativeLuminance } from "../contrast";
+import {
+  AA_LARGE_OR_UI,
+  AA_TEXT,
+  contrastRatio,
+  meetsAA,
+  relativeLuminance,
+} from "../contrast";
 
 describe("contrastRatio", () => {
   it("gives the WCAG extremes and is symmetric", () => {
@@ -63,5 +69,31 @@ describe.each([
     for (const value of Object.values(colors)) {
       expect(value).toMatch(/^#[0-9A-Fa-f]{6}$/);
     }
+  });
+});
+
+// Bars in components/BarCharts.js are graphics, not text: 3:1 is the WCAG
+// minimum for them against whatever they sit on.
+const CHART_PAIRS = [
+  ["primary", "surface"], // bar on a card
+  ["primary", "outlineVariant"], // bar over its track
+  ["primary", "surfaceVariant"],
+];
+
+describe.each([
+  ["light", lightColors],
+  ["dark", darkColors],
+])("%s palette charts", (name, colors) => {
+  it.each(CHART_PAIRS)("%s bar on %s reaches 3:1", (foreground, background) => {
+    expect(contrastRatio(colors[foreground], colors[background])).toBeGreaterThanOrEqual(
+      AA_LARGE_OR_UI,
+    );
+  });
+
+  it("keeps the track visible against the card and the empty tick more so", () => {
+    const track = contrastRatio(colors.outlineVariant, colors.surface);
+    const tick = contrastRatio(colors.outline, colors.surface);
+    expect(track).toBeGreaterThan(contrastRatio(colors.surfaceVariant, colors.surface));
+    expect(tick).toBeGreaterThanOrEqual(track);
   });
 });

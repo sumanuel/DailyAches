@@ -36,7 +36,7 @@ export const BarList = ({ items, emptyLabel = "Sin datos" }) => {
           <View
             style={[
               styles.track,
-              { backgroundColor: paperTheme.colors.surfaceVariant },
+              { backgroundColor: paperTheme.colors.outlineVariant },
             ]}
           >
             <View
@@ -77,7 +77,7 @@ export const ColumnChart = ({ data, height = 110, labelEvery = 1 }) => {
                   height: item.count === 0 ? 3 : (item.count / max) * height,
                   backgroundColor:
                     item.count === 0
-                      ? paperTheme.colors.surfaceVariant
+                      ? paperTheme.colors.outline
                       : paperTheme.colors.primary,
                 },
               ]}
