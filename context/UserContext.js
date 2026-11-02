@@ -26,6 +26,7 @@ import {
   isSameDay,
   getUserStorageKey,
 } from "../utils/gamification";
+import { withProgressEvent } from "../utils/progressEvents";
 
 // Progress saved before it was kept per user lived under this single key.
 const LEGACY_STORAGE_KEY = getUserStorageKey(null);
@@ -101,9 +102,12 @@ export const UserProvider = ({ children }) => {
   // Stable: it only reads a ref, and useRemoteData depends on it.
   const saveUserData = useCallback(async (userData) => {
     try {
+      // progressEvent is a one-off celebration, not part of the saved account.
+      const persisted = { ...userData };
+      delete persisted.progressEvent;
       await AsyncStorage.setItem(
         storageKeyRef.current,
-        JSON.stringify(userData),
+        JSON.stringify(persisted),
       );
     } catch (error) {
       console.error("Error saving user data:", error);
@@ -117,12 +121,12 @@ export const UserProvider = ({ children }) => {
         recordsCount: prevUser.recordsCount,
         points: prevUser.points + points,
       });
-      const newUser = {
+      const newUser = withProgressEvent(prevUser, {
         ...prevUser,
         achievements: automatic.achievements,
         points: automatic.points,
         level: automatic.level,
-      };
+      });
       saveUserData(newUser);
       return newUser;
     });
@@ -130,10 +134,10 @@ export const UserProvider = ({ children }) => {
 
   const incrementRecords = (basePoints = 0) => {
     setUser((prevUser) => {
-      const newUser = buildProgressState(prevUser, {
-        recordsAdded: 1,
-        basePoints,
-      });
+      const newUser = withProgressEvent(
+        prevUser,
+        buildProgressState(prevUser, { recordsAdded: 1, basePoints }),
+      );
       saveUserData(newUser);
       return newUser;
     });
@@ -153,12 +157,12 @@ export const UserProvider = ({ children }) => {
         recordsCount: prevUser.recordsCount,
         points: prevUser.points + pointsDelta,
       });
-      const newUser = {
+      const newUser = withProgressEvent(prevUser, {
         ...prevUser,
         achievements: automatic.achievements,
         points: automatic.points,
         level: automatic.level,
-      };
+      });
       saveUserData(newUser);
       return newUser;
     });
