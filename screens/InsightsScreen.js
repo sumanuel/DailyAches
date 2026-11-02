@@ -10,6 +10,7 @@ import {
 import ActionIcon from "../components/ActionIcon";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
+import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 import { BarList, ColumnChart } from "../components/BarCharts";
@@ -198,18 +199,16 @@ const InsightsScreen = () => {
       />
 
       {summary.count === 0 ? (
-        <Card
-          style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
-        >
-          <Card.Content>
-            <Text variant="titleMedium">Sin registros en este periodo</Text>
-            <Text style={{ color: paperTheme.colors.onSurfaceVariant }}>
-              {comparison.hasPrevious
-                ? "Hubo registros en el periodo anterior: usa la flecha para verlos."
-                : "Cuando haya registros, aquí aparecerá su resumen."}
-            </Text>
-          </Card.Content>
-        </Card>
+        <EmptyState
+          illustration="Zen.png"
+          title="Sin registros en este periodo"
+          description={
+            comparison.hasPrevious
+              ? "Hubo registros en el periodo anterior: usa la flecha para verlos."
+              : "Cuando haya registros, aquí aparecerá su resumen."
+          }
+          style={styles.card}
+        />
       ) : (
         <>
           <View style={styles.tiles}>

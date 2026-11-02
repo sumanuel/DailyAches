@@ -9,6 +9,7 @@ import {
 import ActionIcon from "../components/ActionIcon";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
+import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
 import IllustrationBadge from "../components/IllustrationBadge";
 import {
@@ -184,34 +185,13 @@ const PeopleScreen = ({ navigation }) => {
         renderItem={renderPerson}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-      <Card
-        style={[
-          styles.emptyCard,
-          { backgroundColor: paperTheme.colors.surface },
-        ]}
-      >
-        <Card.Content>
-          <Text variant="titleMedium" style={styles.emptyTitle}>
-            Todavia no hay elenco
-          </Text>
-          <Text
-            variant="bodyMedium"
-            style={[
-              styles.muted,
-              { color: paperTheme.colors.onSurfaceVariant },
-            ]}
-          >
-            Agrega una persona para empezar a registrar sus molestias con
-            claridad y un tono ligero.
-          </Text>
-          <Text
-            style={[styles.emptyHint, { color: paperTheme.colors.primary }]}
-          >
-            El boton + ya esta listo para sumar a la primera persona del
-            listado.
-          </Text>
-        </Card.Content>
-      </Card>
+          <EmptyState
+            illustration="Mujer feliz.png"
+            title="Todavía no hay elenco"
+            description="Agrega a la primera persona y empieza a anotar sus molestias, con cariño y un toque de humor."
+            actionLabel="Agregar persona"
+            onAction={openAdd}
+          />
         }
       />
 
@@ -238,9 +218,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   list: { flex: 1, marginTop: 12 },
-  emptyCard: { borderRadius: 24, overflow: "hidden" },
-  emptyTitle: { marginBottom: 6, fontWeight: "800" },
-  emptyHint: { marginTop: 12, fontWeight: "700" },
   card: {
     width: "100%",
     borderRadius: 24,
