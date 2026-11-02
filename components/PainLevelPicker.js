@@ -65,8 +65,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   option: {
-    width: 44,
-    height: 44,
+    minWidth: 44,
+    minHeight: 44,
+    paddingHorizontal: 4,
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",

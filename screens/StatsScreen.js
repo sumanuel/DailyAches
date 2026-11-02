@@ -726,7 +726,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   segmentBtn: { flex: 1, borderRadius: 12 },
-  segmentBtnContent: { height: 40 },
+  segmentBtnContent: { minHeight: 40 },
 
   filtersCard: { marginTop: 12, borderRadius: 24, overflow: "hidden" },
   filtersHeader: { marginBottom: 14 },
@@ -735,7 +735,7 @@ const styles = StyleSheet.create({
   rangeRow: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
   rangeCol: { flex: 1, gap: 6 },
   calendarBtn: { alignSelf: "stretch", borderRadius: 999 },
-  calendarBtnContent: { justifyContent: "flex-start", height: 44 },
+  calendarBtnContent: { justifyContent: "flex-start", minHeight: 44 },
   calendarBtnLabel: { fontSize: 12 },
   quickRow: {
     flexDirection: "row",
@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
   quickBtn: {
     borderRadius: 999,
   },
-  quickBtnContent: { height: 38, paddingHorizontal: 6 },
+  quickBtnContent: { minHeight: 38, paddingHorizontal: 6 },
   quickBtnLabel: { fontSize: 12 },
 
   recordsList: { marginTop: 12, gap: 12 },
