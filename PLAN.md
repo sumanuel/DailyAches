@@ -43,7 +43,7 @@ Los puntos son hipótesis a validar usando la app en la fase 0.
 **Registro de dolor** (`RecordPainScreen`)
 - [x] Registro rápido (2026-10-24): el tipo de dolor del último registro de esa persona llega preseleccionado y la intensidad 1-10 se elige con `PainLevelPicker` (antes se guardaba siempre 5, y no se mostraba en ninguna parte). La intensidad aparece ahora en Inicio y en Estadísticas. Probado en web contra la API local; no en dispositivo.
 - [x] Editar y eliminar registros desde Inicio y desde el Historial de cada persona (2026-10-24). Eliminar oculta el registro al instante y muestra "Registro eliminado · Deshacer" durante 6 s; pasado ese tiempo se borra en la API (si el servidor falla, el registro vuelve y se avisa). Sustituye al diálogo de confirmación porque deshacer es menos intrusivo y funciona también en web. Si se cierra la app durante esos 6 s el registro no se borra. Probado en web contra la API local; no en dispositivo.
-- [ ] Permitir elegir fecha y hora (registrar un dolor de ayer). Bloqueado por la API: `POST /api/records` no acepta `created_at` (ver fase 4).
+- [x] Elegir cuándo fue el dolor (2026-11-02): al registrar, «¿Cuándo fue?» ofrece Ahora, Ayer, Hace 2 días y Hace 3 días (misma hora del día; `utils/recordDate.js`, 4 pruebas). Al editar se conserva la fecha. Probado en web contra la API local. Falta un selector de fecha y hora libres para días más lejanos.
 
 **Historial** (`HistoryPeopleScreen`)
 - [x] Filtros del historial por persona (se elige antes), rango de fechas (ya existía), tipo de dolor (chips con conteo) y búsqueda en notas y nombre del dolor, sin distinguir mayúsculas ni acentos (2026-10-24). Lógica en `utils/recordFilters.js` con 13 pruebas. Probado en web.
@@ -90,7 +90,7 @@ Ordenadas por valor estimado frente a esfuerzo.
 - [ ] Cambio de contraseña, eliminación de cuenta y exportación.
 - [x] Paginación en `GET /api/records` (2026-11-02, en `Dailyaches-api`): `limit` (1..200), `offset`, `from` (inclusivo), `to` (exclusivo), `person_id` y `pain_type_id`; responde `{ records, total, limit, offset }` y sin `limit` devuelve todo, como antes. La app todavía carga todo: usar la paginación cuando haya estadísticas agregadas.
 - [x] Borrar una persona borra sus registros (migración 002, cascada); borrar un tipo de dolor con registros sigue dando 409. La app ya no borra los registros uno a uno.
-- [x] `created_at` opcional en `POST` y `PUT /api/records` (entre 2000-01-01 y ahora). La app todavía no deja elegir la fecha al registrar: pendiente.
+- [x] `created_at` opcional en `POST` y `PUT /api/records` (entre 2000-01-01 y ahora). La app ya deja elegir hasta 3 días atrás (2026-11-02).
 - [x] La API tiene migraciones numeradas (`npm run migrate`) y pruebas de integración (`npm test`, schema `dailyaches_test`, 14 casos). Respaldo previo con `pg_dump` en `C:\Users\user\DailyAches-backups`.
 - [ ] Decidido el 2026-11-02: borrar un tipo con registros se bloquea con 409; los logros y puntos irán al servidor; el correo de recuperación espera datos del proveedor.
 - [x] Cambiar contraseña y eliminar cuenta (2026-11-02): `PUT /api/auth/password` y `DELETE /api/auth/account` en la API (migración 003, tokens con marca de versión de contraseña: al cambiarla se cierran las otras sesiones; contraseña incorrecta = 403 para no cerrar la sesión por un 401) y pantallas `ChangePasswordScreen` y `DeleteAccountScreen` desde Más → Perfil → Seguridad. Borrar la cuenta limpia también los datos locales. API: 24 pruebas de integración; app: 264 pruebas. Probado de punta a punta en web.
