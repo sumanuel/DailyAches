@@ -179,6 +179,14 @@ const MoreScreen = ({ navigation }) => {
         />
         <View style={styles.divider} />
         <List.Item
+          title="Ver la guía otra vez"
+          description="Un repaso rápido de cómo se usa la app"
+          left={(props) => <List.Icon {...props} icon="compass-outline" />}
+          right={(props) => <List.Icon {...props} icon="arrow-right" />}
+          onPress={() => navigation.getParent()?.navigate("Onboarding")}
+        />
+        <View style={styles.divider} />
+        <List.Item
           title="Perfil"
           description="Datos principales y ajustes personales"
           left={(props) => (
