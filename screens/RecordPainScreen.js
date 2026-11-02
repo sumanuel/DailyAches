@@ -26,6 +26,11 @@ import {
   getLastPainTypeForPerson,
   normalizePainLevel,
 } from "../utils/painLevel";
+import {
+  DEFAULT_RECORD_DATE,
+  RECORD_DATE_OPTIONS,
+  createdAtForOption,
+} from "../utils/recordDate";
 
 const schema = yup.object({
   pain: yup.string().required("Elige un tipo de dolor."),
@@ -48,6 +53,7 @@ const RecordPainScreen = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPainType, setSelectedPainType] = useState(null);
   const [painLevel, setPainLevel] = useState(DEFAULT_PAIN_LEVEL);
+  const [dateOption, setDateOption] = useState(DEFAULT_RECORD_DATE);
   const [saving, setSaving] = useState(false);
   const {
     personId: paramPersonId,
@@ -123,6 +129,9 @@ const RecordPainScreen = ({ navigation, route }) => {
         pain_level: painLevel,
         notes: data.notes,
       };
+      // Editing keeps the date the record already has.
+      const createdAt = isEdit ? undefined : createdAtForOption(dateOption);
+      if (createdAt) recordData.created_at = createdAt;
 
       const result =
         isEdit && editRecord
@@ -288,6 +297,54 @@ const RecordPainScreen = ({ navigation, route }) => {
             style={styles.level}
           />
 
+          {isEdit ? null : (
+            <View style={styles.when}>
+              <Text
+                variant="titleSmall"
+                accessibilityRole="header"
+                style={styles.whenTitle}
+              >
+                ¿Cuándo fue?
+              </Text>
+              <View style={styles.whenOptions}>
+                {RECORD_DATE_OPTIONS.map((option) => {
+                  const isSelected = dateOption === option.key;
+                  return (
+                    <PressableScale
+                      key={option.key}
+                      accessibilityRole="button"
+                      accessibilityLabel={option.label}
+                      accessibilityState={{ selected: isSelected }}
+                      style={[
+                        styles.whenOption,
+                        {
+                          backgroundColor: isSelected
+                            ? paperTheme.colors.primaryContainer
+                            : paperTheme.colors.surfaceVariant,
+                          borderColor: isSelected
+                            ? paperTheme.colors.primary
+                            : "transparent",
+                        },
+                      ]}
+                      onPress={() => setDateOption(option.key)}
+                    >
+                      <Text
+                        style={{
+                          color: isSelected
+                            ? paperTheme.colors.onPrimaryContainer
+                            : paperTheme.colors.onSurface,
+                          fontWeight: isSelected ? "800" : "500",
+                        }}
+                      >
+                        {option.label}
+                      </Text>
+                    </PressableScale>
+                  );
+                })}
+              </View>
+            </View>
+          )}
+
           <Controller
             control={control}
             name="notes"
@@ -344,6 +401,16 @@ const styles = StyleSheet.create({
   painImage: { width: 60, height: 60, borderRadius: 30, marginBottom: 8 },
   painText: { fontSize: 14, textAlign: "center", fontWeight: "500" },
   level: { marginTop: 16 },
+  when: { marginTop: 16 },
+  whenTitle: { fontWeight: "800", marginBottom: 8 },
+  whenOptions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  whenOption: {
+    minHeight: 44,
+    paddingHorizontal: 16,
+    justifyContent: "center",
+    borderRadius: 999,
+    borderWidth: 2,
+  },
   input: { marginTop: 12 },
   notesContent: { minHeight: 72, textAlignVertical: "top" },
   button: { marginTop: 24, marginBottom: 8, borderRadius: 16 },
