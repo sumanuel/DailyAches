@@ -2,7 +2,7 @@
 // the labels shown on each group. Records use the app shape from apiMappers.
 
 const WEEKDAYS_ES = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
-const MONTHS_ES = [
+export const MONTHS_ES = [
   "ene",
   "feb",
   "mar",
