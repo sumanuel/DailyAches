@@ -4,10 +4,10 @@ import {
   Button,
   Card,
   Chip,
-  IconButton,
   Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
+import ActionIcon from "../components/ActionIcon";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
@@ -151,7 +151,7 @@ const InsightsScreen = () => {
       </View>
 
       <View style={styles.navigator}>
-        <IconButton
+        <ActionIcon
           icon="chevron-left"
           onPress={() => setOffset((current) => current - 1)}
           accessibilityLabel="Periodo anterior"
@@ -159,7 +159,7 @@ const InsightsScreen = () => {
         <Text variant="titleMedium" accessibilityRole="header">
           {range.label}
         </Text>
-        <IconButton
+        <ActionIcon
           icon="chevron-right"
           disabled={offset === 0}
           onPress={() => setOffset((current) => Math.min(0, current + 1))}

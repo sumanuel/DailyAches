@@ -38,6 +38,8 @@ Export: `utils/exportRecords.js` builds the CSV / PDF HTML (pure) and `utils/exp
 
 Daily reminder: `utils/reminders.js` (pure) and `utils/reminderService.js` (expo-notifications, saved per device under `reminderSettings`). Native modules that Expo Go may lack (`expo-notifications`, `expo-file-system`, `expo-sharing`, `expo-print`) are loaded lazily with `require` inside the functions that need them, never imported at the top of a file: a missing module would crash the whole app at start. Reminders need a development build; on web and in Expo Go the switch in Settings is disabled.
 
+Theme colors live in `constants/palettes.js` (light and dark) and are checked by `utils/__tests__/palettes.test.js`: every text/background pair must keep WCAG AA contrast (4.5:1). Change a color there, not inline, and run the tests. Icon buttons use `components/ActionIcon.js` (44 px target, needs an `accessibilityLabel`).
+
 ## UI conventions
 
 `.github/instructions/dailyaches-ui.instructions.md` applies to `screens/`, `components/`, `navigation/` and `ThemeContext`: calm, humane health-app tone; use theme tokens rather than hard-coded colors; rounded soft cards; one primary action per screen; intentional empty states (illustration + short message + CTA); short friendly Spanish copy; consistent card padding/radius.

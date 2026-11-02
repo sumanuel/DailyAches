@@ -229,6 +229,9 @@ const RecordPainScreen = ({ navigation, route }) => {
               return (
                 <View key={keyExtractor(item)} style={styles.painCell}>
                 <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={item.name}
+                  accessibilityState={{ selected: isSelected }}
                   style={[
                     styles.painOption,
                     {

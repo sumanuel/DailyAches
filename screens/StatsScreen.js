@@ -4,10 +4,10 @@ import {
   Button,
   Card,
   Chip,
-  IconButton,
   Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
+import ActionIcon from "../components/ActionIcon";
 import { Calendar } from "react-native-calendars";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
@@ -322,14 +322,14 @@ const StatsScreen = ({ route, navigation }) => {
         </Card.Content>
 
         <Card.Content style={styles.recordActions}>
-          <IconButton
+          <ActionIcon
             icon="square-edit-outline"
             size={18}
             style={{ backgroundColor: paperTheme.colors.surfaceVariant }}
             onPress={() => navigation.navigate("RecordPain", { record })}
             accessibilityLabel="Editar registro"
           />
-          <IconButton
+          <ActionIcon
             icon="delete-circle-outline"
             size={18}
             style={{ backgroundColor: paperTheme.colors.surfaceVariant }}

@@ -3,10 +3,10 @@ import { StyleSheet, View } from "react-native";
 import {
   Button,
   Card,
-  IconButton,
   Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
+import ActionIcon from "./ActionIcon";
 import {
   describeAverageChange,
   describeCountChange,
@@ -43,7 +43,7 @@ const WeeklySummaryCard = ({ records, onSeeStats, onShare }) => {
               {range.label}
             </Text>
           </View>
-          <IconButton
+          <ActionIcon
             icon="share-variant-outline"
             size={20}
             onPress={() => onShare?.(getWeeklyHighlights(records))}

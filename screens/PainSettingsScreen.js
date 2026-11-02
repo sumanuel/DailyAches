@@ -3,10 +3,10 @@ import { FlatList, StyleSheet, View } from "react-native";
 import {
   Card,
   FAB,
-  IconButton,
   Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
+import ActionIcon from "../components/ActionIcon";
 import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
 import { confirmAction, showMessage } from "../utils/confirm";
@@ -175,7 +175,7 @@ const PainSettingsScreen = () => {
                 </View>
               </View>
               <View style={styles.itemActions}>
-                <IconButton
+                <ActionIcon
                   icon="square-edit-outline"
                   size={20}
                   style={[
@@ -185,7 +185,7 @@ const PainSettingsScreen = () => {
                   onPress={() => openEditScreen(item)}
                   accessibilityLabel={`Editar ${item.name}`}
                 />
-                <IconButton
+                <ActionIcon
                   icon="delete-circle-outline"
                   size={20}
                   style={[
