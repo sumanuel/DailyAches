@@ -36,8 +36,9 @@ const ProgressCelebration = () => {
   const kind = message?.kind;
   const top = (insets?.top ?? 0) + 44;
 
-  // A level-up rains confetti, an achievement throws it, a plain record sends
-  // up a few hearts. Each event is celebrated once.
+  // A level-up rains confetti and an achievement throws it. A plain record has
+  // no confetti here: the screen that saved it reacts to its intensity. Each
+  // event is celebrated once.
   useEffect(() => {
     if (!eventId) return;
     const where = { x: width / 2, y: top };
@@ -46,8 +47,6 @@ const ProgressCelebration = () => {
       fire("confetti", where);
     } else if (kind === "achievement") {
       fire("confetti", where);
-    } else {
-      fire("hearts", where);
     }
     // Only a new event should fire; the rest is read as it is at that moment.
     // eslint-disable-next-line react-hooks/exhaustive-deps

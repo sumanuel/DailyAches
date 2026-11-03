@@ -10,6 +10,9 @@
 
 export const MAX_PARTICLES = 60;
 
+// Faces and drops that fall when something is deleted.
+export const DELETE_EMOJIS = ["😢", "😭", "💧"];
+
 export const HEART_EMOJIS = ["❤️", "💖", "💗", "💕"];
 export const FALLBACK_COLORS = ["#FF6B6B", "#4D96FF", "#FFD93D", "#6BCB77", "#C77DFF"];
 
@@ -32,6 +35,7 @@ const sign = (random) => (random() < 0.5 ? -1 : 1);
 export const PRESETS = {
   confetti: { count: 30 }, // colored paper out of one point
   rain: { count: 44 }, // colored paper falling over the whole screen
+  emojiRain: { count: 14 }, // emojis falling over the whole screen
   hearts: { count: 9 }, // emojis floating up
   emoji: { count: 8 }, // emojis out of one point
 };
@@ -56,7 +60,7 @@ const glyph = (random, emojis, min, max) => ({
   round: false,
 });
 
-// `width` and `height` are the screen: rain spreads over the first and falls
+// `width` and `height` are the screen: rain (of paper or of emojis) spreads over the first and falls
 // across the second. Returns at most MAX_PARTICLES pieces.
 export const makeParticles = (
   preset,
@@ -98,6 +102,22 @@ export const makeParticles = (
         rotate: sign(random) * between(random, 540, 1080),
         delay: between(random, 0, 900),
         duration: between(random, 2200, 3600),
+      };
+    }
+    if (preset === "emojiRain") {
+      return {
+        ...base,
+        ...glyph(random, symbols, 22, 34),
+        x0: between(random, -width / 2, width / 2),
+        y0: -between(random, 30, 140),
+        dx: sign(random) * between(random, 0, 20),
+        up: 0,
+        fall: height + 220,
+        sway: between(random, 6, 18),
+        waves: between(random, 1, 2),
+        rotate: sign(random) * between(random, 10, 30),
+        delay: between(random, 0, 1200),
+        duration: between(random, 2400, 3800),
       };
     }
     if (preset === "hearts") {

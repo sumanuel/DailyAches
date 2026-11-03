@@ -7,15 +7,20 @@ import AppNavigator from "./navigation/AppNavigator";
 import UndoDeleteSnackbar from "./components/UndoDeleteSnackbar";
 import ProgressCelebration from "./components/ProgressCelebration";
 import { BurstProvider } from "./components/BurstProvider";
+import { ToastProvider } from "./components/ToastProvider";
+import MoodAmbience from "./components/MoodAmbience";
 
 const AppContent = () => {
   const { theme } = useTheme();
   return (
     <PaperProvider theme={theme}>
       <BurstProvider>
-        <AppNavigator />
-        <UndoDeleteSnackbar />
-        <ProgressCelebration />
+        <ToastProvider>
+          <AppNavigator />
+          <UndoDeleteSnackbar />
+          <ProgressCelebration />
+          <MoodAmbience />
+        </ToastProvider>
       </BurstProvider>
     </PaperProvider>
   );

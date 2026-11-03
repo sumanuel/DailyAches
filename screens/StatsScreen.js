@@ -13,6 +13,8 @@ import AppScreen from "../components/AppScreen";
 import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
 import RecordRow from "../components/RecordRow";
+import { useBurst } from "../components/BurstProvider";
+import { DELETE_EMOJIS } from "../utils/particles";
 import { formatClock } from "../utils/timeFormat";
 import { getRecordIllustrationKey } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
@@ -67,6 +69,7 @@ const RECORDS_PAGE_SIZE = 30;
 
 const StatsScreen = ({ route, navigation }) => {
   const paperTheme = usePaperTheme();
+  const fire = useBurst();
   const {
     user,
     getTodayRecords,
@@ -194,7 +197,10 @@ const StatsScreen = ({ route, navigation }) => {
         illustrationKey={getRecordIllustrationKey(record, painTypesById)}
         subtitle={formatClock(record.createdAt)}
         onEdit={() => navigation.navigate("RecordPain", { record })}
-        onDelete={() => scheduleDeleteRecord(record)}
+        onDelete={() => {
+          fire("emojiRain", undefined, { emojis: DELETE_EMOJIS });
+          scheduleDeleteRecord(record);
+        }}
       />
     </View>
   );

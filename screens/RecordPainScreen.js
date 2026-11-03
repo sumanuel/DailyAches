@@ -16,9 +16,12 @@ import AppTextField from "../components/AppTextField";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 import PainLevelPicker from "../components/PainLevelPicker";
 import PainTypeField from "../components/PainTypeField";
+import { useBurst } from "../components/BurstProvider";
+import { useToast } from "../components/ToastProvider";
 import {
   DEFAULT_PAIN_LEVEL,
   getLastPainTypeForPerson,
+  getPainLevelEmojis,
   normalizePainLevel,
 } from "../utils/painLevel";
 import { DEFAULT_RECORD_DATE, resolveRecordDate } from "../utils/recordDate";
@@ -38,6 +41,8 @@ const RecordPainScreen = ({ navigation, route }) => {
     remoteStatus,
   } = useUser();
   const paperTheme = usePaperTheme();
+  const fire = useBurst();
+  const toast = useToast();
   const [isEdit, setIsEdit] = useState(false);
   const [editRecord, setEditRecord] = useState(null);
   const [selectedPainType, setSelectedPainType] = useState(null);
@@ -104,7 +109,7 @@ const RecordPainScreen = ({ navigation, route }) => {
     }
   }, [record, selectedPainType, user.records, personId, painTypes, setValue]);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data, event) => {
     if (!selectedPainType || saving) return;
 
     // Editing keeps the date the record already has.
@@ -138,13 +143,14 @@ const RecordPainScreen = ({ navigation, route }) => {
         return;
       }
 
-      // A new record is celebrated by the progress banner; an edit has no points.
-      if (isEdit) {
-        Alert.alert(
-          "¡Actualizado!",
-          `Registro actualizado para ${personName}: ${selectedPainType.name}`,
-        );
-      }
+      // The reaction follows the intensity (calm leaves up to flames), and a
+      // message confirms what was saved. A new record also gets the progress
+      // banner; an edit has no points.
+      fire("emoji", event, { emojis: getPainLevelEmojis(painLevel), count: 16 });
+      toast(
+        isEdit ? "Registro actualizado" : "Registro guardado",
+        `${selectedPainType.name} de ${personName} · intensidad ${painLevel}`,
+      );
       navigation.goBack();
     } catch (error) {
       Alert.alert(

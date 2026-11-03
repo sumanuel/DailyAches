@@ -138,7 +138,8 @@ export const BurstProvider = ({ children }) => {
         ...options,
       });
       if (particles.length === 0) return;
-      const point = preset === "rain" ? { x: width / 2, y: 0 } : pointOf(where, width, height);
+      const falls = preset === "rain" || preset === "emojiRain";
+      const point = falls ? { x: width / 2, y: 0 } : pointOf(where, width, height);
 
       const add = (offsetX, offsetY) => {
         setBursts((current) => [

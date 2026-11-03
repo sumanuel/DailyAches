@@ -7,6 +7,9 @@ import {
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import ActionMenu from "../components/ActionMenu";
+import { useBurst } from "../components/BurstProvider";
+import { useToast } from "../components/ToastProvider";
+import { DELETE_EMOJIS } from "../utils/particles";
 import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
 import { confirmAction, showMessage } from "../utils/confirm";
@@ -26,6 +29,8 @@ const keyExtractor = (item) => String(item.id ?? item.name);
 const PainSettingsScreen = () => {
   const paperTheme = usePaperTheme();
   const navigation = useNavigation();
+  const fire = useBurst();
+  const toast = useToast();
   const { user, removePainType, loadPainTypesFromAPI, remoteStatus } =
     useUser();
 
@@ -65,7 +70,12 @@ const PainSettingsScreen = () => {
     if (!confirmed) return;
 
     const result = await removePainType(painType.id);
-    if (!result.success) showMessage("No se pudo eliminar", result.error);
+    if (!result.success) {
+      showMessage("No se pudo eliminar", result.error);
+      return;
+    }
+    fire("emojiRain", undefined, { emojis: DELETE_EMOJIS });
+    toast("Tipo de dolor eliminado", painType.name);
   };
 
   return (

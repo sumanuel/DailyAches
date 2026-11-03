@@ -9,6 +9,7 @@ import {
 import PersonAvatar from "../components/PersonAvatar";
 import PressableScale from "../components/PressableScale";
 import { useBurst } from "../components/BurstProvider";
+import { DELETE_EMOJIS } from "../utils/particles";
 import { formatClock } from "../utils/timeFormat";
 import RecordRow from "../components/RecordRow";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -127,7 +128,10 @@ const HomeScreen = () => {
     }
   };
 
-  const handleDeleteRecord = (record) => scheduleDeleteRecord(record);
+  const handleDeleteRecord = (record) => {
+    fire("emojiRain", undefined, { emojis: DELETE_EMOJIS });
+    scheduleDeleteRecord(record);
+  };
 
   const groupedByPerson = useMemo(() => {
     return Object.entries(

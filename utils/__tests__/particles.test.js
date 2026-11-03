@@ -1,4 +1,5 @@
 import {
+  DELETE_EMOJIS,
   FALLBACK_COLORS,
   HEART_EMOJIS,
   MAX_PARTICLES,
@@ -74,6 +75,22 @@ describe("makeParticles", () => {
     }
     expect(Math.min(...rain.map((p) => p.x0))).toBeLessThan(0);
     expect(Math.max(...rain.map((p) => p.x0))).toBeGreaterThan(0);
+  });
+
+  it("makes a rain of emojis that falls across the screen", () => {
+    const rain = makeParticles("emojiRain", {
+      emojis: DELETE_EMOJIS,
+      width: 400,
+      height: 800,
+      seed: 4,
+    });
+    expect(rain).toHaveLength(PRESETS.emojiRain.count);
+    for (const piece of rain) {
+      expect(DELETE_EMOJIS).toContain(piece.glyph);
+      expect(piece.y0).toBeLessThan(0);
+      expect(Math.abs(piece.x0)).toBeLessThanOrEqual(200);
+      expect(piece.fall).toBeGreaterThan(800);
+    }
   });
 
   it("keeps every piece moving for a positive time", () => {

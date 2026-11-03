@@ -2,6 +2,9 @@ import React, { useMemo, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { FAB, useTheme as usePaperTheme } from "react-native-paper";
 import ActionMenu from "../components/ActionMenu";
+import { useBurst } from "../components/BurstProvider";
+import { useToast } from "../components/ToastProvider";
+import { DELETE_EMOJIS } from "../utils/particles";
 import PersonRow from "../components/PersonRow";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
@@ -17,6 +20,8 @@ const keyExtractor = (person) => String(person.id);
 const PeopleScreen = ({ navigation }) => {
   const paperTheme = usePaperTheme();
   const { user, removePerson, loadPeopleFromAPI, remoteStatus } = useUser();
+  const fire = useBurst();
+  const toast = useToast();
 
   const openAdd = () => {
     navigation.navigate("AddPerson");
@@ -58,7 +63,12 @@ const PeopleScreen = ({ navigation }) => {
     if (!confirmed) return;
 
     const result = await removePerson(person.id);
-    if (!result.success) showMessage("No se pudo eliminar", result.error);
+    if (!result.success) {
+      showMessage("No se pudo eliminar", result.error);
+      return;
+    }
+    fire("emojiRain", undefined, { emojis: DELETE_EMOJIS });
+    toast("Persona eliminada", person.name);
   };
 
   const places = useMemo(
