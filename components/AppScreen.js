@@ -14,6 +14,7 @@ const AppScreen = ({
   style,
   scroll = true,
   keyboardOffset = 0,
+  overlay,
 }) => {
   const paperTheme = usePaperTheme();
   const Container = scroll ? ScrollView : View;
@@ -52,6 +53,7 @@ const AppScreen = ({
         ]}
       />
       <Container {...containerProps}>{children}</Container>
+      {overlay}
     </KeyboardAvoidingView>
   );
 };

@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Text, useTheme as usePaperTheme } from "react-native-paper";
+import { categoryColor, intensityColor } from "../utils/chartColors";
 
 // Small bar charts drawn with plain views: no chart library, and they follow
 // the theme in light and dark mode.
@@ -8,7 +9,7 @@ import { Text, useTheme as usePaperTheme } from "react-native-paper";
 const describe = (items) =>
   items.map((item) => `${item.label ?? item.name} ${item.count}`).join(", ");
 
-// Horizontal bars for a ranking (pain types, people).
+// Horizontal bars for a ranking (pain types, people), one color each.
 export const BarList = ({ items, emptyLabel = "Sin datos" }) => {
   const paperTheme = usePaperTheme();
   const max = Math.max(1, ...items.map((item) => item.count));
@@ -23,7 +24,7 @@ export const BarList = ({ items, emptyLabel = "Sin datos" }) => {
 
   return (
     <View style={styles.list} accessibilityLabel={describe(items)}>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <View key={item.key} style={styles.listRow}>
           <View style={styles.listHeader}>
             <Text numberOfLines={1} style={styles.listName}>
@@ -43,7 +44,7 @@ export const BarList = ({ items, emptyLabel = "Sin datos" }) => {
               style={[
                 styles.fill,
                 {
-                  backgroundColor: paperTheme.colors.primary,
+                  backgroundColor: categoryColor(paperTheme.colors, index),
                   width: `${Math.max(4, (item.count / max) * 100)}%`,
                 },
               ]}
@@ -55,7 +56,7 @@ export const BarList = ({ items, emptyLabel = "Sin datos" }) => {
   );
 };
 
-// Vertical bars over time. `labelEvery` thins out the labels for long series.
+// Vertical bars over time, colored by how heavy the period was. `labelEvery` thins out the labels for long series.
 export const ColumnChart = ({ data, height = 110, labelEvery = 1 }) => {
   const paperTheme = usePaperTheme();
   const max = Math.max(1, ...data.map((item) => item.count));
@@ -78,7 +79,7 @@ export const ColumnChart = ({ data, height = 110, labelEvery = 1 }) => {
                   backgroundColor:
                     item.count === 0
                       ? paperTheme.colors.outline
-                      : paperTheme.colors.primary,
+                      : intensityColor(paperTheme.colors, item.count / max),
                 },
               ]}
             />

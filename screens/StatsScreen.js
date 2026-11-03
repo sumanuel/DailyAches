@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { StyleSheet, View, Modal } from "react-native";
+import { ScrollView, StyleSheet, View, Modal } from "react-native";
 import {
   Button,
   Card,
@@ -7,17 +7,13 @@ import {
   Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
-import ActionIcon from "../components/ActionIcon";
 import { Calendar } from "react-native-calendars";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
-import IllustrationBadge from "../components/IllustrationBadge";
-import {
-  getPainIllustration,
-  resolvePainIllustrationKey,
-} from "../constants/illustrations";
+import RecordRow from "../components/RecordRow";
+import { resolvePainIllustrationKey } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 import AppTextField from "../components/AppTextField";
 import {
@@ -50,6 +46,10 @@ const formatDateEs = (date) => {
     monthShortEs[d.getMonth()]
   } ${d.getFullYear()}`;
 };
+
+// "01 nov", or "01 nov 2025" when it is not this year: the range buttons are narrow.
+const formatShortDateEs = (date) =>
+  formatDateEs(date).replace(` ${new Date().getFullYear()}`, "");
 
 const formatTimeEs = (date) => {
   const d = new Date(date);
@@ -145,12 +145,6 @@ const StatsScreen = ({ route, navigation }) => {
     setHistoryRange(getPresetRange(p));
   };
 
-  const peopleById = useMemo(() => {
-    const map = new Map();
-    for (const p of user.people || []) map.set(p.id, p);
-    return map;
-  }, [user.people]);
-
   const todayRecords = useMemo(() => {
     const allToday = getTodayRecords();
     if (!personId) return [];
@@ -234,113 +228,34 @@ const StatsScreen = ({ route, navigation }) => {
     return marked;
   };
 
-  const renderRecord = (record, index) => {
-    const person = record.personId ? peopleById.get(record.personId) : null;
-    const relationship = person?.relationship || "Otro";
+  const renderRecord = (record, index) => (
+    <View
+      key={record.id || index}
+      style={[
+        index > 0 && styles.recordDivider,
+        { borderTopColor: paperTheme.colors.outlineVariant },
+      ]}
+    >
+      <RecordRow
+        record={record}
+        illustrationKey={resolvePainIllustrationKey(record)}
+        subtitle={formatTimeEs(record.createdAt)}
+        onEdit={() => navigation.navigate("RecordPain", { record })}
+        onDelete={() => scheduleDeleteRecord(record)}
+      />
+    </View>
+  );
 
-    return (
-      <Card
-        key={record.id || index}
-        style={[
-          styles.recordCard,
-          { backgroundColor: paperTheme.colors.surface },
-        ]}
-      >
-        <Card.Content style={styles.recordRowTop}>
-          <IllustrationBadge
-            preset={getPainIllustration(resolvePainIllustrationKey(record))}
-            size={54}
-            style={styles.recordIcon}
-          />
-
-          <View style={styles.recordMain}>
-            <Text variant="titleMedium" numberOfLines={1}>
-              {record.personName}
-            </Text>
-            <Text
-              style={[
-                styles.recordSub,
-                { color: paperTheme.colors.onSurfaceVariant },
-              ]}
-            >
-              {formatDateEs(record.createdAt)} ·{" "}
-              {formatTimeEs(record.createdAt)}
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.pill,
-              { backgroundColor: paperTheme.colors.primaryContainer },
-            ]}
-          >
-            <Text
-              style={{
-                color: paperTheme.colors.onPrimaryContainer,
-                fontWeight: "700",
-              }}
-              numberOfLines={1}
-            >
-              😣 {record.pain}
-              {record.painLevel ? ` · ${record.painLevel}/10` : ""}
-            </Text>
-          </View>
-        </Card.Content>
-
-        <Card.Content style={styles.recordBottom}>
-          <View
-            style={[
-              styles.kv,
-              { backgroundColor: paperTheme.colors.surfaceVariant },
-            ]}
-          >
-            <Text
-              style={[
-                styles.kvLabel,
-                { color: paperTheme.colors.onSurfaceVariant },
-              ]}
-            >
-              PARENTEZCO
-            </Text>
-            <Text numberOfLines={1}>{relationship}</Text>
-          </View>
-          <View
-            style={[
-              styles.kv,
-              { backgroundColor: paperTheme.colors.surfaceVariant },
-            ]}
-          >
-            <Text
-              style={[
-                styles.kvLabel,
-                { color: paperTheme.colors.onSurfaceVariant },
-              ]}
-            >
-              NOTAS
-            </Text>
-            <Text numberOfLines={1}>{record.notes ? record.notes : "-"}</Text>
-          </View>
-        </Card.Content>
-
-        <Card.Content style={styles.recordActions}>
-          <ActionIcon
-            icon="square-edit-outline"
-            size={18}
-            style={{ backgroundColor: paperTheme.colors.surfaceVariant }}
-            onPress={() => navigation.navigate("RecordPain", { record })}
-            accessibilityLabel="Editar registro"
-          />
-          <ActionIcon
-            icon="delete-circle-outline"
-            size={18}
-            style={{ backgroundColor: paperTheme.colors.surfaceVariant }}
-            onPress={() => scheduleDeleteRecord(record)}
-            accessibilityLabel="Eliminar registro"
-          />
-        </Card.Content>
-      </Card>
-    );
-  };
+  // One card per list of records, rows separated by a thin line.
+  const renderRecordCard = (list) => (
+    <Card
+      style={[styles.recordCard, { backgroundColor: paperTheme.colors.surface }]}
+    >
+      <Card.Content style={styles.recordCardContent}>
+        {list.map(renderRecord)}
+      </Card.Content>
+    </Card>
+  );
 
   if (!personId || !personName) {
     return (
@@ -364,22 +279,10 @@ const StatsScreen = ({ route, navigation }) => {
   return (
     <AppScreen contentContainerStyle={styles.content}>
       <HeroPanel
+        compact
         eyebrow="HISTORIAL DETALLADO"
         title={`${personName} en cifras y episodios`}
-        description="Alterna entre el resumen de hoy y el archivo historico para leer el comportamiento del dolor sin perder contexto."
-      >
-        <Text
-          style={[
-            styles.heroChip,
-            {
-              backgroundColor: paperTheme.colors.accentSun,
-              color: paperTheme.colors.onSurface,
-            },
-          ]}
-        >
-          Registros: {count}
-        </Text>
-      </HeroPanel>
+      />
 
       <LoadStatusNotice
         sources={[
@@ -419,30 +322,8 @@ const StatsScreen = ({ route, navigation }) => {
           ]}
         >
           <Card.Content>
-            <View style={styles.filtersHeader}>
-              <Text variant="titleMedium" style={styles.filtersTitle}>
-                Rango del historial
-              </Text>
-              <Text
-                style={[
-                  styles.filtersSubtitle,
-                  { color: paperTheme.colors.onSurfaceVariant },
-                ]}
-              >
-                Elige fechas rápidas o define un rango manual.
-              </Text>
-            </View>
-
             <View style={styles.rangeRow}>
               <View style={styles.rangeCol}>
-                <Text
-                  style={[
-                    styles.kvLabel,
-                    { color: paperTheme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  DESDE
-                </Text>
                 <Button
                   mode="outlined"
                   icon="calendar"
@@ -455,18 +336,10 @@ const StatsScreen = ({ route, navigation }) => {
                   contentStyle={styles.calendarBtnContent}
                   labelStyle={styles.calendarBtnLabel}
                 >
-                  {formatDateEs(historyRange.start)}
+                  Desde {formatShortDateEs(historyRange.start)}
                 </Button>
               </View>
               <View style={styles.rangeCol}>
-                <Text
-                  style={[
-                    styles.kvLabel,
-                    { color: paperTheme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  HASTA
-                </Text>
                 <Button
                   mode="outlined"
                   icon="calendar"
@@ -479,7 +352,7 @@ const StatsScreen = ({ route, navigation }) => {
                   contentStyle={styles.calendarBtnContent}
                   labelStyle={styles.calendarBtnLabel}
                 >
-                  {formatDateEs(historyRange.end)}
+                  Hasta {formatShortDateEs(historyRange.end)}
                 </Button>
               </View>
             </View>
@@ -526,7 +399,11 @@ const StatsScreen = ({ route, navigation }) => {
             />
 
             {painTypeOptions.length > 1 ? (
-              <View style={styles.chipRow}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.chipRow}
+              >
                 <Chip
                   selected={!painTypeKey}
                   onPress={() => setPainTypeChoice(null)}
@@ -548,7 +425,7 @@ const StatsScreen = ({ route, navigation }) => {
                     {option.name} ({option.count})
                   </Chip>
                 ))}
-              </View>
+              </ScrollView>
             ) : null}
           </Card.Content>
         </Card>
@@ -670,10 +547,10 @@ const StatsScreen = ({ route, navigation }) => {
                   >
                     {formatDayHeader(group.date)} · {group.records.length}
                   </Text>
-                  {group.records.map(renderRecord)}
+                  {renderRecordCard(group.records)}
                 </View>
               ))
-            : records.slice(0, visibleCount).map(renderRecord)}
+            : renderRecordCard(records.slice(0, visibleCount))}
           {count > visibleCount ? (
             <Button
               mode="text"
@@ -696,9 +573,8 @@ const StatsScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 12, paddingBottom: 24 },
-  searchInput: { marginTop: 16 },
-  recordActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8 },
-  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
+  searchInput: { marginTop: 10 },
+  chipRow: { flexDirection: "row", gap: 8, paddingTop: 10, paddingRight: 4 },
   filterChip: { borderRadius: 16 },
   dayHeader: {
     fontSize: 12,
@@ -708,30 +584,17 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 6,
   },
-  heroChip: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: "800",
-    overflow: "hidden",
-  },
-
   segment: {
     flexDirection: "row",
     gap: 8,
     padding: 6,
     borderRadius: 14,
-    marginTop: 12,
+    marginTop: 8,
   },
   segmentBtn: { flex: 1, borderRadius: 12 },
   segmentBtnContent: { minHeight: 40 },
 
-  filtersCard: { marginTop: 12, borderRadius: 24, overflow: "hidden" },
-  filtersHeader: { marginBottom: 14 },
-  filtersTitle: { fontWeight: "800" },
-  filtersSubtitle: { marginTop: 4, lineHeight: 18 },
+  filtersCard: { marginTop: 8, borderRadius: 22, overflow: "hidden" },
   rangeRow: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
   rangeCol: { flex: 1, gap: 6 },
   calendarBtn: { alignSelf: "stretch", borderRadius: 999 },
@@ -741,7 +604,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-    marginTop: 12,
+    marginTop: 10,
   },
   quickBtn: {
     borderRadius: 999,
@@ -751,28 +614,8 @@ const styles = StyleSheet.create({
 
   recordsList: { marginTop: 12, gap: 12 },
   recordCard: { borderRadius: 24, overflow: "hidden" },
-  recordRowTop: { flexDirection: "row", alignItems: "center", gap: 12 },
-  recordIcon: { borderRadius: 16 },
-  recordMain: { flex: 1 },
-  recordSub: { marginTop: 2 },
-  pill: {
-    maxWidth: 132,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-  },
-  recordBottom: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 14,
-    gap: 10,
-  },
-  kv: {
-    flex: 1,
-    borderRadius: 18,
-    padding: 12,
-  },
-  kvLabel: { fontSize: 10, letterSpacing: 0.6, fontWeight: "700" },
+  recordCardContent: { paddingVertical: 0 },
+  recordDivider: { borderTopWidth: StyleSheet.hairlineWidth },
 
   emptyCard: { marginTop: 12, borderRadius: 24, overflow: "hidden" },
   modalOverlay: {

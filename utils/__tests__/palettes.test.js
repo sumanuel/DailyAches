@@ -74,6 +74,17 @@ describe.each([
 
 // Bars in components/BarCharts.js are graphics, not text: 3:1 is the WCAG
 // minimum for them against whatever they sit on.
+const CHART_COLOR_KEYS = [
+  "chartCoral",
+  "chartBlue",
+  "chartTeal",
+  "chartAmber",
+  "chartPurple",
+  "chartPink",
+  "chartGreen",
+  "chartCyan",
+];
+
 const CHART_PAIRS = [
   ["primary", "surface"], // bar on a card
   ["primary", "outlineVariant"], // bar over its track
@@ -88,6 +99,14 @@ describe.each([
     expect(contrastRatio(colors[foreground], colors[background])).toBeGreaterThanOrEqual(
       AA_LARGE_OR_UI,
     );
+  });
+
+  it.each(CHART_COLOR_KEYS)("%s reaches 3:1 on the card and over the track", (key) => {
+    for (const background of ["surface", "outlineVariant", "surfaceVariant"]) {
+      expect(contrastRatio(colors[key], colors[background])).toBeGreaterThanOrEqual(
+        AA_LARGE_OR_UI,
+      );
+    }
   });
 
   it("keeps the track visible against the card and the empty tick more so", () => {

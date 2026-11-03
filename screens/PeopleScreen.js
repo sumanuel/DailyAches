@@ -1,21 +1,12 @@
 import React, { useMemo, useEffect } from "react";
-import { StyleSheet, View, FlatList } from "react-native";
-import {
-  Card,
-  Text,
-  FAB,
-  useTheme as usePaperTheme,
-} from "react-native-paper";
-import ActionIcon from "../components/ActionIcon";
+import { StyleSheet, View } from "react-native";
+import { FAB, useTheme as usePaperTheme } from "react-native-paper";
+import ActionMenu from "../components/ActionMenu";
+import PersonRow from "../components/PersonRow";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
-import IllustrationBadge from "../components/IllustrationBadge";
-import {
-  getAvatarIllustration,
-  resolveAvatarIllustrationKey,
-} from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 import { confirmAction, showMessage } from "../utils/confirm";
 import { countRecordsFor, describeRecordCount } from "../utils/recordFilters";
@@ -69,106 +60,55 @@ const PeopleScreen = ({ navigation }) => {
     if (!result.success) showMessage("No se pudo eliminar", result.error);
   };
 
-  const renderPerson = ({ item: p }) => (
-      <Card
-        style={[
-          styles.card,
-          { backgroundColor: paperTheme.colors.surface },
-        ]}
+  const renderPerson = (p) => {
+    const recordCount = countRecordsFor(user.records, { personId: p.id });
+    const detail = [p.relationship, describeRecordCount(recordCount)]
+      .filter(Boolean)
+      .join(" · ");
+    return (
+      <PersonRow
+        key={keyExtractor(p)}
+        person={p}
+        detail={detail}
+        accessibilityLabel={`Registrar dolor de ${p.name}`}
         onPress={() => onSelectPerson(p)}
-      >
-        <Card.Content style={styles.row}>
-          <View style={styles.rowLeft}>
-            {p.avatar ? (
-              <IllustrationBadge
-                preset={getAvatarIllustration(
-                  resolveAvatarIllustrationKey(p.avatar),
-                )}
-                size={52}
-                style={styles.avatar}
-              />
-            ) : (
-              <View
-                style={[
-                  styles.avatar,
-                  { backgroundColor: paperTheme.colors.surfaceVariant },
-                ]}
-              >
-                <Text style={styles.avatarText}>
-                  {(p.name || "?").slice(0, 1).toUpperCase()}
-                </Text>
-              </View>
-            )}
-            <View style={styles.meta}>
-              <Text variant="titleMedium" numberOfLines={1}>
-                {p.name}
-              </Text>
-              <Text
-                style={{
-                  color: paperTheme.colors.onSurfaceVariant,
-                  marginTop: 4,
-                }}
-              >
-                {p.relationship || "Relacion sin etiqueta"}
-              </Text>
-              <Text
-                style={[
-                  styles.ctaText,
-                  { color: paperTheme.colors.primary },
-                ]}
-              >
-                Toca para registrar el achaque que presente
-              </Text>
-            </View>
-          </View>
-          <View style={styles.actions}>
-            <ActionIcon
-              icon="square-edit-outline"
-              onPress={() => openEdit(p)}
-              accessibilityLabel="Editar persona"
-            />
-            <ActionIcon
-              icon="delete-circle-outline"
-              onPress={() => handleRemovePerson(p)}
-              accessibilityLabel="Eliminar persona"
-            />
-          </View>
-        </Card.Content>
-      </Card>
-  );
+        right={
+          <ActionMenu
+            title={p.name}
+            actions={[
+              { label: "Editar", icon: "square-edit-outline", onPress: () => openEdit(p) },
+              {
+                label: "Eliminar",
+                icon: "delete-outline",
+                onPress: () => handleRemovePerson(p),
+                destructive: true,
+              },
+            ]}
+          />
+        }
+      />
+    );
+  };
 
   return (
-    <AppScreen scroll={false} contentContainerStyle={styles.container}>
+    <AppScreen
+      contentContainerStyle={styles.container}
+      overlay={
+        <FAB
+          icon="plus"
+          accessibilityLabel="Agregar persona"
+          style={[styles.fab, { backgroundColor: paperTheme.colors.primary }]}
+          color={paperTheme.colors.onPrimary}
+          onPress={openAdd}
+        />
+      }
+    >
       <HeroPanel
+        compact
         eyebrow="PERSONAS"
-        title="Personas registradas para sus achaques"
-        description="Desde aqui se agregan personas, se editan sus datos y se abre el registro del malestar que toque ese dia."
-      >
-        <View style={styles.heroStats}>
-          <Text
-            style={[
-              styles.heroChip,
-              {
-                backgroundColor: paperTheme.colors.accentSun,
-                color: paperTheme.colors.onSurface,
-              },
-            ]}
-          >
-            Activas: {filtered.length}
-          </Text>
-          <Text
-            style={[
-              styles.heroChip,
-              {
-                backgroundColor: paperTheme.colors.accentMint,
-                color: paperTheme.colors.onSurface,
-              },
-            ]}
-          >
-            Total: {user.people.length}
-          </Text>
-        </View>
-      </HeroPanel>
+        title="¿Quién tiene achaque hoy?"
+        description="Toca a una persona para registrar su dolor. Desde el menú de cada ficha puedes editarla o eliminarla."
+      />
 
       <LoadStatusNotice
         sources={[
@@ -176,13 +116,8 @@ const PeopleScreen = ({ navigation }) => {
         ]}
       />
 
-      <FlatList
-        style={styles.list}
-        data={filtered}
-        keyExtractor={keyExtractor}
-        renderItem={renderPerson}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
+      <View style={styles.list}>
+        {filtered.length === 0 ? (
           <EmptyState
             illustration="Mujer feliz.png"
             title="Todavía no hay elenco"
@@ -190,53 +125,18 @@ const PeopleScreen = ({ navigation }) => {
             actionLabel="Agregar persona"
             onAction={openAdd}
           />
-        }
-      />
-
-      <FAB
-        icon="plus"
-        accessibilityLabel="Agregar persona"
-        style={[styles.fab, { backgroundColor: paperTheme.colors.primary }]}
-        color={paperTheme.colors.onPrimary}
-        onPress={openAdd}
-      />
+        ) : (
+          filtered.map(renderPerson)
+        )}
+      </View>
     </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  heroStats: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  heroChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: "800",
-    overflow: "hidden",
-  },
-  list: { flex: 1, marginTop: 12 },
-  card: {
-    width: "100%",
-    borderRadius: 24,
-    overflow: "hidden",
-    marginBottom: 12,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  rowLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
-  avatar: {
-    flexShrink: 0,
-  },
-  avatarText: { fontSize: 18, fontWeight: "700" },
-  meta: { flex: 1 },
-  ctaText: { marginTop: 6, fontSize: 12, fontWeight: "700" },
-  muted: { marginTop: 2, lineHeight: 20 },
+  container: { paddingBottom: 96 },
+  list: { marginTop: 12 },
   fab: { position: "absolute", right: 16, bottom: 16 },
-  actions: { flexDirection: "row" },
 });
 
 export default PeopleScreen;
