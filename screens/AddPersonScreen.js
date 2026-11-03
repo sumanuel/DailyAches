@@ -116,6 +116,12 @@ const AddPersonScreen = ({ navigation, route }) => {
               {isEdit ? "Editar Persona" : "Agregar Persona"}
             </Text>
 
+            <AvatarField
+              value={selectedAvatar}
+              onChange={setSelectedAvatar}
+              style={styles.avatarSection}
+            />
+
             <AppTextField
               label="Nombre *"
               value={name}
@@ -164,12 +170,6 @@ const AddPersonScreen = ({ navigation, route }) => {
                 Enviar sus recordatorios por WhatsApp
               </Text>
             </View>
-
-            <AvatarField
-              value={selectedAvatar}
-              onChange={setSelectedAvatar}
-              style={styles.avatarSection}
-            />
 
             <FieldError message={formError} />
             <View style={styles.buttonContainer}>
