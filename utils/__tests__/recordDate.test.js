@@ -92,7 +92,7 @@ describe("datetime-local values", () => {
 
 describe("formatCustomDate", () => {
   it("reads day, month, year and time", () => {
-    expect(formatCustomDate(new Date(2026, 9, 12, 18, 5))).toBe("12 oct 2026, 18:05");
+    expect(formatCustomDate(new Date(2026, 9, 12, 18, 5))).toBe("12 oct 2026, 06:05 pm");
     expect(formatCustomDate(null)).toBe("");
   });
 });

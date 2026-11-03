@@ -7,6 +7,7 @@ import {
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import PersonAvatar from "../components/PersonAvatar";
+import { formatClock } from "../utils/timeFormat";
 import RecordRow from "../components/RecordRow";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
@@ -67,18 +68,6 @@ const HomeScreen = () => {
     return map;
   }, [user.painTypes]);
 
-  const formatTime = (iso) => {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "";
-    let hours = d.getHours();
-    const minutes = String(d.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    const hh = String(hours).padStart(2, "0");
-    return `${hh}:${minutes} ${ampm}`;
-  };
-
   const resolveRecordIllustrationKey = useCallback(
     (record) => {
       const linkedPainType = record?.painTypeId
@@ -133,7 +122,7 @@ const HomeScreen = () => {
       }
 
       if (record.createdAt) {
-        shareLines.push(`Hora: ${formatTime(record.createdAt)}`);
+        shareLines.push(`Hora: ${formatClock(record.createdAt)}`);
       }
 
       await Share.share({
@@ -508,7 +497,7 @@ const HomeScreen = () => {
                         record={record}
                         illustrationKey={resolveRecordIllustrationKey(record)}
                         subtitle={
-                          record.createdAt ? formatTime(record.createdAt) : ""
+                          record.createdAt ? formatClock(record.createdAt) : ""
                         }
                         onEdit={() =>
                           navigation.navigate("RecordPain", { record })

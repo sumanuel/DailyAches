@@ -64,7 +64,11 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "center",
     gap: 8,
+    // Five buttons per row (5 x 44 + 4 x 8), centered on the card.
+    alignSelf: "center",
+    maxWidth: 252,
   },
   option: {
     minWidth: 44,

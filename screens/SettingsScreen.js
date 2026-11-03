@@ -142,7 +142,7 @@ const SettingsScreen = () => {
             <DateTimePicker
               value={reminderToDate(reminder)}
               mode="time"
-              is24Hour
+              is24Hour={false}
               onChange={onTimeChange}
             />
           ) : null}

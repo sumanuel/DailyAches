@@ -37,13 +37,13 @@ describe("normalizeReminder", () => {
 
 describe("describing the reminder", () => {
   it("formats the time with two digits", () => {
-    expect(formatReminderTime({ hour: 7, minute: 5 })).toBe("07:05");
-    expect(formatReminderTime({ hour: 20, minute: 0 })).toBe("20:00");
+    expect(formatReminderTime({ hour: 7, minute: 5 })).toBe("07:05 am");
+    expect(formatReminderTime({ hour: 20, minute: 0 })).toBe("08:00 pm");
   });
 
   it("says when it fires, or that it is off", () => {
     expect(describeReminder({ enabled: true, hour: 20, minute: 30 })).toBe(
-      "Todos los días a las 20:30",
+      "Todos los días a las 08:30 pm",
     );
     expect(describeReminder({ enabled: false, hour: 20, minute: 30 })).toBe(
       "Desactivado",

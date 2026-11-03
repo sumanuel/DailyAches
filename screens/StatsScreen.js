@@ -13,6 +13,7 @@ import AppScreen from "../components/AppScreen";
 import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
 import RecordRow from "../components/RecordRow";
+import { formatClock } from "../utils/timeFormat";
 import { resolvePainIllustrationKey } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 import AppTextField from "../components/AppTextField";
@@ -29,11 +30,6 @@ const pad2 = (n) => String(n).padStart(2, "0");
 const formatDate = (date) => {
   const d = new Date(date);
   return `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()}`;
-};
-
-const formatTimeEs = (date) => {
-  const d = new Date(date);
-  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 };
 
 const startOfDay = (date) => {
@@ -188,7 +184,7 @@ const StatsScreen = ({ route, navigation }) => {
       <RecordRow
         record={record}
         illustrationKey={resolvePainIllustrationKey(record)}
-        subtitle={formatTimeEs(record.createdAt)}
+        subtitle={formatClock(record.createdAt)}
         onEdit={() => navigation.navigate("RecordPain", { record })}
         onDelete={() => scheduleDeleteRecord(record)}
       />

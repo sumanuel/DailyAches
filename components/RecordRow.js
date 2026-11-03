@@ -33,30 +33,25 @@ const RecordRow = ({
       />
 
       <View style={styles.body}>
-        <View style={styles.titleRow}>
-          <Text variant="titleMedium" numberOfLines={1} style={styles.title}>
-            {record.pain}
-          </Text>
-          {record.painLevel ? (
-            <Text
-              style={[
-                styles.level,
-                {
-                  backgroundColor: paperTheme.colors.accentBerry,
-                  color: paperTheme.colors.onSurface,
-                },
-              ]}
-              accessibilityLabel={`Intensidad ${record.painLevel} de 10`}
-            >
-              {record.painLevel}/10
-            </Text>
-          ) : null}
-        </View>
-        {subtitle ? (
+        <Text variant="titleMedium" numberOfLines={1} style={styles.title}>
+          {record.pain}
+        </Text>
+        <View style={styles.metaRow}>
           <Text style={[styles.meta, { color: paperTheme.colors.onSurfaceVariant }]}>
             {subtitle}
           </Text>
-        ) : null}
+          {record.painLevel ? (
+            <Text
+              style={[styles.meta, { color: paperTheme.colors.onSurfaceVariant }]}
+              accessibilityLabel={`Intensidad ${record.painLevel} de 10`}
+            >
+              Intensidad:{" "}
+              <Text style={[styles.level, { color: paperTheme.colors.onSurface }]}>
+                {record.painLevel}
+              </Text>
+            </Text>
+          ) : null}
+        </View>
         {record.notes ? (
           <Text
             numberOfLines={2}
@@ -76,17 +71,10 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
   badge: { flexShrink: 0 },
   body: { flex: 1, gap: 2 },
-  titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  title: { flex: 1, fontWeight: "800" },
-  level: {
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: "800",
-    overflow: "hidden",
-  },
+  title: { fontWeight: "800" },
+  metaRow: { flexDirection: "row", justifyContent: "space-between", gap: 12 },
   meta: { fontSize: 13 },
+  level: { fontWeight: "800" },
   notes: { fontSize: 13, lineHeight: 18, marginTop: 2 },
 });
 
