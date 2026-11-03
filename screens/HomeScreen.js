@@ -6,6 +6,7 @@ import {
   Button,
   useTheme as usePaperTheme,
 } from "react-native-paper";
+import PersonAvatar from "../components/PersonAvatar";
 import RecordRow from "../components/RecordRow";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
@@ -13,7 +14,6 @@ import IllustrationBadge from "../components/IllustrationBadge";
 import {
   getAvatarIllustration,
   getPainIllustration,
-  resolveAvatarIllustrationKey,
   resolvePainIllustrationKey,
 } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
@@ -457,13 +457,7 @@ const HomeScreen = () => {
                     { backgroundColor: paperTheme.colors.primaryContainer },
                   ]}
                 >
-                  <IllustrationBadge
-                    preset={getAvatarIllustration(
-                      resolveAvatarIllustrationKey(person?.avatar),
-                    )}
-                    size={44}
-                    avatar
-                  />
+                  <PersonAvatar avatar={person?.avatar} size={44} />
                   <View style={styles.personCopy}>
                     <Text
                       variant="titleMedium"

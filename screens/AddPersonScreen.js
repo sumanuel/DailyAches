@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   StyleSheet,
   View,
-  Pressable,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -12,19 +11,15 @@ import {
   Button,
   useTheme as usePaperTheme,
   Checkbox,
-  List,
 } from "react-native-paper";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
-import IllustrationBadge from "../components/IllustrationBadge";
 import AppTextField from "../components/AppTextField";
+import AvatarField from "../components/AvatarField";
 import FieldError from "../components/FieldError";
+import SelectField from "../components/SelectField";
 import { validateName, validatePhone } from "../utils/validation";
-import {
-  avatarIllustrationKeys,
-  getAvatarIllustration,
-} from "../constants/illustrations";
 
 const AddPersonScreen = ({ navigation, route }) => {
   const paperTheme = usePaperTheme();
@@ -45,12 +40,9 @@ const AddPersonScreen = ({ navigation, route }) => {
   const [selectedAvatar, setSelectedAvatar] = useState(
     editPerson?.avatar || "Mujer feliz.png",
   );
-  const [expanded, setExpanded] = useState(false);
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
-
-  const avatars = avatarIllustrationKeys;
 
   const relationshipOptions = [
     "Esposa",
@@ -99,11 +91,6 @@ const AddPersonScreen = ({ navigation, route }) => {
     navigation.goBack();
   };
 
-  const handleRelationshipSelect = (option) => {
-    setRelationship(option);
-    setExpanded(false);
-  };
-
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -111,13 +98,14 @@ const AddPersonScreen = ({ navigation, route }) => {
     >
       <AppScreen contentContainerStyle={styles.contentContainer}>
         <HeroPanel
+          compact
           eyebrow={isEdit ? "EDITAR PERSONA" : "NUEVA PERSONA"}
           title={
             isEdit
               ? "Actualiza la ficha de la persona"
               : "Agrega una persona al registro"
           }
-          description="Se puede guardar su nombre, relacion y avatar para que luego sus achaques queden identificados con claridad."
+          description="Guarda su nombre, relación y una foto o avatar para identificar sus achaques."
         />
 
         <Card
@@ -140,22 +128,14 @@ const AddPersonScreen = ({ navigation, route }) => {
             />
             <FieldError message={errors.name} />
 
-            <List.Accordion
-              title="Relación"
-              description={relationship || "Seleccionar relación"}
-              expanded={expanded}
-              onPress={() => setExpanded(!expanded)}
-              style={styles.accordion}
-            >
-              {relationshipOptions.map((option) => (
-                <List.Item
-                  key={option}
-                  title={option}
-                  onPress={() => handleRelationshipSelect(option)}
-                  style={styles.listItem}
-                />
-              ))}
-            </List.Accordion>
+            <SelectField
+              label="Relación"
+              value={relationship}
+              options={relationshipOptions}
+              onChange={setRelationship}
+              placeholder="Seleccionar relación"
+              style={styles.input}
+            />
 
             <AppTextField
               label="Número de teléfono"
@@ -185,58 +165,11 @@ const AddPersonScreen = ({ navigation, route }) => {
               </Text>
             </View>
 
-            <View style={styles.avatarSection}>
-              <Text variant="titleMedium" style={styles.sectionTitle}>
-                Avatar
-              </Text>
-              <View style={styles.avatarGrid}>
-                {avatars.map((avatar) => {
-                  const preset = getAvatarIllustration(avatar);
-
-                  return (
-                    <Pressable
-                      key={avatar}
-                      onPress={() => setSelectedAvatar(avatar)}
-                      style={[
-                        styles.avatarOption,
-                        {
-                          backgroundColor:
-                            selectedAvatar === avatar
-                              ? paperTheme.colors.primaryContainer
-                              : paperTheme.colors.surfaceVariant,
-                          borderColor:
-                            selectedAvatar === avatar
-                              ? paperTheme.colors.primary
-                              : "transparent",
-                        },
-                        selectedAvatar === avatar && styles.selectedAvatar,
-                      ]}
-                    >
-                      <IllustrationBadge
-                        preset={preset}
-                        size={54}
-                        avatar
-                        selected={selectedAvatar === avatar}
-                        style={styles.avatarImage}
-                      />
-                      <Text
-                        style={[
-                          styles.avatarLabel,
-                          {
-                            color:
-                              selectedAvatar === avatar
-                                ? paperTheme.colors.onPrimaryContainer
-                                : paperTheme.colors.onSurfaceVariant,
-                          },
-                        ]}
-                      >
-                        {preset.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
+            <AvatarField
+              value={selectedAvatar}
+              onChange={setSelectedAvatar}
+              style={styles.avatarSection}
+            />
 
             <FieldError message={formError} />
             <View style={styles.buttonContainer}>
@@ -282,45 +215,8 @@ const styles = StyleSheet.create({
   avatarSection: {
     marginBottom: 24,
   },
-  sectionTitle: {
-    marginBottom: 12,
-    fontWeight: "600",
-  },
-  avatarGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  avatarOption: {
-    alignItems: "center",
-    width: "31%",
-    minWidth: 90,
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 2,
-    gap: 8,
-  },
-  selectedAvatar: {
-    transform: [{ scale: 1.03 }],
-  },
-  avatarImage: {
-    flexShrink: 0,
-  },
-  avatarLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    textAlign: "center",
-  },
   input: {
     marginBottom: 16,
-  },
-  accordion: {
-    backgroundColor: "transparent",
-    marginBottom: 16,
-  },
-  listItem: {
-    paddingLeft: 16,
   },
   checkboxSection: {
     flexDirection: "row",
