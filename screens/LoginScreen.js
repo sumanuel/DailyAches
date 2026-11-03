@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
 import {
   Button,
   Text,
   Card,
+  Switch,
   useTheme as usePaperTheme,
   ActivityIndicator,
 } from "react-native-paper";
@@ -15,6 +16,14 @@ import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import AppTextField from "../components/AppTextField";
 import FieldError from "../components/FieldError";
+import { showMessage } from "../utils/confirm";
+import {
+  clearCredentials,
+  getSavedEmail,
+  isBiometricSupported,
+  readCredentials,
+  saveCredentials,
+} from "../utils/biometricService";
 
 const schema = yup.object({
   email: yup
@@ -30,6 +39,26 @@ const LoginScreen = ({ navigation }) => {
   const { login } = useUser();
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
+  // Fingerprint login: whether the phone can, which account is saved, and the
+  // "next time" switch for an account that is not saved yet.
+  const [supported, setSupported] = useState(false);
+  const [savedEmail, setSavedEmail] = useState(null);
+  const [remember, setRemember] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([isBiometricSupported(), getSavedEmail()]).then(
+      ([canUse, email]) => {
+        if (!active) return;
+        setSupported(canUse);
+        setSavedEmail(canUse ? email : null);
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const {
     control,
@@ -49,11 +78,48 @@ const LoginScreen = ({ navigation }) => {
       // On success the navigator switches to the app by itself (isAuthenticated).
       if (!response.success) {
         setFormError(response.error || "No se pudo iniciar sesión.");
+      } else if (remember && supported && !savedEmail) {
+        // The login screen goes away now, so a failure is told with a dialog.
+        saveCredentials(data.email.trim(), data.password).then((saved) => {
+          if (!saved.success && saved.error) showMessage("Huella", saved.error);
+        });
       }
     } catch {
       setFormError("Ocurrió un error inesperado. Inténtalo de nuevo.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onBiometric = async () => {
+    setBiometricLoading(true);
+    setFormError("");
+    try {
+      const saved = await readCredentials();
+      if (!saved.success) {
+        if (saved.error) setFormError(saved.error);
+        setSavedEmail(await getSavedEmail());
+        return;
+      }
+      const response = await login(
+        saved.credentials.email,
+        saved.credentials.password,
+      );
+      if (response.success) return;
+      if (response.status === 401) {
+        // The password changed somewhere else: what is saved is useless now.
+        await clearCredentials();
+        setSavedEmail(null);
+        setFormError(
+          "La contraseña guardada ya no es válida. Entra con tu contraseña y vuelve a activar la huella.",
+        );
+      } else {
+        setFormError(response.error || "No se pudo iniciar sesión.");
+      }
+    } catch {
+      setFormError("Ocurrió un error inesperado. Inténtalo de nuevo.");
+    } finally {
+      setBiometricLoading(false);
     }
   };
 
@@ -81,6 +147,39 @@ const LoginScreen = ({ navigation }) => {
           >
             Usa la cuenta para volver al tablero de seguimiento.
           </Text>
+
+          {savedEmail ? (
+            <>
+              <Button
+                mode="contained-tonal"
+                icon="fingerprint"
+                onPress={onBiometric}
+                loading={biometricLoading}
+                disabled={biometricLoading || loading}
+                style={styles.biometric}
+                contentStyle={styles.biometricContent}
+                accessibilityLabel={`Entrar con huella como ${savedEmail}`}
+              >
+                Entrar con huella
+              </Button>
+              <Text
+                style={[
+                  styles.biometricAccount,
+                  { color: paperTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                {savedEmail}
+              </Text>
+              <Text
+                style={[
+                  styles.orDivider,
+                  { color: paperTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                o con tu contraseña
+              </Text>
+            </>
+          ) : null}
 
           <Controller
             control={control}
@@ -120,6 +219,19 @@ const LoginScreen = ({ navigation }) => {
               {errors.password.message}
             </Text>
           )}
+
+          {supported && !savedEmail ? (
+            <View style={styles.rememberRow}>
+              <Text style={styles.rememberText}>
+                Entrar con huella la próxima vez
+              </Text>
+              <Switch
+                value={remember}
+                onValueChange={setRemember}
+                accessibilityLabel="Entrar con huella la próxima vez"
+              />
+            </View>
+          ) : null}
 
           <FieldError message={formError} />
           <Button
@@ -177,6 +289,18 @@ const styles = StyleSheet.create({
   linkButton: {
     marginTop: 4,
   },
+  biometric: { borderRadius: 16 },
+  biometricContent: { minHeight: 48 },
+  biometricAccount: { textAlign: "center", marginTop: 6, fontSize: 13 },
+  orDivider: { textAlign: "center", marginTop: 14, marginBottom: 14, fontSize: 13 },
+  rememberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 4,
+  },
+  rememberText: { flex: 1 },
   loader: {
     marginRight: 8,
   },

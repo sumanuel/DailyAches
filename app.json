@@ -32,7 +32,14 @@
         }
       ],
       "expo-image",
-      "expo-sharing"
+      "expo-sharing",
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permite entrar a DailyAches con tu rostro."
+        }
+      ]
     ]
   }
 }

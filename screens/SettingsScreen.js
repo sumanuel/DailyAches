@@ -13,6 +13,11 @@ import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import FieldError from "../components/FieldError";
 import {
+  clearCredentials,
+  getSavedEmail,
+  isBiometricSupported,
+} from "../utils/biometricService";
+import {
   applyReminder,
   isReminderSupported,
   loadReminder,
@@ -33,6 +38,27 @@ const SettingsScreen = () => {
   const [showPicker, setShowPicker] = useState(false);
   const [reminderError, setReminderError] = useState("");
   const [savingReminder, setSavingReminder] = useState(false);
+  const [biometricSupported, setBiometricSupported] = useState(false);
+  const [savedEmail, setSavedEmail] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([isBiometricSupported(), getSavedEmail()]).then(
+      ([canUse, email]) => {
+        if (!active) return;
+        setBiometricSupported(canUse);
+        setSavedEmail(email);
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const turnOffBiometric = async () => {
+    await clearCredentials();
+    setSavedEmail(null);
+  };
 
   useEffect(() => {
     loadReminder().then(setReminder);
@@ -123,6 +149,47 @@ const SettingsScreen = () => {
           <FieldError message={reminderError} />
         </Card.Content>
       </Card>
+
+      {biometricSupported ? (
+        <Card
+          style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
+        >
+          <Card.Content>
+            <Text variant="titleMedium">Entrar con huella</Text>
+            {savedEmail ? (
+              <>
+                <Text
+                  style={[
+                    styles.biometricText,
+                    { color: paperTheme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  Activada para {savedEmail}. Al abrir la app podrás entrar con
+                  tu huella en lugar de escribir la contraseña.
+                </Text>
+                <Button
+                  mode="outlined"
+                  icon="fingerprint-off"
+                  onPress={turnOffBiometric}
+                  style={styles.timeButton}
+                >
+                  Desactivar
+                </Button>
+              </>
+            ) : (
+              <Text
+                style={[
+                  styles.biometricText,
+                  { color: paperTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                Está desactivada. Para activarla, cierra sesión y marca «Entrar
+                con huella la próxima vez» al iniciar sesión.
+              </Text>
+            )}
+          </Card.Content>
+        </Card>
+      ) : null}
     </AppScreen>
   );
 };
@@ -132,6 +199,7 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
   card: { borderRadius: 24, overflow: "hidden", marginBottom: 12 },
   timeButton: { marginTop: 12 },
+  biometricText: { marginTop: 6, lineHeight: 20 },
   settingItem: {
     flexDirection: "row",
     justifyContent: "space-between",

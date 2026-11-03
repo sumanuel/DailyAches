@@ -6,6 +6,7 @@ import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import AppTextField from "../components/AppTextField";
 import FieldError from "../components/FieldError";
+import { clearCredentials } from "../utils/biometricService";
 import { confirmAction, showMessage } from "../utils/confirm";
 import { validatePasswordForDeletion } from "../utils/validation";
 
@@ -38,6 +39,7 @@ const DeleteAccountScreen = () => {
       return;
     }
     // The session is gone: the navigator is already showing the login screen.
+    clearCredentials();
     showMessage("Cuenta eliminada", "Tus datos se borraron. Gracias por haber usado DailyAches.");
   };
 
