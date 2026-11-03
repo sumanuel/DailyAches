@@ -6,12 +6,16 @@ import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
 import AppTextField from "../components/AppTextField";
 import FieldError from "../components/FieldError";
+import { clearCredentials } from "../utils/biometricService";
+import { useBurst } from "../components/BurstProvider";
+import { DELETE_EMOJIS } from "../utils/particles";
 import { confirmAction, showMessage } from "../utils/confirm";
 import { validatePasswordForDeletion } from "../utils/validation";
 
 const DeleteAccountScreen = () => {
   const paperTheme = usePaperTheme();
   const { user, deleteAccount } = useUser();
+  const fire = useBurst();
 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -38,6 +42,8 @@ const DeleteAccountScreen = () => {
       return;
     }
     // The session is gone: the navigator is already showing the login screen.
+    clearCredentials();
+    fire("emojiRain", undefined, { emojis: DELETE_EMOJIS });
     showMessage("Cuenta eliminada", "Tus datos se borraron. Gracias por haber usado DailyAches.");
   };
 

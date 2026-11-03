@@ -6,15 +6,19 @@ import {
   Button,
   useTheme as usePaperTheme,
 } from "react-native-paper";
-import ActionIcon from "../components/ActionIcon";
+import PersonAvatar from "../components/PersonAvatar";
+import PressableScale from "../components/PressableScale";
+import { useBurst } from "../components/BurstProvider";
+import { DELETE_EMOJIS } from "../utils/particles";
+import { formatClock } from "../utils/timeFormat";
+import RecordRow from "../components/RecordRow";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
 import IllustrationBadge from "../components/IllustrationBadge";
 import {
   getAvatarIllustration,
   getPainIllustration,
-  resolveAvatarIllustrationKey,
-  resolvePainIllustrationKey,
+  getRecordIllustrationKey,
 } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 import { SHARE_ACHIEVEMENT_ID } from "../utils/gamification";
@@ -35,6 +39,7 @@ const HomeScreen = () => {
   } = useUser();
   const paperTheme = usePaperTheme();
   const navigation = useNavigation();
+  const fire = useBurst();
   const [dailyRecords, setDailyRecords] = useState([]);
 
   useEffect(() => {
@@ -67,31 +72,8 @@ const HomeScreen = () => {
     return map;
   }, [user.painTypes]);
 
-  const formatTime = (iso) => {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "";
-    let hours = d.getHours();
-    const minutes = String(d.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    const hh = String(hours).padStart(2, "0");
-    return `${hh}:${minutes} ${ampm}`;
-  };
-
   const resolveRecordIllustrationKey = useCallback(
-    (record) => {
-      const linkedPainType = record?.painTypeId
-        ? painTypesById[record.painTypeId]
-        : null;
-  
-      return resolvePainIllustrationKey({
-        ...record,
-        image: linkedPainType?.image || record?.image,
-        name: linkedPainType?.name || record?.pain,
-        pain: record?.pain,
-      });
-    },
+    (record) => getRecordIllustrationKey(record, painTypesById),
     [painTypesById],
   );
 
@@ -133,7 +115,7 @@ const HomeScreen = () => {
       }
 
       if (record.createdAt) {
-        shareLines.push(`Hora: ${formatTime(record.createdAt)}`);
+        shareLines.push(`Hora: ${formatClock(record.createdAt)}`);
       }
 
       await Share.share({
@@ -146,7 +128,10 @@ const HomeScreen = () => {
     }
   };
 
-  const handleDeleteRecord = (record) => scheduleDeleteRecord(record);
+  const handleDeleteRecord = (record) => {
+    fire("emojiRain", undefined, { emojis: DELETE_EMOJIS });
+    scheduleDeleteRecord(record);
+  };
 
   const groupedByPerson = useMemo(() => {
     return Object.entries(
@@ -261,15 +246,21 @@ const HomeScreen = () => {
                 {heroDescription}
               </Text>
             </View>
-            <IllustrationBadge
-              preset={
-                todayCount === 0
-                  ? getAvatarIllustration(heroIllustrationKey)
-                  : getPainIllustration(heroIllustrationKey)
-              }
-              size={132}
-              style={styles.heroImage}
-            />
+            <PressableScale
+              onPress={(event) => fire("hearts", event, { count: 12 })}
+              accessibilityRole="button"
+              accessibilityLabel="Mandar corazones"
+            >
+              <IllustrationBadge
+                preset={
+                  todayCount === 0
+                    ? getAvatarIllustration(heroIllustrationKey)
+                    : getPainIllustration(heroIllustrationKey)
+                }
+                size={132}
+                style={styles.heroImage}
+              />
+            </PressableScale>
           </View>
 
           {home.celebrate ? (
@@ -292,7 +283,8 @@ const HomeScreen = () => {
           ) : null}
 
           <View style={styles.statsRow}>
-            <View
+            <PressableScale
+              onPress={(event) => fire("emoji", event, { emojis: ["🩹", "💊", "🤕"] })}
               style={[
                 styles.statTile,
                 { backgroundColor: paperTheme.colors.primaryContainer },
@@ -308,8 +300,9 @@ const HomeScreen = () => {
               >
                 Registros hoy
               </Text>
-            </View>
-            <View
+            </PressableScale>
+            <PressableScale
+              onPress={(event) => fire("emoji", event, { emojis: ["⚡", "⭐", "✨"] })}
               style={[
                 styles.statTile,
                 { backgroundColor: paperTheme.colors.secondaryContainer },
@@ -325,8 +318,9 @@ const HomeScreen = () => {
               >
                 Puntos
               </Text>
-            </View>
-            <View
+            </PressableScale>
+            <PressableScale
+              onPress={(event) => fire("emoji", event, { emojis: ["🫶", "💖", "🤗"] })}
               style={[
                 styles.statTile,
                 { backgroundColor: paperTheme.colors.accentMint },
@@ -342,7 +336,7 @@ const HomeScreen = () => {
               >
                 Personas
               </Text>
-            </View>
+            </PressableScale>
           </View>
 
           <View style={styles.summaryRow}>
@@ -411,7 +405,7 @@ const HomeScreen = () => {
       {dailyRecords.length > 0 && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <View>
+            <View style={styles.sectionHeading}>
               <Text
                 variant="titleMedium"
                 accessibilityRole="header"
@@ -441,7 +435,8 @@ const HomeScreen = () => {
             </Text>
           </View>
           {groupedByPerson.map(([personKey, group]) => {
-            const relationship = peopleById[personKey]?.relationship;
+            const person = peopleById[personKey];
+            const relationship = person?.relationship;
             return (
               <Card
                 key={personKey}
@@ -450,177 +445,74 @@ const HomeScreen = () => {
                   { backgroundColor: paperTheme.colors.surface },
                 ]}
               >
-                <Card.Content style={styles.personPanelContent}>
-                  <View style={styles.personHeader}>
-                    <View style={styles.personIdentity}>
-                      <IllustrationBadge
-                        preset={getAvatarIllustration(
-                          resolveAvatarIllustrationKey(
-                            peopleById[personKey]?.avatar,
-                          ),
-                        )}
-                        size={56}
-                      />
-                      <View style={styles.personCopy}>
-                        <Text variant="titleLarge" style={styles.personTitle}>
-                          {group.personName}
-                        </Text>
-                        {relationship ? (
-                          <Text
-                            style={[
-                              styles.personRelation,
-                              {
-                                color: paperTheme.colors.onSurfaceVariant,
-                              },
-                            ]}
-                          >
-                            {relationship}
-                          </Text>
-                        ) : null}
-                      </View>
-                    </View>
+                <View
+                  style={[
+                    styles.personHeader,
+                    { backgroundColor: paperTheme.colors.primaryContainer },
+                  ]}
+                >
+                  <PersonAvatar avatar={person?.avatar} size={44} />
+                  <View style={styles.personCopy}>
                     <Text
+                      variant="titleMedium"
+                      numberOfLines={1}
                       style={[
-                        styles.personCount,
-                        {
-                          backgroundColor: paperTheme.colors.primaryContainer,
-                          color: paperTheme.colors.onPrimaryContainer,
-                        },
+                        styles.personTitle,
+                        { color: paperTheme.colors.onPrimaryContainer },
                       ]}
                     >
-                      {group.records.length} evento
-                      {group.records.length === 1 ? "" : "s"}
+                      {group.personName}
                     </Text>
+                    {relationship ? (
+                      <Text
+                        numberOfLines={1}
+                        style={[
+                          styles.personRelation,
+                          { color: paperTheme.colors.onPrimaryContainer },
+                        ]}
+                      >
+                        {relationship}
+                      </Text>
+                    ) : null}
                   </View>
+                  <Text
+                    style={[
+                      styles.personCount,
+                      {
+                        backgroundColor: paperTheme.colors.surface,
+                        color: paperTheme.colors.onSurface,
+                      },
+                    ]}
+                  >
+                    {group.records.length} evento
+                    {group.records.length === 1 ? "" : "s"}
+                  </Text>
+                </View>
 
-                  <View style={styles.recordList}>
-                    {group.records.map((record, index) => {
-                      const timeLabel = record.createdAt
-                        ? formatTime(record.createdAt)
-                        : "";
-
-                      return (
-                        <View
-                          key={record.id || index}
-                          style={[
-                            styles.recordRow,
-                            !record.notes && styles.recordRowCompact,
-                            {
-                              backgroundColor: paperTheme.colors.surfaceVariant,
-                            },
-                          ]}
-                        >
-                          <View style={styles.recordTopRow}>
-                            <IllustrationBadge
-                              preset={getPainIllustration(
-                                resolveRecordIllustrationKey(record),
-                              )}
-                              size={54}
-                              style={styles.recordImage}
-                            />
-
-                            <View style={styles.recordBody}>
-                              <View style={styles.recordHeadingRow}>
-                                <Text
-                                  variant="titleMedium"
-                                  style={styles.painTitle}
-                                >
-                                  {record.pain}
-                                </Text>
-                                {timeLabel ? (
-                                  <Text
-                                    style={[
-                                      styles.timePill,
-                                      {
-                                        backgroundColor:
-                                          paperTheme.colors.accentSky,
-                                        color: paperTheme.colors.onSurface,
-                                      },
-                                    ]}
-                                  >
-                                    {timeLabel}
-                                  </Text>
-                                ) : null}
-                                {record.painLevel ? (
-                                  <Text
-                                    style={[
-                                      styles.timePill,
-                                      {
-                                        backgroundColor:
-                                          paperTheme.colors.accentBerry,
-                                        color: paperTheme.colors.onSurface,
-                                      },
-                                    ]}
-                                    accessibilityLabel={`Intensidad ${record.painLevel} de 10`}
-                                  >
-                                    {record.painLevel}/10
-                                  </Text>
-                                ) : null}
-                              </View>
-                            </View>
-                          </View>
-
-                          <View style={styles.recordBottomRow}>
-                            <View style={styles.recordMetaRow}>
-                              <Text
-                                numberOfLines={2}
-                                style={[
-                                  styles.recordMetaText,
-                                  {
-                                    color: paperTheme.colors.onSurfaceVariant,
-                                  },
-                                ]}
-                              >
-                                {record.notes ? record.notes : "-"}
-                              </Text>
-                            </View>
-
-                            <View style={styles.painActions}>
-                              <ActionIcon
-                                icon="square-edit-outline"
-                                size={18}
-                                style={[
-                                  styles.actionButton,
-                                  {
-                                    backgroundColor: paperTheme.colors.surface,
-                                  },
-                                ]}
-                                onPress={() =>
-                                  navigation.navigate("RecordPain", { record })
-                                }
-                                accessibilityLabel="Editar registro"
-                              />
-                              <ActionIcon
-                                icon="delete-circle-outline"
-                                size={18}
-                                style={[
-                                  styles.actionButton,
-                                  {
-                                    backgroundColor: paperTheme.colors.surface,
-                                  },
-                                ]}
-                                onPress={() => handleDeleteRecord(record)}
-                                accessibilityLabel="Eliminar registro"
-                              />
-                              <ActionIcon
-                                icon="share-variant-outline"
-                                size={18}
-                                style={[
-                                  styles.actionButton,
-                                  {
-                                    backgroundColor: paperTheme.colors.surface,
-                                  },
-                                ]}
-                                onPress={() => handleShareRecord(record)}
-                                accessibilityLabel="Compartir registro"
-                              />
-                            </View>
-                          </View>
-                        </View>
-                      );
-                    })}
-                  </View>
-                </Card.Content>
+                <View style={styles.recordsBlock}>
+                  {group.records.map((record, index) => (
+                    <View
+                      key={record.id || index}
+                      style={[
+                        index > 0 && styles.recordItem,
+                        { borderTopColor: paperTheme.colors.outlineVariant },
+                      ]}
+                    >
+                      <RecordRow
+                        record={record}
+                        illustrationKey={resolveRecordIllustrationKey(record)}
+                        subtitle={
+                          record.createdAt ? formatClock(record.createdAt) : ""
+                        }
+                        onEdit={() =>
+                          navigation.navigate("RecordPain", { record })
+                        }
+                        onShare={() => handleShareRecord(record)}
+                        onDelete={() => handleDeleteRecord(record)}
+                      />
+                    </View>
+                  ))}
+                </View>
               </Card>
             );
           })}
@@ -682,9 +574,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 2,
   },
+  sectionHeading: { flex: 1 },
   sectionTitle: { fontWeight: "700" },
   sectionSubcopy: { marginTop: 4, fontSize: 13, lineHeight: 18 },
   sectionCount: {
+    marginLeft: 12,
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 999,
@@ -749,28 +643,17 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginBottom: 14,
   },
-  personPanelContent: {
-    paddingTop: 18,
-    paddingBottom: 18,
-  },
   personHeader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  personIdentity: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  personCopy: {
-    flex: 1,
-    gap: 2,
-  },
-  personTitle: { fontWeight: "800", fontSize: 18 },
-  personRelation: { fontSize: 13, fontWeight: "800" },
+  recordsBlock: { paddingHorizontal: 16 },
+  personCopy: { flex: 1, gap: 2 },
+  personTitle: { fontWeight: "800" },
+  personRelation: { fontSize: 13 },
   personCount: {
     paddingHorizontal: 11,
     paddingVertical: 7,
@@ -779,64 +662,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     overflow: "hidden",
   },
-  recordList: { marginTop: 14, gap: 10 },
-  recordRow: {
-    borderRadius: 22,
-    padding: 14,
-    gap: 12,
-  },
-  recordRowCompact: {
-    gap: 8,
-  },
-  recordTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  recordImage: { flexShrink: 0 },
-  recordBody: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  recordHeadingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-  },
-  painTitle: { flex: 1, fontWeight: "800" },
-  timePill: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 999,
-    fontSize: 11,
-    fontWeight: "800",
-    overflow: "hidden",
-  },
-  recordMetaRow: {
-    flex: 1,
-    justifyContent: "center",
-    marginTop: -1,
-  },
-  recordBottomRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  recordMetaText: {
-    fontSize: 12,
-    fontWeight: "600",
-    lineHeight: 18,
-  },
-  painActions: {
-    flexDirection: "row",
-    gap: 14,
-    alignItems: "center",
-    justifyContent: "flex-end",
-  },
-  actionButton: {
-    margin: 0,
-  },
+  recordItem: { borderTopWidth: StyleSheet.hairlineWidth },
 });
 
 export default HomeScreen;

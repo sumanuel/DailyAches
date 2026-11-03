@@ -1,12 +1,15 @@
 import React, { useMemo, useEffect } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   Card,
   FAB,
   Text,
   useTheme as usePaperTheme,
 } from "react-native-paper";
-import ActionIcon from "../components/ActionIcon";
+import ActionMenu from "../components/ActionMenu";
+import { useBurst } from "../components/BurstProvider";
+import { useToast } from "../components/ToastProvider";
+import { DELETE_EMOJIS } from "../utils/particles";
 import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../context/UserContext";
 import { confirmAction, showMessage } from "../utils/confirm";
@@ -26,6 +29,8 @@ const keyExtractor = (item) => String(item.id ?? item.name);
 const PainSettingsScreen = () => {
   const paperTheme = usePaperTheme();
   const navigation = useNavigation();
+  const fire = useBurst();
+  const toast = useToast();
   const { user, removePainType, loadPainTypesFromAPI, remoteStatus } =
     useUser();
 
@@ -65,28 +70,33 @@ const PainSettingsScreen = () => {
     if (!confirmed) return;
 
     const result = await removePainType(painType.id);
-    if (!result.success) showMessage("No se pudo eliminar", result.error);
+    if (!result.success) {
+      showMessage("No se pudo eliminar", result.error);
+      return;
+    }
+    fire("emojiRain", undefined, { emojis: DELETE_EMOJIS });
+    toast("Tipo de dolor eliminado", painType.name);
   };
 
   return (
-    <AppScreen scroll={false} contentContainerStyle={styles.container}>
+    <AppScreen
+      contentContainerStyle={styles.container}
+      overlay={
+        <FAB
+          icon="plus"
+          onPress={openAddScreen}
+          style={[styles.fab, { backgroundColor: paperTheme.colors.primary }]}
+          color={paperTheme.colors.onPrimary}
+          accessibilityLabel="Agregar nuevo tipo de dolor"
+        />
+      }
+    >
       <HeroPanel
+        compact
         eyebrow="CATALOGO DE DOLORES"
         title="Ordena el menu del drama corporal"
         description="Edita nombres e imagenes para que registrar un dolor sea rapido, claro y con personalidad."
-      >
-        <Text
-          style={[
-            styles.heroChip,
-            {
-              backgroundColor: paperTheme.colors.accentBerry,
-              color: paperTheme.colors.onSurface,
-            },
-          ]}
-        >
-          Tipos: {painTypes.length}
-        </Text>
-      </HeroPanel>
+      />
 
       <LoadStatusNotice
         sources={[
@@ -106,7 +116,7 @@ const PainSettingsScreen = () => {
             { borderBottomColor: paperTheme.colors.outlineVariant },
           ]}
         >
-          <View>
+          <View style={styles.listHeading}>
             <Text variant="titleMedium" style={styles.listTitle}>
               Tipos disponibles
             </Text>
@@ -116,7 +126,7 @@ const PainSettingsScreen = () => {
                 { color: paperTheme.colors.onSurfaceVariant },
               ]}
             >
-              Cada fila puede editarse o retirarse del catálogo.
+              Toca ⋮ para editar o retirar un tipo.
             </Text>
           </View>
           <Text
@@ -132,10 +142,8 @@ const PainSettingsScreen = () => {
           </Text>
         </View>
 
-        <FlatList
-          data={painTypes}
-          keyExtractor={keyExtractor}
-          ListEmptyComponent={
+        <View style={styles.listContent}>
+          {painTypes.length === 0 ? (
             <EmptyState
               illustration="Creativa.png"
               title="No hay tipos de dolor"
@@ -143,83 +151,63 @@ const PainSettingsScreen = () => {
               actionLabel="Agregar tipo"
               onAction={openAddScreen}
             />
-          }
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.itemRow,
-                { backgroundColor: paperTheme.colors.surfaceVariant },
-              ]}
-            >
-              <View style={styles.itemLead}>
-                <IllustrationBadge
-                  preset={getPainIllustration(resolvePainIllustrationKey(item))}
-                  size={56}
-                  style={styles.itemImage}
-                />
-                <View style={styles.itemMeta}>
-                  <Text style={styles.itemText}>{item.name}</Text>
-                  <Text
-                    style={[
-                      styles.itemSubtext,
-                      { color: paperTheme.colors.onSurfaceVariant },
-                    ]}
-                  >
-                    Disponible para nuevos registros
-                  </Text>
+          ) : (
+            painTypes.map((item) => (
+              <View
+                key={keyExtractor(item)}
+                style={[
+                  styles.itemRow,
+                  { backgroundColor: paperTheme.colors.surfaceVariant },
+                ]}
+              >
+                <View style={styles.itemLead}>
+                  <IllustrationBadge
+                    preset={getPainIllustration(resolvePainIllustrationKey(item))}
+                    size={56}
+                    style={styles.itemImage}
+                  />
+                  <View style={styles.itemMeta}>
+                    <Text style={styles.itemText}>{item.name}</Text>
+                    <Text
+                      style={[
+                        styles.itemSubtext,
+                        { color: paperTheme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {describeRecordCount(
+                      countRecordsFor(user.records, { painTypeId: item.id }),
+                    )}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <View style={styles.itemActions}>
-                <ActionIcon
-                  icon="square-edit-outline"
-                  size={20}
-                  style={[
-                    styles.itemActionButton,
-                    { backgroundColor: paperTheme.colors.surface },
+                <ActionMenu
+                  title={item.name}
+                  actions={[
+                    {
+                      label: "Editar",
+                      icon: "square-edit-outline",
+                      onPress: () => openEditScreen(item),
+                    },
+                    {
+                      label: "Eliminar",
+                      icon: "delete-outline",
+                      onPress: () => handleDeletePainType(item),
+                      destructive: true,
+                    },
                   ]}
-                  onPress={() => openEditScreen(item)}
-                  accessibilityLabel={`Editar ${item.name}`}
-                />
-                <ActionIcon
-                  icon="delete-circle-outline"
-                  size={20}
-                  style={[
-                    styles.itemActionButton,
-                    { backgroundColor: paperTheme.colors.surface },
-                  ]}
-                  onPress={() => handleDeletePainType(item)}
-                  accessibilityLabel={`Eliminar ${item.name}`}
                 />
               </View>
-            </View>
+            ))
           )}
-          contentContainerStyle={styles.listContent}
-        />
+        </View>
       </Card>
-
-      <FAB
-        icon="plus"
-        onPress={openAddScreen}
-        style={[styles.fab, { backgroundColor: paperTheme.colors.primary }]}
-        color={paperTheme.colors.onPrimary}
-        accessibilityLabel="Agregar nuevo tipo de dolor"
-      />
     </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  heroChip: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: "800",
-    overflow: "hidden",
-  },
-  listCard: { flex: 1, borderRadius: 24, overflow: "hidden" },
+  container: { paddingBottom: 96 },
+  listCard: { borderRadius: 24, overflow: "hidden" },
   listHeader: {
     paddingHorizontal: 18,
     paddingTop: 18,
@@ -230,6 +218,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 12,
   },
+  listHeading: { flex: 1 },
   listTitle: { fontWeight: "800" },
   listSubtitle: { marginTop: 4, fontSize: 13, lineHeight: 18 },
   listCount: {
@@ -242,7 +231,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     overflow: "hidden",
   },
-  listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 92 },
+  listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
   itemRow: {
     padding: 14,
     borderRadius: 22,
@@ -257,8 +246,6 @@ const styles = StyleSheet.create({
   itemMeta: { flex: 1 },
   itemText: { fontSize: 16, fontWeight: "700" },
   itemSubtext: { marginTop: 4, fontSize: 12, lineHeight: 17 },
-  itemActions: { flexDirection: "row", gap: 8 },
-  itemActionButton: { margin: 0 },
   fab: {
     position: "absolute",
     right: 16,

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { StyleSheet, Alert, View } from "react-native";
+import { StyleSheet, Alert } from "react-native";
 import {
   Button,
   Text,
@@ -12,18 +12,16 @@ import * as yup from "yup";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import HeroPanel from "../components/HeroPanel";
-import IllustrationBadge from "../components/IllustrationBadge";
 import AppTextField from "../components/AppTextField";
-import PressableScale from "../components/PressableScale";
-import {
-  getPainIllustration,
-  resolvePainIllustrationKey,
-} from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 import PainLevelPicker from "../components/PainLevelPicker";
+import PainTypeField from "../components/PainTypeField";
+import { useBurst } from "../components/BurstProvider";
+import { useToast } from "../components/ToastProvider";
 import {
   DEFAULT_PAIN_LEVEL,
   getLastPainTypeForPerson,
+  getPainLevelEmojis,
   normalizePainLevel,
 } from "../utils/painLevel";
 import { DEFAULT_RECORD_DATE, resolveRecordDate } from "../utils/recordDate";
@@ -34,8 +32,6 @@ const schema = yup.object({
   notes: yup.string(),
 });
 
-const keyExtractor = (item) => String(item.id ?? item.name);
-
 const RecordPainScreen = ({ navigation, route }) => {
   const {
     user,
@@ -45,9 +41,10 @@ const RecordPainScreen = ({ navigation, route }) => {
     remoteStatus,
   } = useUser();
   const paperTheme = usePaperTheme();
+  const fire = useBurst();
+  const toast = useToast();
   const [isEdit, setIsEdit] = useState(false);
   const [editRecord, setEditRecord] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedPainType, setSelectedPainType] = useState(null);
   const [painLevel, setPainLevel] = useState(DEFAULT_PAIN_LEVEL);
   const [dateChoice, setDateChoice] = useState({
@@ -69,13 +66,6 @@ const RecordPainScreen = ({ navigation, route }) => {
   }, [loadPainTypesFromAPI]);
 
   const painTypes = useMemo(() => user.painTypes || [], [user.painTypes]);
-
-  const filteredPainTypes = useMemo(() => {
-    if (!searchQuery.trim()) return painTypes;
-    return painTypes.filter((pain) =>
-      pain.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [painTypes, searchQuery]);
 
   const {
     control,
@@ -119,7 +109,7 @@ const RecordPainScreen = ({ navigation, route }) => {
     }
   }, [record, selectedPainType, user.records, personId, painTypes, setValue]);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data, event) => {
     if (!selectedPainType || saving) return;
 
     // Editing keeps the date the record already has.
@@ -153,13 +143,14 @@ const RecordPainScreen = ({ navigation, route }) => {
         return;
       }
 
-      // A new record is celebrated by the progress banner; an edit has no points.
-      if (isEdit) {
-        Alert.alert(
-          "¡Actualizado!",
-          `Registro actualizado para ${personName}: ${selectedPainType.name}`,
-        );
-      }
+      // The reaction follows the intensity (calm leaves up to flames), and a
+      // message confirms what was saved. A new record also gets the progress
+      // banner; an edit has no points.
+      fire("emoji", event, { emojis: getPainLevelEmojis(painLevel), count: 16 });
+      toast(
+        isEdit ? "Registro actualizado" : "Registro guardado",
+        `${selectedPainType.name} de ${personName} · intensidad ${painLevel}`,
+      );
       navigation.goBack();
     } catch (error) {
       Alert.alert(
@@ -202,24 +193,11 @@ const RecordPainScreen = ({ navigation, route }) => {
   return (
     <AppScreen contentContainerStyle={styles.container}>
       <HeroPanel
+        compact
         eyebrow={isEdit ? "EDITAR REGISTRO" : "NUEVO REGISTRO"}
         title={`${personName} queda en el radar del dia`}
-        description="Aqui se elige el tipo de molestia, se agrega una nota si hace falta y se guarda el episodio con claridad."
-      >
-        {selectedPainType ? (
-          <Text
-            style={[
-              styles.selectionChip,
-              {
-                backgroundColor: paperTheme.colors.accentSun,
-                color: paperTheme.colors.onSurface,
-              },
-            ]}
-          >
-            Seleccionado: {selectedPainType.name}
-          </Text>
-        ) : null}
-      </HeroPanel>
+        description="Elige el tipo de molestia, agrega una nota si hace falta y guarda el episodio."
+      />
 
       <LoadStatusNotice
         sources={[
@@ -231,72 +209,15 @@ const RecordPainScreen = ({ navigation, route }) => {
         style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}
       >
         <Card.Content>
-          <AppTextField
-            label="Dolor"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            style={styles.searchInput}
-            placeholder="Filtrar por nombre"
+          <PainTypeField
+            value={selectedPainType}
+            options={painTypes}
+            onChange={(pain) => {
+              setSelectedPainType(pain);
+              setValue("pain", pain.name, { shouldValidate: true });
+            }}
+            error={errors.pain?.message}
           />
-
-          <View style={styles.painGrid}>
-            {filteredPainTypes.map((item) => {
-              const preset = getPainIllustration(
-                resolvePainIllustrationKey(item),
-              );
-              const isSelected = selectedPainType?.name === item.name;
-
-              return (
-                <View key={keyExtractor(item)} style={styles.painCell}>
-                <PressableScale
-                  pop={isSelected}
-                  accessibilityRole="button"
-                  accessibilityLabel={item.name}
-                  accessibilityState={{ selected: isSelected }}
-                  style={[
-                    styles.painOption,
-                    {
-                      backgroundColor: isSelected
-                        ? paperTheme.colors.primaryContainer
-                        : paperTheme.colors.surfaceVariant,
-                      borderColor: isSelected
-                        ? paperTheme.colors.primary
-                        : "transparent",
-                    },
-                  ]}
-                  onPress={() => {
-                    setSelectedPainType(item);
-                    setValue("pain", item.name);
-                  }}
-                >
-                  <IllustrationBadge
-                    preset={preset}
-                    size={60}
-                    selected={isSelected}
-                    style={styles.painImage}
-                  />
-                  <Text
-                    style={[
-                      styles.painText,
-                      {
-                        color: isSelected
-                          ? paperTheme.colors.onPrimaryContainer
-                          : paperTheme.colors.onSurface,
-                      },
-                    ]}
-                  >
-                    {item.name}
-                  </Text>
-                </PressableScale>
-                </View>
-              );
-            })}
-          </View>
-          {errors.pain && (
-            <Text style={[styles.error, { color: paperTheme.colors.error }]}>
-              {errors.pain.message}
-            </Text>
-          )}
 
           <PainLevelPicker
             value={painLevel}
@@ -349,34 +270,12 @@ const RecordPainScreen = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: { paddingBottom: 32 },
-  selectionChip: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: "800",
-    overflow: "hidden",
-  },
   card: { borderRadius: 24, overflow: "hidden" },
-  searchInput: { marginBottom: 16 },
-  painGrid: { flexDirection: "row", flexWrap: "wrap", paddingVertical: 8 },
-  painCell: { width: "33.333%" },
-  painOption: {
-    alignItems: "center",
-    padding: 12,
-    margin: 4,
-    borderRadius: 20,
-    borderWidth: 2,
-  },
-  painImage: { width: 60, height: 60, borderRadius: 30, marginBottom: 8 },
-  painText: { fontSize: 14, textAlign: "center", fontWeight: "500" },
   level: { marginTop: 16 },
   when: { marginTop: 16 },
   input: { marginTop: 12 },
   notesContent: { minHeight: 72, textAlignVertical: "top" },
   button: { marginTop: 24, marginBottom: 8, borderRadius: 16 },
-  error: { fontSize: 12, marginTop: 6 },
 });
 
 export default RecordPainScreen;

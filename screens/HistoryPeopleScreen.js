@@ -1,26 +1,18 @@
 import React, { useMemo, useEffect } from "react";
-import { StyleSheet, View, FlatList } from "react-native";
-import {
-  Card,
-  Text,
-  IconButton,
-  useTheme as usePaperTheme,
-} from "react-native-paper";
+import { StyleSheet, View } from "react-native";
+import { IconButton } from "react-native-paper";
+import PersonRow from "../components/PersonRow";
 import { useUser } from "../context/UserContext";
 import AppScreen from "../components/AppScreen";
 import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
-import IllustrationBadge from "../components/IllustrationBadge";
-import {
-  getAvatarIllustration,
-  resolveAvatarIllustrationKey,
-} from "../constants/illustrations";
+import { countRecordsFor, describeRecordCount } from "../utils/recordFilters";
+import { rankPeopleByRecords } from "../utils/peopleRanking";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 
 const keyExtractor = (person) => String(person.id);
 
 const HistoryPeopleScreen = ({ navigation }) => {
-  const paperTheme = usePaperTheme();
   const { user, loadPeopleFromAPI, remoteStatus } = useUser();
 
   useEffect(() => {
@@ -36,82 +28,37 @@ const HistoryPeopleScreen = ({ navigation }) => {
     });
   };
 
-  const renderPerson = ({ item: p }) => (
-      <Card
-        style={[
-          styles.card,
-          { backgroundColor: paperTheme.colors.surface },
-        ]}
-        onPress={() => onSelectPerson(p)}
-      >
-        <Card.Content style={styles.row}>
-          <View style={styles.rowLeft}>
-            {p.avatar ? (
-              <IllustrationBadge
-                preset={getAvatarIllustration(
-                  resolveAvatarIllustrationKey(p.avatar),
-                )}
-                size={52}
-                style={styles.avatar}
-              />
-            ) : (
-              <View
-                style={[
-                  styles.avatar,
-                  { backgroundColor: paperTheme.colors.surfaceVariant },
-                ]}
-              >
-                <Text style={styles.avatarText}>
-                  {(p.name || "?").slice(0, 1).toUpperCase()}
-                </Text>
-              </View>
-            )}
-            <View style={styles.meta}>
-              <Text variant="titleMedium" numberOfLines={1}>
-                {p.name}
-              </Text>
-              <Text
-                style={{
-                  color: paperTheme.colors.onSurfaceVariant,
-                  marginTop: 4,
-                }}
-              >
-                {p.relationship || "Relacion sin etiqueta"}
-              </Text>
-              <Text
-                style={[
-                  styles.ctaText,
-                  { color: paperTheme.colors.primary },
-                ]}
-              >
-                Toca para ver todo su historial
-              </Text>
-            </View>
-          </View>
-          <IconButton icon="arrow-right-circle-outline" />
-        </Card.Content>
-      </Card>
+  const places = useMemo(
+    () => rankPeopleByRecords(user.people, user.records),
+    [user.people, user.records],
   );
 
+  const renderPerson = (p) => {
+    const recordCount = countRecordsFor(user.records, { personId: p.id });
+    const detail = [p.relationship, describeRecordCount(recordCount)]
+      .filter(Boolean)
+      .join(" · ");
+    return (
+      <PersonRow
+        key={keyExtractor(p)}
+        person={p}
+        detail={detail}
+        place={places.get(String(p.id))}
+        accessibilityLabel={`Ver historial de ${p.name}`}
+        onPress={() => onSelectPerson(p)}
+        right={<IconButton icon="chevron-right" accessibilityElementsHidden />}
+      />
+    );
+  };
+
   return (
-    <AppScreen scroll={false} contentContainerStyle={styles.container}>
+    <AppScreen contentContainerStyle={styles.container}>
       <HeroPanel
+        compact
         eyebrow="HISTORIAL"
-        title="Historial disponible por persona"
-        description="Cada ficha abre el archivo completo de molestias, fechas y episodios registrados para esa persona."
-      >
-        <Text
-          style={[
-            styles.heroChip,
-            {
-              backgroundColor: paperTheme.colors.accentBerry,
-              color: paperTheme.colors.onSurface,
-            },
-          ]}
-        >
-          Coincidencias: {filtered.length}
-        </Text>
-      </HeroPanel>
+        title="¿De quién vemos el historial?"
+        description="Cada ficha abre el archivo completo de molestias, fechas y episodios de esa persona."
+      />
 
       <LoadStatusNotice
         sources={[
@@ -119,13 +66,8 @@ const HistoryPeopleScreen = ({ navigation }) => {
         ]}
       />
 
-      <FlatList
-        style={styles.list}
-        data={filtered}
-        keyExtractor={keyExtractor}
-        renderItem={renderPerson}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
+      <View style={styles.list}>
+        {filtered.length === 0 ? (
           <EmptyState
             illustration="Zen.png"
             title="Sin expedientes todavía"
@@ -133,42 +75,17 @@ const HistoryPeopleScreen = ({ navigation }) => {
             actionLabel="Ir a Registro"
             onAction={() => navigation.getParent()?.navigate("Registro")}
           />
-        }
-      />
+        ) : (
+          filtered.map(renderPerson)
+        )}
+      </View>
     </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  heroChip: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: "800",
-    overflow: "hidden",
-  },
-  list: { flex: 1, marginTop: 12 },
-  card: {
-    width: "100%",
-    borderRadius: 24,
-    overflow: "hidden",
-    marginBottom: 12,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  rowLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
-  avatar: {
-    flexShrink: 0,
-  },
-  avatarText: { fontSize: 18, fontWeight: "700" },
-  meta: { flex: 1 },
-  ctaText: { marginTop: 6, fontSize: 12, fontWeight: "700" },
+  container: { paddingBottom: 24 },
+  list: { marginTop: 12 },
 });
 
 export default HistoryPeopleScreen;

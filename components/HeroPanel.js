@@ -21,16 +21,16 @@ const HeroPanel = ({
         compact && styles.compactCard,
       ]}
     >
-      <Card.Content style={styles.content}>
+      <Card.Content style={[styles.content, compact && styles.compactContent]}>
         {eyebrow ? (
           <Text style={[styles.eyebrow, { color: paperTheme.colors.primary }]}>
             {eyebrow}
           </Text>
         ) : null}
         <Text
-          variant="headlineSmall"
+          variant={compact ? "titleLarge" : "headlineSmall"}
           accessibilityRole="header"
-          style={styles.title}
+          style={[styles.title, compact && styles.compactTitle]}
         >
           {title}
         </Text>
@@ -38,6 +38,7 @@ const HeroPanel = ({
           <Text
             style={[
               styles.description,
+              compact && styles.compactDescription,
               { color: paperTheme.colors.onSurfaceVariant },
             ]}
           >
@@ -58,6 +59,18 @@ const styles = StyleSheet.create({
   },
   compactCard: {
     borderRadius: 22,
+    marginBottom: 10,
+  },
+  compactContent: {
+    gap: 2,
+    paddingVertical: 6,
+  },
+  compactTitle: {
+    lineHeight: 26,
+  },
+  compactDescription: {
+    fontSize: 13,
+    lineHeight: 18,
   },
   content: {
     gap: 8,

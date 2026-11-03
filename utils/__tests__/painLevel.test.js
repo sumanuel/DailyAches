@@ -2,6 +2,7 @@ import {
   DEFAULT_PAIN_LEVEL,
   PAIN_LEVELS,
   getLastPainTypeForPerson,
+  getPainLevelEmojis,
   getPainLevelLabel,
   normalizePainLevel,
 } from "../painLevel";
@@ -64,5 +65,17 @@ describe("getLastPainTypeForPerson", () => {
   it("falls back to the pain name when the id no longer matches", () => {
     const old = [{ personId: "7", painTypeId: "404", pain: "Cabeza", createdAt: "2026-10-01T10:00:00Z" }];
     expect(getLastPainTypeForPerson(old, "7", painTypes)).toBe(painTypes[0]);
+  });
+});
+
+describe("getPainLevelEmojis", () => {
+  it("goes from calm to on fire as the pain grows", () => {
+    expect(getPainLevelEmojis(1)).toEqual(["🍃", "😌"]);
+    expect(getPainLevelEmojis(3)).toEqual(["🍃", "😌"]);
+    expect(getPainLevelEmojis(4)).toEqual(["😬", "😕"]);
+    expect(getPainLevelEmojis(6)).toEqual(["😬", "😕"]);
+    expect(getPainLevelEmojis(7)).toEqual(["🥵", "😣"]);
+    expect(getPainLevelEmojis(9)).toEqual(["🥵", "😣"]);
+    expect(getPainLevelEmojis(10)).toEqual(["🔥", "🤯"]);
   });
 });

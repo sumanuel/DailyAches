@@ -2,11 +2,17 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Text, useTheme as usePaperTheme } from "react-native-paper";
 import PressableScale from "./PressableScale";
-import { PAIN_LEVELS, getPainLevelLabel } from "../utils/painLevel";
+import { useBurst } from "./BurstProvider";
+import {
+  PAIN_LEVELS,
+  getPainLevelEmojis,
+  getPainLevelLabel,
+} from "../utils/painLevel";
 
 // Pick an intensity from 1 to 10. Large circles keep comfortable tap targets.
 const PainLevelPicker = ({ value, onChange, style }) => {
   const paperTheme = usePaperTheme();
+  const fire = useBurst();
 
   return (
     <View style={style}>
@@ -23,7 +29,10 @@ const PainLevelPicker = ({ value, onChange, style }) => {
             <PressableScale
               key={level}
               pop={selected}
-              onPress={() => onChange(level)}
+              onPress={(event) => {
+                onChange(level);
+                fire("emoji", event, { emojis: getPainLevelEmojis(level), count: 7 });
+              }}
               accessibilityRole="button"
               accessibilityLabel={`Intensidad ${level} de 10`}
               accessibilityState={{ selected }}
@@ -64,7 +73,11 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "center",
     gap: 8,
+    // Five buttons per row (5 x 44 + 4 x 8), centered on the card.
+    alignSelf: "center",
+    maxWidth: 252,
   },
   option: {
     minWidth: 44,

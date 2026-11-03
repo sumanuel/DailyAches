@@ -7,6 +7,7 @@ import HeroPanel from "../components/HeroPanel";
 import AppTextField from "../components/AppTextField";
 import FieldError from "../components/FieldError";
 import { showMessage } from "../utils/confirm";
+import { clearCredentials, getSavedEmail } from "../utils/biometricService";
 import { validatePasswordChange } from "../utils/validation";
 
 const ChangePasswordScreen = ({ navigation }) => {
@@ -34,9 +35,14 @@ const ChangePasswordScreen = ({ navigation }) => {
       setFormError(result.error);
       return;
     }
+    // The saved password is the old one now: drop the fingerprint login.
+    const hadFingerprint = Boolean(await getSavedEmail());
+    if (hadFingerprint) await clearCredentials();
     showMessage(
       "Contraseña actualizada",
-      "Cerramos tu sesión en los demás dispositivos. Aquí sigues dentro.",
+      hadFingerprint
+        ? "Cerramos tu sesión en los demás dispositivos. Desactivamos la huella: vuelve a activarla en tu próximo inicio de sesión."
+        : "Cerramos tu sesión en los demás dispositivos. Aquí sigues dentro.",
     );
     navigation.goBack();
   };

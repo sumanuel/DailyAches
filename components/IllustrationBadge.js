@@ -11,10 +11,14 @@ const IllustrationBadge = ({
   preset,
   size = 56,
   selected = false,
-  rounded = true,
+  rounded: roundedProp = true,
+  avatar = false,
   style,
 }) => {
   const paperTheme = usePaperTheme();
+  // Pain pictures are circles; a person's avatar is a rounded square with a
+  // thin gray frame, so the two read differently at a glance.
+  const rounded = roundedProp && !avatar;
   const radius = rounded ? size / 2 : Math.round(size * 0.34);
   const backgroundColor = resolveColor(
     paperTheme,
@@ -46,8 +50,10 @@ const IllustrationBadge = ({
           backgroundColor,
           borderColor: selected
             ? paperTheme.colors.primary
-            : paperTheme.colors.outlineVariant,
-          borderWidth: selected ? 2 : 1,
+            : avatar
+              ? paperTheme.colors.avatarBorder
+              : paperTheme.colors.outlineVariant,
+          borderWidth: selected ? 2 : avatar ? 1.5 : 1,
           shadowColor: paperTheme.colors.onSurface,
           shadowOpacity: selected ? 0.18 : 0.08,
           shadowRadius: selected ? 16 : 10,

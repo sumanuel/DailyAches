@@ -1,6 +1,8 @@
 // The daily reminder: when it fires and how it is described. Pure helpers; the
 // notification scheduling itself lives in reminderService.js.
 
+import { formatClockParts } from "./timeFormat";
+
 export const DEFAULT_REMINDER = { enabled: false, hour: 20, minute: 0 };
 
 export const REMINDER_TITLE = "DailyAches";
@@ -20,10 +22,8 @@ export const normalizeReminder = (value) => ({
   minute: toInt(value?.minute, DEFAULT_REMINDER.minute, 0, 59),
 });
 
-const pad2 = (n) => String(n).padStart(2, "0");
-
 export const formatReminderTime = ({ hour, minute }) =>
-  `${pad2(hour)}:${pad2(minute)}`;
+  formatClockParts(hour, minute);
 
 export const describeReminder = (reminder) =>
   reminder.enabled

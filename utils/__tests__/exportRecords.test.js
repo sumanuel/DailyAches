@@ -36,8 +36,8 @@ describe("buildCsv", () => {
     );
     expect(lines(csv)).toEqual([
       "Fecha,Hora,Persona,Parentesco,Dolor,Intensidad,Notas",
-      "2026-10-20,09:05,Ana,hermana,Cabeza,6,tras el trabajo",
-      "2026-10-22,18:30,Ana,hermana,Cabeza,8,",
+      "2026-10-20,09:05 am,Ana,hermana,Cabeza,6,tras el trabajo",
+      "2026-10-22,06:30 pm,Ana,hermana,Cabeza,8,",
     ]);
   });
 
@@ -54,7 +54,7 @@ describe("buildCsv", () => {
       [rec("1", at(20), { pain: "Migraña", painLevel: undefined, personId: "99" })],
       people,
     );
-    expect(lines(csv)[1]).toBe("2026-10-20,10:05,Ana,,Migraña,,");
+    expect(lines(csv)[1]).toBe("2026-10-20,10:05 am,Ana,,Migraña,,");
   });
 
   it("neutralizes cells a spreadsheet would run as a formula", () => {

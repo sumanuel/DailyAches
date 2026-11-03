@@ -1,4 +1,5 @@
 import { MONTHS_ES } from "./recordFilters";
+import { formatClock } from "./timeFormat";
 
 // When a pain episode happened. "Ahora" sends no date (the API uses its own
 // clock); the other options go back whole days at the current time of day, so
@@ -66,5 +67,5 @@ export const fromDateTimeLocalValue = (value) => {
 // "12 oct 2026, 18:30"
 export const formatCustomDate = (date) =>
   isValidDate(date)
-    ? `${date.getDate()} ${MONTHS_ES[date.getMonth()]} ${date.getFullYear()}, ${pad2(date.getHours())}:${pad2(date.getMinutes())}`
+    ? `${date.getDate()} ${MONTHS_ES[date.getMonth()]} ${date.getFullYear()}, ${formatClock(date)}`
     : "";

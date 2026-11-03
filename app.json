@@ -32,7 +32,21 @@
         }
       ],
       "expo-image",
-      "expo-sharing"
+      "expo-sharing",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "DailyAches usa tus fotos para poner la imagen de una persona.",
+          "cameraPermission": "DailyAches usa la cámara para tomar la foto de una persona."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permite entrar a DailyAches con tu rostro."
+        }
+      ]
     ]
   }
 }

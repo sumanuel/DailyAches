@@ -4,6 +4,7 @@
 import { normalizeText } from "./recordFilters";
 import { getPeriodRange } from "./periodStats";
 
+import { formatClock } from "./timeFormat";
 const pad2 = (n) => String(n).padStart(2, "0");
 
 const MONTHS_ES = [
@@ -36,11 +37,6 @@ const isoDate = (value) => {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 };
 
-const clock = (value) => {
-  const d = new Date(value);
-  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-};
-
 const longDate = (value) => {
   const d = new Date(value);
   return `${pad2(d.getDate())} ${MONTHS_ES[d.getMonth()]} ${d.getFullYear()}`;
@@ -68,7 +64,7 @@ const relationshipOf = (record, people) =>
 export const buildCsv = (records, people) => {
   const rows = chronological(records).map((record) => [
     isoDate(record.createdAt),
-    clock(record.createdAt),
+    formatClock(record.createdAt),
     record.personName,
     relationshipOf(record, people),
     record.pain,
@@ -106,7 +102,7 @@ export const buildReportHtml = (
   const rows = sorted
     .map(
       (record) => `<tr>
-  <td>${escapeHtml(longDate(record.createdAt))}<br /><span class="muted">${escapeHtml(clock(record.createdAt))}</span></td>
+  <td>${escapeHtml(longDate(record.createdAt))}<br /><span class="muted">${escapeHtml(formatClock(record.createdAt))}</span></td>
   <td>${escapeHtml(record.personName)}<br /><span class="muted">${escapeHtml(relationshipOf(record, people))}</span></td>
   <td>${escapeHtml(record.pain)}</td>
   <td class="center">${escapeHtml(record.painLevel ?? "–")}</td>

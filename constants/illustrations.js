@@ -544,3 +544,16 @@ export const resolvePainIllustrationKey = (painType) => {
 
   return mappedKey || PAIN_FALLBACK_KEY;
 };
+
+// The picture of a record: the current icon of its pain type (looked up by id
+// in `painTypesById`, so a change of icon shows everywhere), else the one the
+// API sent with the record, else whatever its name maps to.
+export const getRecordIllustrationKey = (record, painTypesById = {}) => {
+  const linked = record?.painTypeId ? painTypesById[record.painTypeId] : null;
+  return resolvePainIllustrationKey({
+    ...record,
+    image: linked?.image || record?.image,
+    name: linked?.name || record?.pain,
+    pain: record?.pain,
+  });
+};
