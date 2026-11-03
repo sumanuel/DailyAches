@@ -20,6 +20,7 @@ export const mapRecord = (r) => ({
   personId: String(r.person_id),
   painTypeId: String(r.pain_type_id),
   pain: r.pain_type_name,
+  image: r.pain_type_image || null,
   personName: r.person_name,
   painLevel: r.pain_level,
   notes: r.notes,

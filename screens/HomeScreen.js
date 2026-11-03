@@ -7,6 +7,8 @@ import {
   useTheme as usePaperTheme,
 } from "react-native-paper";
 import PersonAvatar from "../components/PersonAvatar";
+import PressableScale from "../components/PressableScale";
+import { useBurst } from "../components/BurstProvider";
 import { formatClock } from "../utils/timeFormat";
 import RecordRow from "../components/RecordRow";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -15,7 +17,7 @@ import IllustrationBadge from "../components/IllustrationBadge";
 import {
   getAvatarIllustration,
   getPainIllustration,
-  resolvePainIllustrationKey,
+  getRecordIllustrationKey,
 } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 import { SHARE_ACHIEVEMENT_ID } from "../utils/gamification";
@@ -36,6 +38,7 @@ const HomeScreen = () => {
   } = useUser();
   const paperTheme = usePaperTheme();
   const navigation = useNavigation();
+  const fire = useBurst();
   const [dailyRecords, setDailyRecords] = useState([]);
 
   useEffect(() => {
@@ -69,18 +72,7 @@ const HomeScreen = () => {
   }, [user.painTypes]);
 
   const resolveRecordIllustrationKey = useCallback(
-    (record) => {
-      const linkedPainType = record?.painTypeId
-        ? painTypesById[record.painTypeId]
-        : null;
-  
-      return resolvePainIllustrationKey({
-        ...record,
-        image: linkedPainType?.image || record?.image,
-        name: linkedPainType?.name || record?.pain,
-        pain: record?.pain,
-      });
-    },
+    (record) => getRecordIllustrationKey(record, painTypesById),
     [painTypesById],
   );
 
@@ -250,15 +242,21 @@ const HomeScreen = () => {
                 {heroDescription}
               </Text>
             </View>
-            <IllustrationBadge
-              preset={
-                todayCount === 0
-                  ? getAvatarIllustration(heroIllustrationKey)
-                  : getPainIllustration(heroIllustrationKey)
-              }
-              size={132}
-              style={styles.heroImage}
-            />
+            <PressableScale
+              onPress={(event) => fire("hearts", event, { count: 12 })}
+              accessibilityRole="button"
+              accessibilityLabel="Mandar corazones"
+            >
+              <IllustrationBadge
+                preset={
+                  todayCount === 0
+                    ? getAvatarIllustration(heroIllustrationKey)
+                    : getPainIllustration(heroIllustrationKey)
+                }
+                size={132}
+                style={styles.heroImage}
+              />
+            </PressableScale>
           </View>
 
           {home.celebrate ? (
@@ -281,7 +279,8 @@ const HomeScreen = () => {
           ) : null}
 
           <View style={styles.statsRow}>
-            <View
+            <PressableScale
+              onPress={(event) => fire("emoji", event, { emojis: ["🩹", "💊", "🤕"] })}
               style={[
                 styles.statTile,
                 { backgroundColor: paperTheme.colors.primaryContainer },
@@ -297,8 +296,9 @@ const HomeScreen = () => {
               >
                 Registros hoy
               </Text>
-            </View>
-            <View
+            </PressableScale>
+            <PressableScale
+              onPress={(event) => fire("emoji", event, { emojis: ["⚡", "⭐", "✨"] })}
               style={[
                 styles.statTile,
                 { backgroundColor: paperTheme.colors.secondaryContainer },
@@ -314,8 +314,9 @@ const HomeScreen = () => {
               >
                 Puntos
               </Text>
-            </View>
-            <View
+            </PressableScale>
+            <PressableScale
+              onPress={(event) => fire("emoji", event, { emojis: ["🫶", "💖", "🤗"] })}
               style={[
                 styles.statTile,
                 { backgroundColor: paperTheme.colors.accentMint },
@@ -331,7 +332,7 @@ const HomeScreen = () => {
               >
                 Personas
               </Text>
-            </View>
+            </PressableScale>
           </View>
 
           <View style={styles.summaryRow}>

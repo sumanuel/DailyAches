@@ -6,14 +6,17 @@ import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import AppNavigator from "./navigation/AppNavigator";
 import UndoDeleteSnackbar from "./components/UndoDeleteSnackbar";
 import ProgressCelebration from "./components/ProgressCelebration";
+import { BurstProvider } from "./components/BurstProvider";
 
 const AppContent = () => {
   const { theme } = useTheme();
   return (
     <PaperProvider theme={theme}>
-      <AppNavigator />
-      <UndoDeleteSnackbar />
-      <ProgressCelebration />
+      <BurstProvider>
+        <AppNavigator />
+        <UndoDeleteSnackbar />
+        <ProgressCelebration />
+      </BurstProvider>
     </PaperProvider>
   );
 };

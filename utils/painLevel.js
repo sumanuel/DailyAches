@@ -50,3 +50,12 @@ export const getLastPainTypeForPerson = (records, personId, painTypes) => {
     ) || null
   );
 };
+
+// The emojis that pop out when an intensity is chosen: calm for a light pain,
+// on fire for the worst.
+export const getPainLevelEmojis = (level) => {
+  if (level >= 10) return ["🔥", "🤯"];
+  if (level >= 7) return ["🥵", "😣"];
+  if (level >= 4) return ["😬", "😕"];
+  return ["🍃", "😌"];
+};

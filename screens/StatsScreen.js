@@ -14,7 +14,7 @@ import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
 import RecordRow from "../components/RecordRow";
 import { formatClock } from "../utils/timeFormat";
-import { resolvePainIllustrationKey } from "../constants/illustrations";
+import { getRecordIllustrationKey } from "../constants/illustrations";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 import AppTextField from "../components/AppTextField";
 import {
@@ -89,6 +89,14 @@ const StatsScreen = ({ route, navigation }) => {
   useEffect(() => {
     loadRecordsFromAPI();
   }, [loadRecordsFromAPI]);
+
+  const painTypesById = useMemo(() => {
+    const map = {};
+    for (const painType of user.painTypes || []) {
+      if (painType?.id) map[painType.id] = painType;
+    }
+    return map;
+  }, [user.painTypes]);
 
   const todayRecords = useMemo(() => {
     const allToday = getTodayRecords();
@@ -183,7 +191,7 @@ const StatsScreen = ({ route, navigation }) => {
     >
       <RecordRow
         record={record}
-        illustrationKey={resolvePainIllustrationKey(record)}
+        illustrationKey={getRecordIllustrationKey(record, painTypesById)}
         subtitle={formatClock(record.createdAt)}
         onEdit={() => navigation.navigate("RecordPain", { record })}
         onDelete={() => scheduleDeleteRecord(record)}

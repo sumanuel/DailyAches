@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { Card, Text, useTheme as usePaperTheme } from "react-native-paper";
 import PersonAvatar from "./PersonAvatar";
 import PressableScale from "./PressableScale";
+import { useBurst } from "./BurstProvider";
 import { MEDALS } from "../utils/peopleRanking";
 
 // A person as a tappable card: avatar, name, and one line of detail. `right` is
@@ -17,6 +18,7 @@ const PersonRow = ({
   accessibilityLabel,
 }) => {
   const paperTheme = usePaperTheme();
+  const fire = useBurst();
 
   return (
     <Card style={[styles.card, { backgroundColor: paperTheme.colors.surface }]}>
@@ -45,13 +47,16 @@ const PersonRow = ({
           </View>
         </PressableScale>
         {MEDALS[place] ? (
-          <Text
+          <PressableScale
+            onPress={(event) => fire("confetti", event)}
+            hitSlop={10}
+            accessibilityRole="button"
             accessibilityLabel={MEDALS[place].label}
-            allowFontScaling={false}
-            style={styles.medal}
           >
-            {MEDALS[place].emoji}
-          </Text>
+            <Text allowFontScaling={false} style={styles.medal}>
+              {MEDALS[place].emoji}
+            </Text>
+          </PressableScale>
         ) : null}
         {right}
       </Card.Content>

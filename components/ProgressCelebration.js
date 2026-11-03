@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import Animated, { FadeInUp, ZoomIn } from "react-native-reanimated";
 import { Text, useTheme as usePaperTheme } from "react-native-paper";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { useUser } from "../context/UserContext";
 import { celebrationMessage } from "../utils/progressEvents";
+import { useBurst } from "./BurstProvider";
 
 const SHOW_MS = 3200;
 const SHOW_BIG_MS = 5000; // achievements and level-ups deserve a longer look
@@ -30,6 +31,27 @@ const ProgressCelebration = () => {
   const eventId = event?.id;
   const message = event ? celebrationMessage(event) : null;
   const duration = message?.kind === "points" ? SHOW_MS : SHOW_BIG_MS;
+  const fire = useBurst();
+  const { width } = useWindowDimensions();
+  const kind = message?.kind;
+  const top = (insets?.top ?? 0) + 44;
+
+  // A level-up rains confetti, an achievement throws it, a plain record sends
+  // up a few hearts. Each event is celebrated once.
+  useEffect(() => {
+    if (!eventId) return;
+    const where = { x: width / 2, y: top };
+    if (kind === "level") {
+      fire("rain");
+      fire("confetti", where);
+    } else if (kind === "achievement") {
+      fire("confetti", where);
+    } else {
+      fire("hearts", where);
+    }
+    // Only a new event should fire; the rest is read as it is at that moment.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventId]);
 
   useEffect(() => {
     if (!eventId) return undefined;
