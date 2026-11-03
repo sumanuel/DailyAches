@@ -7,6 +7,7 @@ import AppScreen from "../components/AppScreen";
 import EmptyState from "../components/EmptyState";
 import HeroPanel from "../components/HeroPanel";
 import { countRecordsFor, describeRecordCount } from "../utils/recordFilters";
+import { rankPeopleByRecords } from "../utils/peopleRanking";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 
 const keyExtractor = (person) => String(person.id);
@@ -27,6 +28,11 @@ const HistoryPeopleScreen = ({ navigation }) => {
     });
   };
 
+  const places = useMemo(
+    () => rankPeopleByRecords(user.people, user.records),
+    [user.people, user.records],
+  );
+
   const renderPerson = (p) => {
     const recordCount = countRecordsFor(user.records, { personId: p.id });
     const detail = [p.relationship, describeRecordCount(recordCount)]
@@ -37,6 +43,7 @@ const HistoryPeopleScreen = ({ navigation }) => {
         key={keyExtractor(p)}
         person={p}
         detail={detail}
+        place={places.get(String(p.id))}
         accessibilityLabel={`Ver historial de ${p.name}`}
         onPress={() => onSelectPerson(p)}
         right={<IconButton icon="chevron-right" accessibilityElementsHidden />}
