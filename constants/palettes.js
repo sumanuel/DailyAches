@@ -30,6 +30,7 @@ export const lightColors = {
   accentSun: "#FFE7A8",
   accentBerry: "#F3D8FF",
   accentSky: "#DCEBFF",
+  avatarBorder: "#BDB6BB", // thin gray frame around people's avatars
   // Bar colors (components/BarCharts.js): each one keeps 3:1 over the card.
   chartCoral: "#C4342A",
   chartBlue: "#3F5FE0",
@@ -68,6 +69,7 @@ export const darkColors = {
   accentSun: "#5A4A1C",
   accentBerry: "#4A295E",
   accentSky: "#24395C",
+  avatarBorder: "#8A7F88",
   chartCoral: "#FF8B8B",
   chartBlue: "#8FA8FF",
   chartTeal: "#5ED9BD",

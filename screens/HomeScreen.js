@@ -462,6 +462,7 @@ const HomeScreen = () => {
                       resolveAvatarIllustrationKey(person?.avatar),
                     )}
                     size={44}
+                    avatar
                   />
                   <View style={styles.personCopy}>
                     <Text

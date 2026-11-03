@@ -23,33 +23,13 @@ import {
   groupRecordsByDay,
 } from "../utils/recordFilters";
 
-const monthShortEs = [
-  "ene",
-  "feb",
-  "mar",
-  "abr",
-  "may",
-  "jun",
-  "jul",
-  "ago",
-  "sep",
-  "oct",
-  "nov",
-  "dic",
-];
-
 const pad2 = (n) => String(n).padStart(2, "0");
 
-const formatDateEs = (date) => {
+// dd-mm-yyyy
+const formatDate = (date) => {
   const d = new Date(date);
-  return `${pad2(d.getDate())} ${
-    monthShortEs[d.getMonth()]
-  } ${d.getFullYear()}`;
+  return `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()}`;
 };
-
-// "01 nov", or "01 nov 2025" when it is not this year: the range buttons are narrow.
-const formatShortDateEs = (date) =>
-  formatDateEs(date).replace(` ${new Date().getFullYear()}`, "");
 
 const formatTimeEs = (date) => {
   const d = new Date(date);
@@ -68,15 +48,6 @@ const endOfDay = (date) => {
   return d;
 };
 
-const startOfWeekMonday = (date) => {
-  const d = startOfDay(date);
-  const day = d.getDay();
-  // JS: 0=Dom ... 6=Sáb. Queremos lunes como inicio.
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  return d;
-};
-
 const startOfMonth = (date) => {
   const d = startOfDay(date);
   d.setDate(1);
@@ -90,25 +61,11 @@ const endOfMonth = (date) => {
   return d;
 };
 
-const getPrevMonthRange = (date) => {
-  const d = new Date(date);
-  d.setMonth(d.getMonth() - 1);
-  return { start: startOfMonth(d), end: endOfMonth(d) };
-};
-
-const getPresetRange = (preset, now = new Date()) => {
-  if (preset === "this_week") {
-    const start = startOfWeekMonday(now);
-    const end = endOfDay(now);
-    return { start, end };
-  }
-  if (preset === "prev_month") {
-    return getPrevMonthRange(now);
-  }
-  const start = startOfMonth(now);
-  const end = endOfMonth(now);
-  return { start, end };
-};
+// First to last day of the month: where the history opens.
+const getMonthRange = (now = new Date()) => ({
+  start: startOfMonth(now),
+  end: endOfMonth(now),
+});
 
 const RECORDS_PAGE_SIZE = 30;
 
@@ -123,10 +80,7 @@ const StatsScreen = ({ route, navigation }) => {
   } = useUser();
   const { personId, personName } = route?.params || {};
   const [tab, setTab] = useState("today"); // today | history
-  const [preset, setPreset] = useState("this_month"); // this_month | prev_month | this_week | custom
-  const [historyRange, setHistoryRange] = useState(() =>
-    getPresetRange("this_month"),
-  );
+  const [historyRange, setHistoryRange] = useState(() => getMonthRange());
   const [rangeOpen, setRangeOpen] = useState(false);
   // How many extra pages were revealed, and for which filters (a change of
   // filters starts again from the first page without needing an effect).
@@ -139,11 +93,6 @@ const StatsScreen = ({ route, navigation }) => {
   useEffect(() => {
     loadRecordsFromAPI();
   }, [loadRecordsFromAPI]);
-
-  const applyPreset = (p) => {
-    setPreset(p);
-    setHistoryRange(getPresetRange(p));
-  };
 
   const todayRecords = useMemo(() => {
     const allToday = getTodayRecords();
@@ -336,7 +285,7 @@ const StatsScreen = ({ route, navigation }) => {
                   contentStyle={styles.calendarBtnContent}
                   labelStyle={styles.calendarBtnLabel}
                 >
-                  Desde {formatShortDateEs(historyRange.start)}
+                  {formatDate(historyRange.start)}
                 </Button>
               </View>
               <View style={styles.rangeCol}>
@@ -352,42 +301,9 @@ const StatsScreen = ({ route, navigation }) => {
                   contentStyle={styles.calendarBtnContent}
                   labelStyle={styles.calendarBtnLabel}
                 >
-                  Hasta {formatShortDateEs(historyRange.end)}
+                  {formatDate(historyRange.end)}
                 </Button>
               </View>
-            </View>
-
-            <View style={styles.quickRow}>
-              <Button
-                mode={preset === "this_month" ? "contained" : "outlined"}
-                onPress={() => applyPreset("this_month")}
-                style={styles.quickBtn}
-                contentStyle={styles.quickBtnContent}
-                labelStyle={styles.quickBtnLabel}
-                compact={true}
-              >
-                Este mes
-              </Button>
-              <Button
-                mode={preset === "prev_month" ? "contained" : "outlined"}
-                onPress={() => applyPreset("prev_month")}
-                style={styles.quickBtn}
-                contentStyle={styles.quickBtnContent}
-                labelStyle={styles.quickBtnLabel}
-                compact={true}
-              >
-                Mes anterior
-              </Button>
-              <Button
-                mode={preset === "this_week" ? "contained" : "outlined"}
-                onPress={() => applyPreset("this_week")}
-                style={styles.quickBtn}
-                contentStyle={styles.quickBtnContent}
-                labelStyle={styles.quickBtnLabel}
-                compact={true}
-              >
-                Esta semana
-              </Button>
             </View>
 
             <AppTextField
@@ -501,7 +417,6 @@ const StatsScreen = ({ route, navigation }) => {
                 mode="contained"
                 onPress={() => {
                   setHistoryRange(tempRange);
-                  setPreset("custom");
                   setRangeOpen(false);
                 }}
               >
@@ -598,19 +513,8 @@ const styles = StyleSheet.create({
   rangeRow: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
   rangeCol: { flex: 1, gap: 6 },
   calendarBtn: { alignSelf: "stretch", borderRadius: 999 },
-  calendarBtnContent: { justifyContent: "flex-start", minHeight: 44 },
+  calendarBtnContent: { minHeight: 44 },
   calendarBtnLabel: { fontSize: 12 },
-  quickRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 10,
-  },
-  quickBtn: {
-    borderRadius: 999,
-  },
-  quickBtnContent: { minHeight: 38, paddingHorizontal: 6 },
-  quickBtnLabel: { fontSize: 12 },
 
   recordsList: { marginTop: 12, gap: 12 },
   recordCard: { borderRadius: 24, overflow: "hidden" },

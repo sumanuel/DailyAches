@@ -215,6 +215,7 @@ const AddPersonScreen = ({ navigation, route }) => {
                       <IllustrationBadge
                         preset={preset}
                         size={54}
+                        avatar
                         selected={selectedAvatar === avatar}
                         style={styles.avatarImage}
                       />

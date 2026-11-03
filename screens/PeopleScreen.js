@@ -10,6 +10,7 @@ import HeroPanel from "../components/HeroPanel";
 import LoadStatusNotice from "../components/LoadStatusNotice";
 import { confirmAction, showMessage } from "../utils/confirm";
 import { countRecordsFor, describeRecordCount } from "../utils/recordFilters";
+import { rankPeopleByRecords } from "../utils/peopleRanking";
 
 const keyExtractor = (person) => String(person.id);
 
@@ -60,6 +61,11 @@ const PeopleScreen = ({ navigation }) => {
     if (!result.success) showMessage("No se pudo eliminar", result.error);
   };
 
+  const places = useMemo(
+    () => rankPeopleByRecords(user.people, user.records),
+    [user.people, user.records],
+  );
+
   const renderPerson = (p) => {
     const recordCount = countRecordsFor(user.records, { personId: p.id });
     const detail = [p.relationship, describeRecordCount(recordCount)]
@@ -70,6 +76,7 @@ const PeopleScreen = ({ navigation }) => {
         key={keyExtractor(p)}
         person={p}
         detail={detail}
+        place={places.get(String(p.id))}
         accessibilityLabel={`Registrar dolor de ${p.name}`}
         onPress={() => onSelectPerson(p)}
         right={

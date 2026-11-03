@@ -29,7 +29,6 @@ const RecordRow = ({
       <IllustrationBadge
         preset={getPainIllustration(illustrationKey)}
         size={44}
-        rounded={false}
         style={styles.badge}
       />
 
@@ -78,7 +77,7 @@ const styles = StyleSheet.create({
   badge: { flexShrink: 0 },
   body: { flex: 1, gap: 2 },
   titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  title: { flexShrink: 1, fontWeight: "800" },
+  title: { flex: 1, fontWeight: "800" },
   level: {
     paddingHorizontal: 10,
     paddingVertical: 3,
